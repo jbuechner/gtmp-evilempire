@@ -1,0 +1,5 @@
+<meta>
+    <info name="GTMP Evil Empire Server" author="lloyd" type="gamemode" />
+
+    <script src="./../../gtmp.evilempire.server.dll" type="server" lang="compiled" />
+</meta>

@@ -1,1 +1,8 @@
 .git
+.idea
+
+*.suo
+
+/dist
+/src/**/bin
+/src/**/obj
