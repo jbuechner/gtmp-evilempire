@@ -13,6 +13,18 @@ ProjectSection(SolutionItems) = preProject
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{83A0EDE9-4823-4B12-8497-96456C30BBE1}"
+ProjectSection(SolutionItems) = preProject
+	gtmp.configs\settings.template.xml = gtmp.configs\settings.template.xml
+	gtmp.configs\settings.user.xml = gtmp.configs\settings.user.xml
+	gtmp.configs\settings.xsl = gtmp.configs\settings.xsl
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.server.launcher", "gtmp.evilempire.server.launcher\gtmp.evilempire.server.launcher.csproj", "{AA73F6BE-D395-418D-9EA3-103AB09526DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{94C6C4B4-85FA-4C30-A978-EB0EDEC6DFBA}"
+ProjectSection(SolutionItems) = preProject
+	..\build\gtmp-server.targets = ..\build\gtmp-server.targets
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +36,10 @@ Global
 		{A366BD42-1588-4FAB-915F-28E142ACD892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A366BD42-1588-4FAB-915F-28E142ACD892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A366BD42-1588-4FAB-915F-28E142ACD892}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA73F6BE-D395-418D-9EA3-103AB09526DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA73F6BE-D395-418D-9EA3-103AB09526DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA73F6BE-D395-418D-9EA3-103AB09526DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA73F6BE-D395-418D-9EA3-103AB09526DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

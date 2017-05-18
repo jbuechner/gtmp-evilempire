@@ -6,4 +6,10 @@
         </ItemGroup>
         <Copy SourceFiles="@(Sources)" DestinationFolder="$(OutDir)\resources\gtmp-server" />
     </Target>
+    <Target Name="CopyServerSettings">
+        <ItemGroup>
+            <Sources Include=".\..\gtmp.configs\settings.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(Sources)" DestinationFolder="$(OutDir)" />
+    </Target>
 </Project>

@@ -2,6 +2,7 @@
 .idea
 
 *.suo
+*.user.xml
 
 /dist
 /src/**/bin
