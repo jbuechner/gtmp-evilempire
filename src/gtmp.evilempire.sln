@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gtmp-server", "gtmp-server", "{B878D824-D825-4284-8DE9-4ECC0C6DF0C8}"
 ProjectSection(SolutionItems) = preProject
 	gtmp.configs\resources\gtmp-server\meta.xml = gtmp.configs\resources\gtmp-server\meta.xml
+	gtmp.configs\resources\gtmp-server\main.js = gtmp.configs\resources\gtmp-server\main.js
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{83A0EDE9-4823-4B12-8497-96456C30BBE1}"
