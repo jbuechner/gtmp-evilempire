@@ -1,6 +1,7 @@
 .git
 .idea
 .vs
+node_modules
 
 *.suo
 *.user.xml

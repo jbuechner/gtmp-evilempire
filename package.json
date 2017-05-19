@@ -1,8 +1,10 @@
 {
   "name": "gtmp-evilempire",
   "version": "0.0.1",
-  "description": "",
+  "description": "GTMP Evil Empire",
   "scripts": {
+	"build": "gulp",
+	"clean": "gulp clean"
   },
   "repository": {
     "type": "git",
@@ -13,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/jbuechner/gtmp-evilempire/issues"
   },
-  "homepage": "https://github.com/jbuechner/gtmp-evilempire"
+  "homepage": "https://github.com/jbuechner/gtmp-evilempire",
+  "devDependencies": {
+    "del": "^2.2.2",
+    "gulp": "^3.9.1"
+  }
 }
