@@ -12,6 +12,7 @@
   <onfoot_lagcomp>true</onfoot_lagcomp>
   <refresh_rate>120</refresh_rate>
   <resource src="gtmp-server" />
+  <resource src="gtmp-public" />
   <announce_lan>true</announce_lan>
   <upnp>false</upnp>
   <fqdn></fqdn>
