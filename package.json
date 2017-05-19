@@ -1,0 +1,17 @@
+{
+  "name": "gtmp-evilempire",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbuechner/gtmp-evilempire.git"
+  },
+  "author": "",
+  "license": "(UNLICENSED)",
+  "bugs": {
+    "url": "https://github.com/jbuechner/gtmp-evilempire/issues"
+  },
+  "homepage": "https://github.com/jbuechner/gtmp-evilempire"
+}
