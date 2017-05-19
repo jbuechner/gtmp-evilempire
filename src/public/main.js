@@ -1,16 +1,20 @@
 'use strict';
 
-API.onResourceStart.connect(function() {
-    API.sendNotification('notification');
+API.onResourceStart.connect(() => boot());
 
-    let player = API.getLocalPlayer();
-    let pos = new Vector3(200, 200, 150);
-    let rot = new Vector3(1, 1, 1);
+let boot = (function() {
+let player = API.getLocalPlayer();
+	let pos = new Vector3(200, 200, 150);
+	let rot = new Vector3(1, 1, 1);
 
-    let newCamera = API.createCamera(pos, rot);
-    API.setActiveCamera(newCamera);
+	let newCamera = API.createCamera(pos, rot);
+	API.setActiveCamera(newCamera);
 
-    let browser = API.createCefBrowser(800, 600);
-    API.waitUntilCefBrowserInit(browser);
-    API.loadPageCefBrowser(browser, 'index.html');
+	let res = API.getScreenResolution();
+
+	let browser = API.createCefBrowser(res.Width, res.Height);
+	API.setCefBrowserPosition(browser, 0, 0);
+	API.waitUntilCefBrowserInit(browser);
+	API.loadPageCefBrowser(browser, 'index.html');
+	API.showCursor(true);
 });

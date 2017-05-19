@@ -1,9 +1,54 @@
 <?doctype html>
 <html>
-<head></head>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="colors.css">
+	<style>
+		html, body {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			overflow: hidden;
+			background: transparent !important;
+			cursor: default;
+			user-select: none;
+		}
+	</style>
+</head>
 <body>
-<div style="background-color:lime">
-    Hallo
-</div>
+	<div style="position: absolute; left: 5px; top: 5px; background-color: #ff6f00; font-size: 11px; padding: 3px; color: #f0f0f0; opacity: 0.6">GTMP Evil Empire Tec Demo</div>
+	<div>
+		<img src="gfx/bg-login.png" style="position: absolute; left: 25%; top: 45px;" />
+	</div>
+	<div class="container" style="position: absolute; width: calc(100% - 55px); left: 27px; top: 350px;">
+		<div class="row">
+			<div class="col-lg-6 col-lg-offset-3 bg-orange accent-4 fg-white">
+				<h3>Login</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-6 col-lg-offset-3 bg-grey darken-4 fg-white">
+				<span>&nbsp;</span>
+				<p>
+					GTA V Evil Empire Role Playing Server
+				</p>
+				<form>
+					<div class="form-group">
+						<label for="User name">User Name</label>
+						<input type="text" class="form-control" id="username" placeholder="User Name">
+					</div>
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input type="password" class="form-control" id="password" placeholder="Password">
+					</div>
+					<button type="submit" class="btn btn-default" id="login">Login</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!--<script src="libs/sha512.min.js"></script>-->
 </body>
 </html>

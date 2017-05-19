@@ -45,6 +45,9 @@ const $__tasks = {
 		let stream = new $stream.Transform({
 			objectMode: true,
 			transform: function(f, enc, cb) {
+				if (f.isDirectory()) {
+					return cb(null, null);
+				}
 				if (f.path.endsWith('.js')) {
 					this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
 				} else {
@@ -73,8 +76,10 @@ $gulp.task('rebuild', function(cb) {
 	$runseq('clean', 'build', cb);
 });
 
+$gulp.task('build-public', ['copy-public', 'build-public-meta']);
+
 $gulp.task('build', function(cb) {
-	$runseq('cs', 'copy', 'build-resourcemeta', 'dist', cb);
+	$runseq('cs', 'copy', 'build-public-meta', 'dist', cb);
 });
 
 $gulp.task('copy', function(cb) {
@@ -116,7 +121,7 @@ $gulp.task('copy-cs', function() {
 		.pipe($gulp.dest(project.paths.dist.root));
 });
 
-$gulp.task('build-resourcemeta', function() {
+$gulp.task('build-public-meta', function() {
 	return $gulp.src(project.paths.src.public)
 		.pipe($__tasks.transformToGtmpResource({ name: 'GTMP Evil Empire Files' }))
 		.pipe($gulp.dest(project.paths.dist.root + '/resources/gtmp-public'));
