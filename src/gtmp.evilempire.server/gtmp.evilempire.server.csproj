@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\dist\debug\</OutputPath>
+    <OutputPath>bin\debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +27,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\dist\release</OutputPath>
+    <OutputPath>bin\dist\release</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,9 +36,11 @@
   <ItemGroup>
     <Reference Include="GrandTheftMultiplayer.Server, Version=0.1.501.566, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\libs\gtmp\v0.1.501.566\GrandTheftMultiplayer.Server.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="GrandTheftMultiplayer.Shared, Version=0.1.489.410, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\libs\gtmp\v0.1.501.566\GrandTheftMultiplayer.Shared.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Core" />
   </ItemGroup>
