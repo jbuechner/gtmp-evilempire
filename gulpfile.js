@@ -48,7 +48,8 @@ const $__tasks = {
 				if (f.isDirectory()) {
 					return cb(null, null);
 				}
-				if (f.path.endsWith('.js')) {
+				if (f.path.endsWith('.client.js') ||
+					f.path.endsWith('.js') && f.path.match(/[/\\]libs[/\\]client[/\\]/)) {
 					this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
 				} else {
 					this.contents += '<file src="' + f.relative + '" />\n';

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8701AC7B-1CDC-4BD4-91E3-CA8CD5654D51}</ProjectGuid>
+    <ProjectGuid>{A366BD42-1588-4FAB-915F-28E142ACD892}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>gtmp.evilempire.server</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
