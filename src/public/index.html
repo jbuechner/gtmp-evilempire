@@ -17,6 +17,9 @@
 			user-select: none;
 		}
 	</style>
+	<script src="libs/slim.min.js"></script>
+	<script src="app.js"></script>
+	<script src="components/core-login.js"></script>
 </head>
 <body>
 	<div style="position: absolute; left: 5px; top: 5px; background-color: #ff6f00; font-size: 11px; padding: 3px; color: #f0f0f0; opacity: 0.6">GTMP Evil Empire Tec Demo</div>
@@ -35,17 +38,7 @@
 				<p>
 					GTA V Evil Empire Role Playing Server
 				</p>
-				<form>
-					<div class="form-group">
-						<label for="User name">User Name</label>
-						<input type="text" class="form-control" id="username" placeholder="User Name">
-					</div>
-					<div class="form-group">
-						<label for="password">Password</label>
-						<input type="password" class="form-control" id="password" placeholder="Password">
-					</div>
-					<button type="submit" class="btn btn-default" id="login">Login</button>
-				</form>
+				<core-login></core-login>
 			</div>
 		</div>
 	</div>

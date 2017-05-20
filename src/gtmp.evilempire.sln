@@ -1,31 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.0.0
-MinimumVisualStudioVersion = 10.0.0.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.server", "gtmp.evilempire.server\gtmp.evilempire.server.csproj", "{A366BD42-1588-4FAB-915F-28E142ACD892}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resources", "resources", "{BE87E10E-3F31-446A-AF82-59F5E773366F}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gtmp-server", "gtmp-server", "{B878D824-D825-4284-8DE9-4ECC0C6DF0C8}"
-ProjectSection(SolutionItems) = preProject
-	gtmp.configs\resources\gtmp-server\meta.xml = gtmp.configs\resources\gtmp-server\meta.xml
-	gtmp.configs\resources\gtmp-server\main.js = gtmp.configs\resources\gtmp-server\main.js
-EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{83A0EDE9-4823-4B12-8497-96456C30BBE1}"
-ProjectSection(SolutionItems) = preProject
-	gtmp.configs\settings.template.xml = gtmp.configs\settings.template.xml
-	gtmp.configs\settings.user.xml = gtmp.configs\settings.user.xml
-	gtmp.configs\settings.xsl = gtmp.configs\settings.xsl
-EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.server.launcher", "gtmp.evilempire.server.launcher\gtmp.evilempire.server.launcher.csproj", "{AA73F6BE-D395-418D-9EA3-103AB09526DE}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{94C6C4B4-85FA-4C30-A978-EB0EDEC6DFBA}"
-ProjectSection(SolutionItems) = preProject
-	..\build\gtmp-server.targets = ..\build\gtmp-server.targets
-EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,9 +24,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{B878D824-D825-4284-8DE9-4ECC0C6DF0C8} = {BE87E10E-3F31-446A-AF82-59F5E773366F}
-		{BE87E10E-3F31-446A-AF82-59F5E773366F} = {83A0EDE9-4823-4B12-8497-96456C30BBE1}
 	EndGlobalSection
 EndGlobal

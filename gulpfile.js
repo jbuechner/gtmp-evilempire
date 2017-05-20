@@ -41,7 +41,7 @@ const project = {
 }
 
 const $__tasks = {
-	transformToGtmpResource: function(info) {
+	transformToGtmpResource: function(elements) {
 		let stream = new $stream.Transform({
 			objectMode: true,
 			transform: function(f, enc, cb) {
@@ -61,12 +61,17 @@ const $__tasks = {
 				cb(null, { contents: this.contents, relative: 'meta.xml', isDirectory: () => false, isStream: () => false, isBuffer: () => true, isNull: () => false });
 			}
 		});
+
 		stream.contents = '<meta>\n';
-		stream.contents += '<info ';
-		Object.getOwnPropertyNames(info).forEach(function(propertyName) {
-			stream.contents += 'propertyName="'  + info[propertyName] + '" ';
-		});
-		stream.contents += '/>\n';
+		Object.getOwnPropertyNames(elements).forEach(elementName => {
+			stream.contents += `<${elementName} `;
+			let element = elements[elementName];
+			Object.getOwnPropertyNames(element).forEach(attributeName => {
+				stream.contents += `${attributeName}="${element[attributeName]}" `;
+			});
+			stream.contents += ' />'
+        });
+
 		return stream;
 	}
 };
@@ -77,14 +82,14 @@ $gulp.task('rebuild', function(cb) {
 	$runseq('clean', 'build', cb);
 });
 
-$gulp.task('build-public', ['copy-public', 'build-public-meta']);
+$gulp.task('build-resources', ['copy-public', 'build-resources-meta']);
 
 $gulp.task('build', function(cb) {
-	$runseq('cs', 'copy', 'build-public-meta', 'dist', cb);
+	$runseq('cs', 'copy', 'build-resources', 'dist', cb);
 });
 
 $gulp.task('copy', function(cb) {
-	$runseq('extract-server', 'delete-resources', ['copy-cs', 'copy-resources'], ['copy-public', 'copy-settings'], cb)
+	$runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings'], cb)
 });
 
 $gulp.task('clean', ['cs-clean'], function() {
@@ -101,14 +106,9 @@ $gulp.task('cs-clean', function() {
 		.pipe($gmsbuild(msbuildConfig));
 });
 
-$gulp.task('copy-resources', function() {
-	return $gulp.src(project.paths.src.resources)
-		.pipe($gulp.dest(project.paths.dist.resources));
-});
-
 $gulp.task('copy-public', function() {
 	return $gulp.src(project.paths.src.public)
-		.pipe($gulp.dest(project.paths.dist.resources + '/gtmp-public'));
+		.pipe($gulp.dest(project.paths.dist.resources + '/gtmp-server'));
 });
 
 $gulp.task('copy-settings', function() {
@@ -122,10 +122,14 @@ $gulp.task('copy-cs', function() {
 		.pipe($gulp.dest(project.paths.dist.root));
 });
 
-$gulp.task('build-public-meta', function() {
+$gulp.task('build-resources-meta', function() {
 	return $gulp.src(project.paths.src.public)
-		.pipe($__tasks.transformToGtmpResource({ name: 'GTMP Evil Empire Files' }))
-		.pipe($gulp.dest(project.paths.dist.root + '/resources/gtmp-public'));
+		//     <info name="GTMP Evil Empire Server" author="lloyd" type="script" />
+		// <script src="./../../gtmp.evilempire.server.dll" type="server" lang="compiled" />
+		.pipe($__tasks.transformToGtmpResource({
+			info: { name: 'GTMP Evil Empire Server', author: 'lloyd', type: 'script' },
+			script: { src: './../../gtmp.evilempire.server.dll', type: 'server', lang: 'compiled' }
+		})).pipe($gulp.dest(project.paths.dist.root + '/resources/gtmp-server'));
 });
 
 $gulp.task('extract-server', function() {
