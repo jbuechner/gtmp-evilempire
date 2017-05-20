@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,11 +43,26 @@
       <HintPath>..\..\libs\gtmp\v0.1.501.566\GrandTheftMultiplayer.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\libs\gtmp\v0.1.501.566\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ClientEventCallbackExtensions.cs" />
+    <Compile Include="JsonSerializer.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ServiceContainer.cs" />
+    <Compile Include="services\AuthorizationService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gtmp.evilempire.shared\gtmp.evilempire.shared.csproj">
+      <Project>{c568b8a5-b498-4e89-8047-598393d73edc}</Project>
+      <Name>gtmp.evilempire.shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

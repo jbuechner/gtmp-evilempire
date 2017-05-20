@@ -124,8 +124,6 @@ $gulp.task('copy-cs', function() {
 
 $gulp.task('build-resources-meta', function() {
 	return $gulp.src(project.paths.src.public)
-		//     <info name="GTMP Evil Empire Server" author="lloyd" type="script" />
-		// <script src="./../../gtmp.evilempire.server.dll" type="server" lang="compiled" />
 		.pipe($__tasks.transformToGtmpResource({
 			info: { name: 'GTMP Evil Empire Server', author: 'lloyd', type: 'script' },
 			script: { src: './../../gtmp.evilempire.server.dll', type: 'server', lang: 'compiled' }

@@ -26,8 +26,15 @@ API.onResourceStart.connect(function() {
 let boot = (function() {
 	const ClientLifecycleState = {
 		None: 0,
-		Connected: 1
+		Connected: 1,
+        LoggedIn: 2
 	};
+
+	const ServiceResultState = {
+        None: 0,
+        Error: 1,
+        Success: 2
+    };
 
 	const debugOut = function(ex) {
         let msg = ':: ' + ex.toString();
@@ -40,7 +47,8 @@ let boot = (function() {
 	class ClientLifecycle {
         constructor() {
             this._transitions = new Map([
-                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.None, ClientLifecycleState.Connected), ClientLifecycle.onClientConnected]
+                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.None, ClientLifecycleState.Connected), ClientLifecycle.onClientConnected],
+                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.Connected, ClientLifecycleState.LoggedIn), ClientLifecycle.onClientLoggedIn]
             ]);
             this._state = ClientLifecycleState.None;
         }
@@ -74,7 +82,13 @@ let boot = (function() {
 
         static onClientConnected(app) {
             app.client.setCamera(200, 200, 150, 1, 1, 1);
-            API.showCursor(true);
+            app.client.cursor(true);
+        }
+
+        static onClientLoggedIn(app) {
+            app.client.cursor(false);
+            app.client.resetCamera();
+            app.browser.hide();
         }
     }
 
@@ -90,6 +104,10 @@ let boot = (function() {
 			let camera = API.createCamera(pos, rot);
 			API.setActiveCamera(camera);
 		}
+
+		resetCamera() {
+            API.setActiveCamera(null);
+        }
 
 		cursor(v) {
             API.showCursor(v);
@@ -107,6 +125,10 @@ let boot = (function() {
             API.loadPageCefBrowser(this._instance, url);
         }
 
+        hide() {
+            API.setCefBrowserHeadless(this._instance, true);
+        }
+
         static create() {
             return new Promise((resolve) => {
                 let browser = new Browser();
@@ -119,6 +141,13 @@ let boot = (function() {
     class Proxy {
 	    constructor() {
 	        this.knownRoots = new Map();
+        }
+
+        relay(browser, target, args) {
+	        if (typeof args !== 'object') {
+	            args = { value: args };
+            }
+            browser._instance.call('relay', JSON.stringify({ target, args }) );
         }
 
 	    onReceived(args) {
@@ -170,6 +199,15 @@ let boot = (function() {
 
         login(args) {
             args = args || {};
+            if (args && args.credentials) {
+                if (args && args.credentials.password) {
+                    let a = '__' + args.credentials.password + '::0';
+                    for (let i = 0; i < 10; i++) {
+                        a = this._app.sha.sha512(a);
+                    }
+                    args.credentials.password = '::' + a;
+                }
+            }
             this._app.sendToServer('login', args);
         }
     }
@@ -181,6 +219,9 @@ let boot = (function() {
 		    this._client = new Client();
 			this._lifecycle = new ClientLifecycle();
 			this._browser = null;
+			this._serverEvents = new Map([
+                [ 'login:response', this.onLoginResponse ]
+            ]);
 
 			Browser.create().then(browser => {
                 this._browser = browser;
@@ -191,10 +232,19 @@ let boot = (function() {
 
 			this.proxy.knownRoots.set('app', new AppProxy(this));
 
-			let m = this.require('sha512');
-			Object.getOwnPropertyNames(prop => API.sendNotification(prop));
+			this.sha = this.require('sha512');
 
-            API.onServerEventTrigger.connect(this.onServerEventTrigger);
+			let self = this;
+            API.onServerEventTrigger.connect(function(ev, args) {
+                try {
+                    if (args && args[0]) {
+                        args = args[0];
+                    }
+                    self.onServerEventTrigger(ev, args);
+                } catch(ex) {
+                    debugOut(ex);
+                }
+            });
 		}
 
 		get proxy() {
@@ -219,7 +269,6 @@ let boot = (function() {
     		    raw = JSON.stringify(args);
             }
 		    try {
-		        API.sendNotification(`send to server "${target}"`);
                 API.triggerServerEvent(target, raw);
             }catch(ex) {
                 debugOut(ex);
@@ -227,9 +276,29 @@ let boot = (function() {
         }
 
         onServerEventTrigger(target, args) {
-            API.sendNotification(`from server: ${target}`);
+            this.proxy.relay(this.browser, target, args);
             if (typeof args === 'string') {
 		        args = JSON.parse(args);
+            }
+            if (args && (args.Error || args.State === ServiceResultState.Error)) {
+                API.sendNotification(`error from server "${target}"`);
+                API.sendNotification(args.Error);
+            }
+            if (this._serverEvents.has(target)) {
+                let handler = this._serverEvents.get(target);
+                if (typeof handler === 'function') {
+                    handler.call(this, args);
+                } else {
+                    API.sendNotification(`server event handler for ${target} is not a function.`)
+                }
+            } else {
+                API.sendNotification(`missing server event handler for ${target}.`);
+            }
+        }
+
+        onLoginResponse(args) {
+            if (args.State === ServiceResultState.Success) {
+                this.lifecycle.transit(ClientLifecycleState.LoggedIn, this);
             }
         }
 
@@ -239,6 +308,9 @@ let boot = (function() {
                 if (res) {
                     if (typeof res.define === 'function') {
                         let m = res.define();
+                        if (!m) {
+                            API.sendNotification(`Module ${module} does not export anything.`);
+                        }
                         this._moduleCache.set(module, m);
                     } else {
                         API.sendNotification(`Module ${module} does not contain a define function.`);
@@ -247,7 +319,7 @@ let boot = (function() {
                     API.sendNotification(`Module ${module} not part of resource object.`);
                 }
             }
-            return this._moduleCache[module];
+            return this._moduleCache.get(module);
         }
 	}
 	app = new App();

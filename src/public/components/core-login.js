@@ -9,6 +9,12 @@ Slim.tag('core-login', class extends Slim {
 
     onBeforeCreated() {
         this.app = window.app;
+        document.addEventListener('relay', (ev) => {
+            if (ev.detail.target === 'login:response') {
+                if (ev.detail.args.State !== ClientLifecycleState.Success) { // todo: change result display in error case
+                }
+            }
+        });
     }
 
     get template() {
@@ -27,7 +33,10 @@ Slim.tag('core-login', class extends Slim {
     }
 
     login() {
-        this.app.login({ username: this.username.value, password: this.password.value });
+        if (this.username.value && this.password.value) {
+            this.app.login({ username: this.username.value, password: this.password.value });
+        }
+        this.username.value = this.password.value = null;
     }
 
     disconnect() {
