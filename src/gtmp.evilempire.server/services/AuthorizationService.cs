@@ -1,22 +1,28 @@
-﻿using gtmp.evilempire.services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.entities.processors;
+using gtmp.evilempire.services;
 
 namespace gtmp.evilempire.server.services
 {
     class AuthorizationService : IAuthorizationService
     {
-        public AuthorizationService()
+        IDbService DbService { get; }
+        UserPasswordHashProcessor PasswordHashProcesser { get; } = new UserPasswordHashProcessor();
+
+        public AuthorizationService(IDbService dbService)
         {
+            DbService = dbService;
         }
 
         public IServiceResult Authenticate(string username, string password)
         {
-            //::fe4873ee8e66fc12ff940d6a21e1ff73962874c56bbed7f41c95247a086ebb362797e60cd413e6f5ceada814d30a96349038686e365a09ecc030d9ad188286c3 abc
-            throw new NotImplementedException($"username={username}, password={password}");
+            var user = DbService.Select<User, string>(username);
+            password = PasswordHashProcesser.Hash(password);
+            if (user != null && string.CompareOrdinal(user.Password, password) == 0)
+            {
+                return ServiceResult.AsSuccess();
+            }
+            return ServiceResult.AsError(null);
         }
     }
 }

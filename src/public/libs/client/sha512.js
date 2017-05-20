@@ -570,11 +570,20 @@ function define() {
         return hex;
     };
 
+    let cshash = function(message) {
+        let a = '__' + message + '::0';
+        for (let i = 0; i < 10; i++) {
+            a = sha512(a);
+        }
+        return '::' + a;
+    };
+
     var exports = sha512;
     exports.sha512 = sha512;
     exports.sha384 = sha384;
     exports.sha512_256 = sha512_256;
     exports.sha512_224 = sha512_224;
+    exports.cshash = cshash;
 
     if (COMMON_JS) {
         module.exports = exports;
@@ -583,6 +592,7 @@ function define() {
         root.sha384 = sha384;
         root.sha512_256 = sha512_256;
         root.sha512_224 = sha512_224;
+        root.cshash = cshash;
         if (AMD) {
             define(function () {
                 return exports;
@@ -590,4 +600,7 @@ function define() {
         }
       return root;
     }
+}
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    define();
 }

@@ -4,7 +4,8 @@
   "description": "GTMP Evil Empire",
   "scripts": {
     "build": "gulp",
-    "clean": "gulp clean"
+    "clean": "gulp clean",
+    "cshash": "node ./cshash.js"
   },
   "repository": {
     "type": "git",

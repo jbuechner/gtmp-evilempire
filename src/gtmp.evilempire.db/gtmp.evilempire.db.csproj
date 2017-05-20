@@ -1,24 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AA73F6BE-D395-418D-9EA3-103AB09526DE}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <AssemblyName>gtmp.evilempire.server.launcher</AssemblyName>
+    <ProjectGuid>{EE61AE9B-AF33-4741-B1D3-BD4A4BEA38F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gtmp.evilempire.db</RootNamespace>
+    <AssemblyName>gtmp.evilempire.db</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <ApplicationVersion>0.0.1.0</ApplicationVersion>
     <FileAlignment>512</FileAlignment>
-    <RootNamespace>gtmp.evilempire.server.launcher</RootNamespace>
-    <LangVersion>6</LangVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,24 +25,25 @@
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\release</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>6</LangVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugSymbols>true</DebugSymbols>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrandTheftMultiplayer.Server">
-      <HintPath>..\..\libs\gtmp\v0.1.501.566\GrandTheftMultiplayer.Server.exe</HintPath>
-      <Private>False</Private>
+    <Reference Include="DBreeze">
+      <HintPath>..\..\libs\dbreeze\1_085_2017_0515\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -51,15 +51,11 @@
       <Link>AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ConsoleExtensions.cs" />
-    <Compile Include="DelegatedDisposable.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="DbEnvironment.cs" />
+    <Compile Include="DbService.cs" />
+    <Compile Include="DbTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\gtmp.evilempire.db\gtmp.evilempire.db.csproj">
-      <Project>{ee61ae9b-af33-4741-b1d3-bd4a4bea38f9}</Project>
-      <Name>gtmp.evilempire.db</Name>
-    </ProjectReference>
     <ProjectReference Include="..\gtmp.evilempire.shared\gtmp.evilempire.shared.csproj">
       <Project>{c568b8a5-b498-4e89-8047-598393d73edc}</Project>
       <Name>gtmp.evilempire.shared</Name>

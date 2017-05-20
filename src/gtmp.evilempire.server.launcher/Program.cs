@@ -1,4 +1,6 @@
-﻿using System;
+﻿using gtmp.evilempire.db;
+using gtmp.evilempire.entities;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -17,6 +19,8 @@ namespace gtmp.evilempire.server.launcher
         internal static class ExitCodes
         {
             public const int ServerSettingsTransformationFailed = -100;
+            public const int DatabaseCheckFailed = -200;
+            public const int DatabasePopulationFailed = -201;
         }
     }
 
@@ -32,6 +36,14 @@ namespace gtmp.evilempire.server.launcher
                 if (!TransformServerSettings())
                 {
                     return Constants.ExitCodes.ServerSettingsTransformationFailed;
+                }
+                if (!CheckDatabase())
+                {
+                    return Constants.ExitCodes.DatabaseCheckFailed;
+                }
+                if (!DatabasePopulation())
+                {
+                    return Constants.ExitCodes.DatabasePopulationFailed;
                 }
                 RunServer();
 
@@ -137,6 +149,45 @@ namespace gtmp.evilempire.server.launcher
             return true;
         }
 
+        static bool CheckDatabase()
+        {
+            if (!ExecuteWithConsoleOutput("Check database directory and entity integrity ... ", WrapWithFailReason(() =>
+                {
+                    using (var dbe = new DbEnvironment(evilempire.Constants.Database.DatabasePath))
+                    {
+                        dbe.Select<User, string>("0");
+                    }
+                    return true;
+                },
+                "unable to check database")))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        static bool DatabasePopulation()
+        {
+            if (!ExecuteWithConsoleOutput("Check database template directory ... ", WrapWithFailReason(() => CheckDirectory(evilempire.Constants.Database.DatabaseTemplatePath), $"{evilempire.Constants.Database.DatabaseTemplatePath} missing")))
+            {
+                return false;
+            }
+
+            using (var dbe = new DbEnvironment(evilempire.Constants.Database.DatabasePath))
+            {
+                var dbt = new DbTemplate(evilempire.Constants.Database.DatabaseTemplatePath);
+                foreach(var template in dbt.GetTemplates())
+                {
+                    if (!ExecuteWithConsoleOutput($"Populate db environment using template {template} ... ", WrapWithFailReason(() => dbt.PopulateByTemplate(template, dbe), "failed")))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         delegate bool WrappedConsoleExecution(out string failReason);
         static bool ExecuteWithConsoleOutput(string message, WrappedConsoleExecution fn)
         {
@@ -160,6 +211,11 @@ namespace gtmp.evilempire.server.launcher
                 Console.WriteLine("OK");
             }
             return true;
+        }
+
+        static bool CheckDirectory(string directory)
+        {
+            return Directory.Exists(directory);
         }
 
         static bool CheckFile(string file)

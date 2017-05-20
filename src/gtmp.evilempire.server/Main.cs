@@ -9,7 +9,7 @@ namespace gtmp.evilempire.server
 {
     public class Main : Script
     {
-        public ServiceContainer Services { get; } = ServiceContainer.Create();
+        public ServiceContainer Services { get; private set; }
 
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
             { "login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailSafeResponse("login:response") }
@@ -17,20 +17,27 @@ namespace gtmp.evilempire.server
 
         public Main()
         {
-            this.Services.Register<IJsonSerializer>(new JsonSerializer());
             this.API.onResourceStart += this.OnResourceStart;
+            this.API.onResourceStop += this.OnResourceStop;
+        }
+
+        void OnResourceStop()
+        {
+            Services?.Dispose();
+            Services = null;
         }
 
         void OnResourceStart()
         {
+            Services = ServiceContainer.Create();
             this.API.onClientEventTrigger += this.OnClientEventTrigger;
             this.API.onPlayerConnected += client =>
             {
                 client.dimension = 1000;
+                client.freeze(false);
                 client.position = new Vector3(-500, -500, 0);
                 client.stopAnimation();
             };
-
         }
 
         void OnClientEventTrigger(Client sender, string eventName, params object[] arguments)
@@ -48,7 +55,7 @@ namespace gtmp.evilempire.server
             }
         }
 
-        static IServiceResult OnClientLogin(ServiceContainer services, Client client, dynamic args)
+        static IServiceResult OnClientLogin(ServiceContainer services, Client client, dynamic args) // todo: less boilerplate request processing
         {
             if (services == null)
             {
@@ -85,7 +92,13 @@ namespace gtmp.evilempire.server
                 throw new ArgumentOutOfRangeException(nameof(password), "password is not a string");
             }
             var authorizationService = services.Get<IAuthorizationService>();
-            return authorizationService.Authenticate(username as string, password as string);
+            var result = authorizationService.Authenticate(username as string, password as string);
+            if (result.State == ServiceResultState.Success)
+            {
+                client.dimension = 0;
+                client.freeze(false);
+            }
+            return result;
         }
     }
 }

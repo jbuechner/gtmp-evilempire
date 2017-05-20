@@ -201,11 +201,11 @@ let boot = (function() {
             args = args || {};
             if (args && args.credentials) {
                 if (args && args.credentials.password) {
-                    let a = '__' + args.credentials.password + '::0';
-                    for (let i = 0; i < 10; i++) {
-                        a = this._app.sha.sha512(a);
-                    }
-                    args.credentials.password = '::' + a;
+                        let a = '__' + args.credentials.password + '::0';
+                        for (let i = 0; i < 10; i++) {
+                            a = this._app.sha.sha512(a);
+                        }
+                        args.credentials.password = '::' + a;
                 }
             }
             this._app.sendToServer('login', args);
