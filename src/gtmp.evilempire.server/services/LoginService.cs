@@ -15,6 +15,7 @@ namespace gtmp.evilempire.server.services
 
         ConcurrentDictionary<string, IClient> LoggedInClients { get; } = new ConcurrentDictionary<string, IClient>();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public LoginService(IDbService dbService)
         {
             DbService = dbService;

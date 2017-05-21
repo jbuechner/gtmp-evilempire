@@ -10,12 +10,12 @@ namespace gtmp.evilempire.server.mapping
     public class MapPoint
     {
         public int Id { get; }
-        public MapPointType Type { get; }
+        public MapPointType PointType { get; }
         public Vector3 Position { get; }
 
         public MapPoint(MapPointType type, int id, Vector3 position)
         {
-            Type = type;
+            PointType = type;
             Id = id;
             Position = position;
         }

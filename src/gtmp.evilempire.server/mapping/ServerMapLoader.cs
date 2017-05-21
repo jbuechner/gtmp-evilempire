@@ -6,13 +6,13 @@ using static System.FormattableString;
 
 namespace gtmp.evilempire.server.mapping
 {
-    class ServerMapLoader
+    static class ServerMapLoader
     {
         public static void Load(Map map, API api)
         {
             foreach(var marker in map.Markers)
             {
-                api.createMarker((int)marker.Type, marker.Position, marker.Direction, marker.Rotation, marker.Scale, marker.Alpha, marker.Red, marker.Green, marker.Blue);
+                api.createMarker((int)marker.MarkerType, marker.Position, marker.Direction, marker.Rotation, marker.Scale, marker.Alpha, marker.Red, marker.Green, marker.Blue);
             }
             foreach(var obj in map.Objects)
             {
@@ -44,7 +44,7 @@ namespace gtmp.evilempire.server.mapping
                     continue;
                 }
                 var hash = (VehicleHash)vehicle.Hash;
-                var r = api.createVehicle(hash, vehicle.Position, vehicle.Rotation, vehicle.Color1, vehicle.Color2);
+                api.createVehicle(hash, vehicle.Position, vehicle.Rotation, vehicle.Color1, vehicle.Color2);
             }
         }
     }

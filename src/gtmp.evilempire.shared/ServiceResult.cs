@@ -68,6 +68,7 @@ namespace gtmp.evilempire
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         public new static IServiceResult<T> AsError(string errorMessage)
         {
             var result = new ServiceResult<T> { State = ServiceResultState.Error };
@@ -75,6 +76,7 @@ namespace gtmp.evilempire
             return result;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         public static IServiceResult<T> AsSuccess(T data)
         {
             return new ServiceResult<T> { State = ServiceResultState.Success, Data = data };

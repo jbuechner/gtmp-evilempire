@@ -9,7 +9,7 @@ namespace gtmp.evilempire.server.mapping
 {
     public class MapMarker
     {
-        public MarkerType Type { get; }
+        public MarkerType MarkerType { get; }
         public Vector3 Position { get; }
         public Vector3 Rotation { get; }
         public Vector3 Direction { get; }
@@ -21,7 +21,7 @@ namespace gtmp.evilempire.server.mapping
 
         public MapMarker(MarkerType markerType, Vector3 position, Vector3 direction, Vector3 rotation, Vector3 scale, byte alpha, byte red, byte blue, byte green)
         {
-            Type = markerType;
+            MarkerType = markerType;
             Position = position;
             Direction = direction;
             Rotation = rotation;

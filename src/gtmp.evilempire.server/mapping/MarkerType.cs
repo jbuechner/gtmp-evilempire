@@ -4,9 +4,13 @@
     {
         UpsideDownCone = 0,
         VerticalCylinder = 1,
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Cevron")]
         ThickCevronUp = 2,
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Cevron")]
         ThinCevronUp = 3,
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag")]
         CheckeredFlagRect = 4,
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag")]
         CheckeredFlagCircle = 5,
         VerticalCircle = 6,
         PlaneModel = 7,

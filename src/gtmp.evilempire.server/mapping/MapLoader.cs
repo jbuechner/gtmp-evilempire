@@ -4,6 +4,7 @@ using GrandTheftMultiplayer.Shared;
 using GrandTheftMultiplayer.Shared.Math;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -101,7 +102,7 @@ namespace gtmp.evilempire.server.mapping
             }
         }
 
-        IEnumerable<XElement> SelectMapObjectsByType(XDocument xdoc, string type)
+        static IEnumerable<XElement> SelectMapObjectsByType(XDocument xdoc, string type)
         {
             var mapObjects = xdoc?.Root?.Elements("Objects")?.Elements("MapObject");
             if (mapObjects == null)
@@ -125,7 +126,7 @@ namespace gtmp.evilempire.server.mapping
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("NewPlayerSpawnPoint"));
         }
 
-        void LoadMapPoints(Map map, IEnumerable<XElement> elements)
+        static void LoadMapPoints(Map map, IEnumerable<XElement> elements)
         {
             if (elements == null)
             {
@@ -225,7 +226,7 @@ namespace gtmp.evilempire.server.mapping
                 return null;
             }
             int v;
-            if (int.TryParse(element.Value, out v))
+            if (int.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
             {
                 return v;
             }
@@ -239,7 +240,7 @@ namespace gtmp.evilempire.server.mapping
                 return null;
             }
             byte v;
-            if (byte.TryParse(element.Value, out v))
+            if (byte.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
             {
                 return v;
             }
@@ -267,7 +268,7 @@ namespace gtmp.evilempire.server.mapping
                 return null;
             }
             float v;
-            if (float.TryParse(element.Value, out v))
+            if (float.TryParse(element.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
             {
                 return v;
             }

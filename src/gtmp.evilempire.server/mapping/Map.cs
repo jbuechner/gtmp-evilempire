@@ -33,11 +33,16 @@ namespace gtmp.evilempire.server.mapping
 
         public void AddPoint(MapPoint mapPoint)
         {
+            if (mapPoint == null)
+            {
+                return;
+            }
+
             Points.Add(mapPoint);
             Dictionary<int, MapPoint> map;
-            if (!MapPointMap.TryGetValue(mapPoint.Type, out map))
+            if (!MapPointMap.TryGetValue(mapPoint.PointType, out map))
             {
-                map = MapPointMap[mapPoint.Type] = new Dictionary<int, MapPoint>();
+                map = MapPointMap[mapPoint.PointType] = new Dictionary<int, MapPoint>();
             }
             map[mapPoint.Id] = mapPoint;
         }

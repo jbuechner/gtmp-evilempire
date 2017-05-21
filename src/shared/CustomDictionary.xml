@@ -11,7 +11,11 @@
             <Word>shared</Word>
             <Word>launcher</Word>
             <Word>server</Word>
+            <Word>mapping</Word>
             <Word>Stringify</Word>
+            <Word>Peds</Word>
+            <Word>Ped</Word>
+            <Word>MapPed</Word>
         </Recognized>
     </Words>
     <Acronyms>
@@ -25,6 +29,9 @@
             <Acronym>shared</Acronym>
             <Acronym>launcher</Acronym>
             <Acronym>server</Acronym>
+            <Acronym>mapping</Acronym>
+            <Acronym>Peds</Acronym>
+            <Acronym>Ped</Acronym>
         </CasingExceptions>
     </Acronyms>
 </Dictionary>
