@@ -199,13 +199,13 @@ let boot = (function() {
 
         login(args) {
             args = args || {};
-            if (args && args.credentials) {
-                if (args && args.credentials.password) {
-                        let a = '__' + args.credentials.password + '::0';
+            if (args) {
+                if (args && args.password) {
+                        let a = '__' + args.password + '::0';
                         for (let i = 0; i < 10; i++) {
                             a = this._app.sha.sha512(a);
                         }
-                        args.credentials.password = '::' + a;
+                        args.password = '::' + a;
                 }
             }
             this._app.sendToServer('login', args);
@@ -276,14 +276,16 @@ let boot = (function() {
         }
 
         onServerEventTrigger(target, args) {
-            this.proxy.relay(this.browser, target, args);
             if (typeof args === 'string') {
 		        args = JSON.parse(args);
             }
-            if (args && (args.Error || args.State === ServiceResultState.Error)) {
+            if (args && (args.state === ServiceResultState.Error)) {
                 API.sendNotification(`error from server "${target}"`);
-                API.sendNotification(args.Error);
+                if (args.data) {
+                    API.sendNotification('>' + args.data);
+                }
             }
+            this.proxy.relay(this.browser, target, args);
             if (this._serverEvents.has(target)) {
                 let handler = this._serverEvents.get(target);
                 if (typeof handler === 'function') {
@@ -297,7 +299,7 @@ let boot = (function() {
         }
 
         onLoginResponse(args) {
-            if (args.State === ServiceResultState.Success) {
+            if (args.state === ServiceResultState.Success) {
                 this.lifecycle.transit(ClientLifecycleState.LoggedIn, this);
             }
         }

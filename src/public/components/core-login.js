@@ -10,8 +10,10 @@ Slim.tag('core-login', class extends Slim {
     onBeforeCreated() {
         this.app = window.app;
         document.addEventListener('relay', (ev) => {
+            console.log(ev);
             if (ev.detail.target === 'login:response') {
-                if (ev.detail.args.State !== ClientLifecycleState.Success) { // todo: change result display in error case
+                if (ev.detail.args.state !== ClientLifecycleState.Success) { // todo: change result display in error case
+                    this.username.value = 'failed:' + ev.detail.args.data;
                 }
             }
         });

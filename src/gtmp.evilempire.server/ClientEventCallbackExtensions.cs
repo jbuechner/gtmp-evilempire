@@ -10,6 +10,19 @@ namespace gtmp.evilempire.server
 
     public static class ClientEventCallbackExtensions
     {
+        class ServiceTransferResult : IServiceResult
+        {
+            public ServiceResultState State { get; set; }
+            public object Data { get; set; }
+            public Exception Exception { get; } = null;
+
+            public ServiceTransferResult(IServiceResult serviceResult)
+            {
+                this.State = serviceResult.State;
+                this.Data = serviceResult.Data;
+            }
+        }
+
         public static ClientEventCallback WrapIntoFailSafeResponse(this ClientEventCallbackWithResponse callback, string response)
         {
             ClientEventCallback cb = (services, client, args) =>
@@ -23,8 +36,9 @@ namespace gtmp.evilempire.server
                 {
                     result = ServiceResult.AsError(ex);
                 }
+
                 var jsonSerializer = services.Get<IJsonSerializer>();
-                var json = jsonSerializer.Stringify(result);
+                var json = jsonSerializer.Stringify(new ServiceTransferResult(result));
                 client.triggerEvent(response, json);
             };
             return cb;

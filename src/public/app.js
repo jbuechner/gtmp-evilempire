@@ -21,7 +21,7 @@ class App {
     }
 
     login(credentials) {
-        this.proxy.invoke('app.login', { credentials });
+        this.proxy.invoke('app.login', { username: credentials.username, password: credentials.password });
     }
 
     disconnect() {

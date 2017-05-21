@@ -1,29 +1,28 @@
 ﻿using gtmp.evilempire.services;
-using System.IO;
-using System.Text;
-using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace gtmp.evilempire.server
 {
     class JsonSerializer : IJsonSerializer
     {
-        Newtonsoft.Json.JsonSerializer serializer;
+        JsonSerializerSettings Settings { get; }
 
         public JsonSerializer()
         {
-            this.serializer = Newtonsoft.Json.JsonSerializer.Create();
+            Settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
         }
 
         public string Stringify(object o)
         {
-            var sb = new StringBuilder();
-            using (var writer = new StringWriter(sb, CultureInfo.InvariantCulture))
+            if (o == null)
             {
-                this.serializer.Serialize(writer, o);
-                return sb.ToString();
+                return "{}";
             }
+
+            var type = o.GetType();
+            return JsonConvert.SerializeObject(o, type, Formatting.None, Settings);
         }
 
         public dynamic Parse(string json)

@@ -9,6 +9,12 @@ namespace gtmp.evilempire.services
     public interface IServiceResult
     {
         ServiceResultState State { get; }
-        string Error { get; }
+        object Data { get; }
+        Exception Exception { get; }
+    }
+
+    public interface IServiceResult<T> : IServiceResult
+    {
+        new T Data { get; }
     }
 }

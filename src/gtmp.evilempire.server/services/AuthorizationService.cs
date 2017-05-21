@@ -22,7 +22,7 @@ namespace gtmp.evilempire.server.services
             {
                 return ServiceResult.AsSuccess();
             }
-            return ServiceResult.AsError(null);
+            return ServiceResult.AsError("Authentication failed.");
         }
     }
 }
