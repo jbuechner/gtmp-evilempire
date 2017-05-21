@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<Dictionary>
+    <Words>
+        <Recognized>
+            <Word>db</Word>
+            <Word>evilempire</Word>
+            <Word>gtmp</Word>
+        </Recognized>
+    </Words>
+    <Acronyms>
+        <CasingExceptions>
+            <Acronym>db</Acronym>
+            <Acronym>evilempire</Acronym>
+            <Acronym>gtmp</Acronym>
+        </CasingExceptions>
+    </Acronyms>
+</Dictionary>

@@ -3,24 +3,25 @@ using System;
 
 namespace gtmp.evilempire.db
 {
-    public class DbService : IDbService, IDisposable
+    public sealed class DbService : IDbService, IDisposable
     {
         DbEnvironment _dbe;
 
         public DbService(string databaseRootPath)
         {
-            this._dbe = new DbEnvironment(databaseRootPath);
+            _dbe = new DbEnvironment(databaseRootPath);
         }
 
         public T Select<T, TKey>(TKey key)
         {
-            return this._dbe.Select<T, TKey>(key);
+            return _dbe.Select<T, TKey>(key);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_dbe")]
         public void Dispose()
         {
-            this._dbe?.Dispose();
-            this._dbe = null;
+            _dbe?.Dispose();
+            _dbe = null;
         }
     }
 }

@@ -9,33 +9,48 @@ using System.Reflection;
 
 namespace gtmp.evilempire.db
 {
-    public class DbEnvironment : IDisposable
+    public sealed class DbEnvironment : IDisposable
     {
+        DBreezeConfiguration _configuration;
         DBreezeEngine _engine;
         ConcurrentDictionary<Type, EntityStorageAttribute> _entityStorageDescriptionCache = new ConcurrentDictionary<Type, EntityStorageAttribute>();
         ConcurrentDictionary<Type, Func<object, object>> _entityKeySelectorCache = new ConcurrentDictionary<Type, Func<object, object>>();
 
         public DbEnvironment(string databaseRootPath)
         {
-            var configuration = new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.DISK, DBreezeDataFolderName = databaseRootPath };
-            this._engine = new DBreezeEngine(configuration);
+            _configuration = new DBreezeConfiguration();
+            try
+            {
+                _configuration.Storage = DBreezeConfiguration.eStorage.DISK;
+                _configuration.DBreezeDataFolderName = databaseRootPath;
+            }
+            catch
+            {
+                _configuration?.Dispose();
+                throw;
+            }
+            _engine = new DBreezeEngine(_configuration);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_engine")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_configuration")]
         public void Dispose()
         {
-            this._engine?.Dispose();
-            this._engine = null;
+            _engine?.Dispose();
+            _configuration?.Dispose();
+            _engine = null;
+            _configuration = null;
         }
 
         public T Select<T, TKey>(TKey key)
         {
-            var reflectedTableName = this.GetReflectedTableName<T>();
+            var reflectedTableName = GetReflectedTableName<T>();
             return Select<T, TKey>(reflectedTableName, key);
         }
 
         public void Insert<T, TKey>(string tableName, TKey key, T value)
         {
-            using (var t = this._engine.GetTransaction())
+            using (var t = _engine.GetTransaction())
             {
                 t.Insert<TKey, DbMJSON<T>>(tableName, key, value);
                 t.Commit();
@@ -49,7 +64,7 @@ namespace gtmp.evilempire.db
                 throw new ArgumentNullException(nameof(tableName));
             }
 
-            using (var t = this._engine.GetTransaction())
+            using (var t = _engine.GetTransaction())
             {
                 var row = t.Select<TKey, DbMJSON<T>>(tableName, key);
                 if (row != null && row.Exists)
@@ -64,30 +79,34 @@ namespace gtmp.evilempire.db
             return default(T);
         }
 
-        public void InsertOrUpdate(object key, object entity) // todo: performance, heavy reflection
+        internal void InsertOrUpdate(object entity)
         {
+            var key = SelectKey(entity);
+            InsertOrUpdate(key, entity);
+        }
+
+        internal void InsertOrUpdate(object key, object entity) // todo: performance, heavy reflection
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             var keyType = key.GetType();
             var entityType = entity.GetType();
-            var reflectedTableName = this.GetEntityStorageDescription(entityType)?.Storage;
+            var reflectedTableName = GetEntityStorageDescription(entityType)?.Storage;
 
-            using (var t = this._engine.GetTransaction())
+            using (var t = _engine.GetTransaction())
             {
-                var select = t.GetType().GetMethod("Select").MakeGenericMethod(keyType, entityType);
-                var result = select.Invoke(t, new[] { reflectedTableName, key, false });
-                if (result != null)
-                {
-                    var existsProperty = result.GetType().GetProperty("Exists");
-                    var exists = existsProperty?.GetMethod?.Invoke(result, null);
-                    if (exists != null && !(bool)exists)
-                    {
-                        var l = typeof(DBreezeEngine).Assembly.GetTypes().Select(s => s.Name).ToList();
-                        var dbmJsonType = typeof(DBreezeEngine).Assembly.GetTypes().First(p => p.Name == "DbMJSON`1").MakeGenericType(entityType);
-                        var dbmJson = Activator.CreateInstance(dbmJsonType, entity);
-                        var insert = t.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(p => p.Name == "Insert" && p.GetParameters().Count() == 3).MakeGenericMethod(keyType, dbmJsonType);
-                        insert.Invoke(t, new[] { reflectedTableName, key, dbmJson });
-                        t.Commit();
-                    }
-                }
+                var dbmJsonType = typeof(DBreezeEngine).Assembly.GetTypes().First(p => p.Name == "DbMJSON`1").MakeGenericType(entityType);
+                var dbmJson = Activator.CreateInstance(dbmJsonType, entity);
+                var insert = t.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(p => p.Name == "Insert" && p.GetParameters().Count() == 3).MakeGenericMethod(keyType, dbmJsonType);
+                insert.Invoke(t, new[] { reflectedTableName, key, dbmJson });
+                t.Commit();
             }
         }
 
@@ -98,7 +117,7 @@ namespace gtmp.evilempire.db
                 return null;
             }
 
-            var keySelector = this.GetEntityKeySelector(entity.GetType());
+            var keySelector = GetEntityKeySelector(entity.GetType());
             if (keySelector != null)
             {
                 return keySelector(entity);
@@ -108,7 +127,7 @@ namespace gtmp.evilempire.db
 
         string GetReflectedTableName<T>()
         {
-            var description = this.GetEntityStorageDescription<T>();
+            var description = GetEntityStorageDescription<T>();
             if (description == null)
             {
                 return null;
@@ -118,20 +137,20 @@ namespace gtmp.evilempire.db
 
         EntityStorageAttribute GetEntityStorageDescription<T>()
         {
-            return this.GetEntityStorageDescription(typeof(T));
+            return GetEntityStorageDescription(typeof(T));
         }
 
         EntityStorageAttribute GetEntityStorageDescription(Type t)
         {
             EntityStorageAttribute v;
-            if (this._entityStorageDescriptionCache.TryGetValue(t, out v))
+            if (_entityStorageDescriptionCache.TryGetValue(t, out v))
             {
                 return v;
             }
             else
             {
                 v = t.GetCustomAttributes(typeof(EntityStorageAttribute), false).Select(s => s as EntityStorageAttribute).FirstOrDefault();
-                this._entityStorageDescriptionCache.TryAdd(t, v);
+                _entityStorageDescriptionCache.TryAdd(t, v);
                 return v;
             }
         }
@@ -139,7 +158,7 @@ namespace gtmp.evilempire.db
         Func<object, object> GetEntityKeySelector(Type t)
         {
             Func<object, object> keySelector;
-            if (this._entityKeySelectorCache.TryGetValue(t, out keySelector))
+            if (_entityKeySelectorCache.TryGetValue(t, out keySelector))
             {
                 return keySelector;
             }
@@ -156,7 +175,7 @@ namespace gtmp.evilempire.db
                 var lambda = Expression.Lambda(cast, p);
                 keySelector = (Func<object, object>)lambda.Compile();
 
-                this._entityKeySelectorCache.TryAdd(t, keySelector);
+                _entityKeySelectorCache.TryAdd(t, keySelector);
                 return keySelector;
             }
         }

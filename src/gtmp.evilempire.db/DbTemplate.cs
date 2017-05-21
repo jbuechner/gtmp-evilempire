@@ -14,25 +14,38 @@ namespace gtmp.evilempire.db
     {
         string path;
 
+        public IEnumerable<string> Templates
+        {
+            get
+            {
+                if (!Directory.Exists(path))
+                {
+                    yield break;
+                }
+                foreach (var file in Directory.GetFiles(path, "*.xml"))
+                {
+                    yield return file;
+                }
+            }
+        }
+
         public DbTemplate(string databaseTemplateRootPath)
         {
-            this.path = databaseTemplateRootPath;
+            path = databaseTemplateRootPath;
         }
 
-        public IEnumerable<string> GetTemplates()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        public static bool PopulateByTemplate(string template, DbEnvironment dbEnvironment)
         {
-            if (!Directory.Exists(path))
+            if (!File.Exists(template))
             {
-                yield break;
+                throw new FileNotFoundException(template);
             }
-            foreach(var file in Directory.GetFiles(path, "*.xml"))
+            if (dbEnvironment == null)
             {
-                yield return file;
+                throw new ArgumentNullException(nameof(dbEnvironment));
             }
-        }
 
-        public bool PopulateByTemplate(string template, DbEnvironment dbEnvironment)
-        {
             using (var file = File.Open(template, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var xmlReader = XmlReader.Create(file))
             {
@@ -62,17 +75,17 @@ namespace gtmp.evilempire.db
                     var o = serializer.Deserialize(xmlReader);
                     if (o != null)
                     {
-                        var key = dbEnvironment.SelectKey(o);
                         if (entityProcessor != null)
                         {
                             entityProcessor.Process(o);
                         }
-                        dbEnvironment.InsertOrUpdate(key, o);
+                        dbEnvironment.InsertOrUpdate(o);
                     }
 
                 } while (xmlReader.ReadToNextSibling(t.Name));
 
             }
+
             return true;
         }
     }

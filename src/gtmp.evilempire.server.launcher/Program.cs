@@ -176,7 +176,7 @@ namespace gtmp.evilempire.server.launcher
             using (var dbe = new DbEnvironment(evilempire.Constants.Database.DatabasePath))
             {
                 var dbt = new DbTemplate(evilempire.Constants.Database.DatabaseTemplatePath);
-                foreach(var template in dbt.GetTemplates())
+                foreach(var template in dbt.Templates)
                 {
                     if (!ExecuteWithConsoleOutput($"Populate db environment using template {template} ... ", WrapWithFailReason(() => dbt.PopulateByTemplate(template, dbe), "failed")))
                     {
