@@ -40,7 +40,8 @@ namespace gtmp.evilempire.server
             var b = client._client;
             return string.Equals(a.socialClubName, b.socialClubName, StringComparison.Ordinal)
                 && string.Equals(a.address, b.address, StringComparison.Ordinal)
-                && a.handle.Value == b.handle.Value;
+                && !a.IsNull && !b.IsNull
+                && (a.exists && !b.exists || (!a.handle.IsNull && !b.handle.IsNull) && a.handle.Value == b.handle.Value);
         }
     }
 }

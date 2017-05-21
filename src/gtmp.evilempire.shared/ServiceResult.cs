@@ -70,7 +70,7 @@ namespace gtmp.evilempire
 
         public new static IServiceResult<T> AsError(string errorMessage)
         {
-            var result = new ServiceResult<T> { State = ServiceResultState.Success };
+            var result = new ServiceResult<T> { State = ServiceResultState.Error };
             result.SetBaseData(errorMessage);
             return result;
         }

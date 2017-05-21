@@ -35,6 +35,10 @@ namespace gtmp.evilempire.server.services
                 {
                     return ServiceResult<User>.AsError("Failed login");
                 }
+                else
+                {
+                    LoggedInClients.AddOrUpdate(login, client, (key, value) => client);
+                }
             }
             else
             {

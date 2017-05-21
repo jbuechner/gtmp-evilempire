@@ -37,6 +37,7 @@ namespace gtmp.evilempire.server
             services.Register<IJsonSerializer>(new JsonSerializer());
             services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
             services.Register<IAuthorizationService, AuthorizationService>();
+            services.Register<ILoginService, LoginService>();
             return services;
         }
 

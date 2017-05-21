@@ -12,7 +12,7 @@ namespace gtmp.evilempire.server.launcher
     static class Program
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
-        public static int Main()
+        public static int Main(string[] args)
         {
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -31,7 +31,7 @@ namespace gtmp.evilempire.server.launcher
                 {
                     return Constants.ExitCodes.DatabasePopulationFailed;
                 }
-                RunServer();
+                RunServer(args);
 
                 return 0;
             }))();
@@ -91,12 +91,13 @@ namespace gtmp.evilempire.server.launcher
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "gtmp.evilempire.server.launcher.Program.ExecuteWithConsoleOutput(System.String,gtmp.evilempire.server.launcher.Program+WrappedConsoleExecution)")]
-        static void RunServer()
+        static void RunServer(string[] args)
         {
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = Constants.ServerExecutable,
                 WorkingDirectory = Environment.CurrentDirectory,
+                Arguments = string.Join(" ", args)
             };
 
             ExecuteWithConsoleOutput("Starting GTMP server instance ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));

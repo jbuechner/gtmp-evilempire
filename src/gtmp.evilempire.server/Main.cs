@@ -2,6 +2,7 @@
 using GrandTheftMultiplayer.Shared.Math;
 using GrandTheftMultiplayer.Server.Elements;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using gtmp.evilempire.services;
 
@@ -17,6 +18,13 @@ namespace gtmp.evilempire.server
 
         public Main()
         {
+#if DEBUG
+            if (Environment.GetCommandLineArgs().Any(p => string.CompareOrdinal(p, "--dbgbreak") == 0))
+            {
+                System.Diagnostics.Debugger.Launch();
+            }
+#endif
+
             this.API.onResourceStart += this.OnResourceStart;
             this.API.onResourceStop += this.OnResourceStop;
         }
