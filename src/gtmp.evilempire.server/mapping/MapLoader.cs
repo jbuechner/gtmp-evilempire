@@ -18,7 +18,7 @@ namespace gtmp.evilempire.server.mapping
 
         public MapLoader()
         {
-            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints };
+            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadObjects, LoadPeds, LoadVehicles };
         }
 
         public static Map LoadFrom(string directory)
@@ -56,6 +56,65 @@ namespace gtmp.evilempire.server.mapping
                 {
                     handler(map, xdoc);
                 }
+            }
+        }
+
+        void LoadObjects(Map map, XDocument xdoc)
+        {
+            foreach (var mapObject in SelectMapObjectsByType(xdoc, "Prop"))
+            {
+                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var position = mapObject.Element("Position")?.ToVector3();
+                var rotation = mapObject.Element("Rotation")?.ToVector3();
+
+                var obj = new MapObject(hash, position, rotation);
+                map.AddObject(obj);
+            }
+        }
+
+        void LoadPeds(Map map, XDocument xdoc)
+        {
+            foreach(var mapObject in SelectMapObjectsByType(xdoc, "Ped"))
+            {
+                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var position = mapObject.Element("Position")?.ToVector3();
+                var rotation = mapObject.Element("Rotation")?.ToVector3();
+                var isInvincible = mapObject.Element("Invicible")?.ToBool() ?? false;
+
+                var ped = new MapPed(hash, position, rotation.Z, isInvincible);
+                map.AddPed(ped);
+            }
+        }
+
+        void LoadVehicles(Map map, XDocument xdoc)
+        {
+            foreach (var mapObject in SelectMapObjectsByType(xdoc, "Vehicle"))
+            {
+                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var position = mapObject.Element("Position")?.ToVector3();
+                var rotation = mapObject.Element("Rotation")?.ToVector3();
+                var color1 = mapObject.Element("PrimaryColor")?.ToInt() ?? 0;
+                var color2 = mapObject.Element("SecondaryColor")?.ToInt() ?? 0;
+
+                var vehicle = new MapVehicle(hash, position, rotation, color1, color2);
+                map.AddVehicle(vehicle);
+            }
+        }
+
+        IEnumerable<XElement> SelectMapObjectsByType(XDocument xdoc, string type)
+        {
+            var mapObjects = xdoc?.Root?.Elements("Objects")?.Elements("MapObject");
+            if (mapObjects == null)
+            {
+                yield break;
+            }
+            foreach (var mapObject in mapObjects)
+            {
+                if (string.Compare(mapObject.GetSubElementValue("Type"), type, StringComparison.OrdinalIgnoreCase) != 0)
+                {
+                    continue;
+                }
+                yield return mapObject;
             }
         }
 
@@ -186,6 +245,20 @@ namespace gtmp.evilempire.server.mapping
             return null;
         }
 
+        internal static bool? ToBool(this XElement element)
+        {
+            if (element == null)
+            {
+                return null;
+            }
+            bool v;
+            if (bool.TryParse(element.Value, out v))
+            {
+                return v;
+            }
+            return null;
+        }
+
         internal static float? ToFloat(this XElement element)
         {
             if (element == null)
@@ -196,6 +269,16 @@ namespace gtmp.evilempire.server.mapping
             if (float.TryParse(element.Value, out v))
             {
                 return v;
+            }
+            return null;
+        }
+
+        internal static string GetSubElementValue(this XElement element, XName subElementName)
+        {
+            var el = element?.Element(subElementName);
+            if (el != null)
+            {
+                return el.Value;
             }
             return null;
         }

@@ -10,6 +10,10 @@ namespace gtmp.evilempire.server.mapping
     {
         public IList<MapPoint> Points { get; } = new List<MapPoint>();
         public IList<MapMarker> Markers { get; } = new List<MapMarker>();
+        public IList<MapObject> Objects { get; } = new List<MapObject>();
+        public IList<MapVehicle> Vehicles { get; } = new List<MapVehicle>();
+
+        public IList<MapPed> Peds { get; } = new List<MapPed>();
 
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
 
@@ -41,6 +45,21 @@ namespace gtmp.evilempire.server.mapping
         public void AddMarker(MapMarker mapMarker)
         {
             Markers.Add(mapMarker);
+        }
+
+        public void AddObject(MapObject mapObject)
+        {
+            Objects.Add(mapObject);
+        }
+
+        public void AddPed(MapPed mapPed)
+        {
+            Peds.Add(mapPed);
+        }
+
+        public void AddVehicle(MapVehicle mapVehicle)
+        {
+            Vehicles.Add(mapVehicle);
         }
     }
 }

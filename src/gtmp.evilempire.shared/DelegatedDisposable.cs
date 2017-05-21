@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace gtmp.evilempire.server.launcher
+namespace gtmp.evilempire.server
 {
     public sealed class DelegatedDisposable : IDisposable
     {

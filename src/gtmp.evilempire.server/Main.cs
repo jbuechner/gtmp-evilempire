@@ -49,7 +49,6 @@ namespace gtmp.evilempire.server
             this.API.onPlayerConnected += client =>
             {
                 var loadingPoint = Map.GetPoint(MapPointType.Loading, 0)?.Position ?? new Vector3(-500, -500, 0);
-
                 client.dimension = 1000;
                 client.freeze(false);
                 client.position = loadingPoint;

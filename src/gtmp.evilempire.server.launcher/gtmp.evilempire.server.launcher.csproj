@@ -56,9 +56,7 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ConsoleExtensions.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="DelegatedDisposable.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>

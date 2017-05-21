@@ -68,8 +68,11 @@
     <Compile Include="mapping\Map.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
+    <Compile Include="mapping\MapObject.cs" />
+    <Compile Include="mapping\MapPed.cs" />
     <Compile Include="mapping\MapPoint.cs" />
     <Compile Include="mapping\MapPointType.cs" />
+    <Compile Include="mapping\MapVehicle.cs" />
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
     <Compile Include="PlatformClient.cs" />

@@ -50,7 +50,9 @@
     <Compile Include="..\shared\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="ConsoleExtensions.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="DelegatedDisposable.cs" />
     <Compile Include="entities\EntityStorageAttribute.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
