@@ -9,14 +9,19 @@ Slim.tag('core-login', class extends Slim {
 
     onBeforeCreated() {
         this.app = window.app;
+        let self = this;
         document.addEventListener('relay', (ev) => {
             console.log(ev);
             if (ev.detail.target === 'login:response') {
-                if (ev.detail.args.state !== ClientLifecycleState.Success) { // todo: change result display in error case
-                    this.username.value = 'failed:' + ev.detail.args.data;
+                if (ev.detail.args.state !== ClientLifecycleState.Success) {
+                    self.message = ev.detail.args.data;
                 }
             }
         });
+    }
+
+    onCreated() {
+        this.message = '';
     }
 
     get template() {
@@ -29,14 +34,19 @@ Slim.tag('core-login', class extends Slim {
         <label for="password">Password</label>
         <input type="password" class="form-control" slim-id="password" placeholder="Password">
     </div>
-    <button type="button" click="login" class="btn btn-default">Login</button>
+    <button type="submit" click="login" class="btn btn-default">Login</button>
     <button type="button" click="disconnect" class="btn btn-default">Disconnect</button>
+    <p>&nbsp;</p>
+    <p bind>[[message]]</p>
 </form>`;
     }
 
-    login() {
+    login(e) {
+        e.preventDefault();
         if (this.username.value && this.password.value) {
             this.app.login({ username: this.username.value, password: this.password.value });
+            this.message = 'Logging in ...';
+            this.username.focus();
         }
         this.username.value = this.password.value = null;
     }

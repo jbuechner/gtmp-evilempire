@@ -10,11 +10,10 @@ namespace gtmp.evilempire.server
 
     public static class ClientEventCallbackExtensions
     {
-        class ServiceTransferResult : IServiceResult
+        class ServiceTransferResult
         {
             public ServiceResultState State { get; set; }
             public object Data { get; set; }
-            public Exception Exception { get; } = null;
 
             public ServiceTransferResult(IServiceResult serviceResult)
             {
