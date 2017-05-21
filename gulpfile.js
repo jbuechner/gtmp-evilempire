@@ -10,140 +10,148 @@ const $gmsbuild = require('gulp-msbuild');
 const $del = require('del');
 
 const project = {
-	paths: {
-		dist: {
-			root: './dist/',
-			resources: './dist/resources'
-		},
-		src: {
-			configs: './src/configs/**/*',
-			resources: './src/resources/**/*',
-			public: './src/public/**/*',
-			csharp: {
-				sln: './src/gtmp.evilempire.sln',
-				binaries: './src/gtmp.evilempire*/bin/debug/*'
-			}
-		},
-		libs: {
-			gtmp: {
-				serverzip: './libs/gtmp/v0.1.501.566/GT-MP-Server.zip'
-			}
-		}
-	},
-	msbuild: {
-		verbosity: 'minimal',
-		stdout: true,
-		toolsVersion: 14.0,
-		properties: {
-			Configuration: 'Debug'
-		}
-	}
+    paths: {
+        dist: {
+            root: './dist/',
+            resources: './dist/resources',
+            dbt: './dist/dbt'
+        },
+        src: {
+            configs: './src/configs/**/*',
+            resources: './src/resources/**/*',
+            public: './src/public/**/*',
+            csharp: {
+                sln: './src/gtmp.evilempire.sln',
+                binaries: './src/gtmp.evilempire*/bin/debug/*'
+            },
+            dbt: './src/db/templates/*'
+        },
+        libs: {
+            gtmp: {
+                serverzip: './libs/gtmp/v0.1.501.566/GT-MP-Server.zip'
+            }
+        }
+    },
+    msbuild: {
+        verbosity: 'minimal',
+        stdout: true,
+        toolsVersion: 14.0,
+        properties: {
+            Configuration: 'Debug'
+        }
+    }
 }
 
 const $__tasks = {
-	transformToGtmpResource: function(elements) {
-		let stream = new $stream.Transform({
-			objectMode: true,
-			transform: function(f, enc, cb) {
-				if (f.isDirectory()) {
-					return cb(null, null);
-				}
-				if (f.path.endsWith('.client.js') ||
-					f.path.endsWith('.js') && f.path.match(/[/\\]libs[/\\]client[/\\]/)) {
-					this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
-				} else {
-					this.contents += '<file src="' + f.relative + '" />\n';
-				}
-				cb(null, null);
-			},
-			flush: function(cb) {
-				this.contents += '</meta>';
-				cb(null, { contents: this.contents, relative: 'meta.xml', isDirectory: () => false, isStream: () => false, isBuffer: () => true, isNull: () => false });
-			}
-		});
-
-		stream.contents = '<meta>\n';
-		Object.getOwnPropertyNames(elements).forEach(elementName => {
-			stream.contents += `<${elementName} `;
-			let element = elements[elementName];
-			Object.getOwnPropertyNames(element).forEach(attributeName => {
-				stream.contents += `${attributeName}="${element[attributeName]}" `;
-			});
-			stream.contents += ' />'
+    transformToGtmpResource: function(elements) {
+        let stream = new $stream.Transform({
+            objectMode: true,
+            transform: function(f, enc, cb) {
+                if (f.isDirectory()) {
+                    return cb(null, null);
+                }
+                if (f.path.endsWith('.client.js') ||
+                    f.path.endsWith('.js') && f.path.match(/[/\\]libs[/\\]client[/\\]/)) {
+                    this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
+                } else {
+                    this.contents += '<file src="' + f.relative + '" />\n';
+                }
+                cb(null, null);
+            },
+            flush: function(cb) {
+                this.contents += '</meta>';
+                cb(null, { contents: this.contents, relative: 'meta.xml', isDirectory: () => false, isStream: () => false, isBuffer: () => true, isNull: () => false });
+            }
         });
 
-		return stream;
-	}
+        stream.contents = '<meta>\n';
+        Object.getOwnPropertyNames(elements).forEach(elementName => {
+            stream.contents += `<${elementName} `;
+            let element = elements[elementName];
+            Object.getOwnPropertyNames(element).forEach(attributeName => {
+                stream.contents += `${attributeName}="${element[attributeName]}" `;
+            });
+            stream.contents += ' />'
+        });
+
+        return stream;
+    }
 };
 
 $gulp.task('default', ['rebuild']);
 
 $gulp.task('rebuild', function(cb) {
-	$runseq('clean', 'build', cb);
+    $runseq('clean', 'build', cb);
 });
 
 $gulp.task('build-resources', ['copy-public', 'build-resources-meta']);
 
 $gulp.task('build', function(cb) {
-	$runseq('cs', 'copy', 'build-resources', 'dist', cb);
+    $runseq('cs', 'copy', 'build-resources', 'dist', cb);
 });
 
 $gulp.task('copy', function(cb) {
-	$runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings'], cb)
+    $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings', 'copy-dbt'], cb);
 });
 
 $gulp.task('clean', ['cs-clean'], function() {
-	return $del([project.paths.dist.root]);
+    return $del([project.paths.dist.root]);
 });
 
 $gulp.task('delete-resources', function() {
-	return $del([project.paths.dist.root + 'resources']);
+    return $del([project.paths.dist.root + 'resources']);
 });
 
 $gulp.task('cs-clean', function() {
-	let msbuildConfig = Object.assign({ targets: ['Clean'] }, project.msbuild);
-	return $gulp.src(project.paths.src.csharp.sln)
-		.pipe($gmsbuild(msbuildConfig));
+    let msbuildConfig = Object.assign({ targets: ['Clean'] }, project.msbuild);
+    return $gulp.src(project.paths.src.csharp.sln)
+        .pipe($gmsbuild(msbuildConfig));
 });
 
 $gulp.task('copy-public', function() {
-	return $gulp.src(project.paths.src.public)
-		.pipe($gulp.dest(project.paths.dist.resources + '/gtmp-server'));
+    return $gulp.src(project.paths.src.public)
+        .pipe($gulp.dest(project.paths.dist.resources + '/gtmp-server'));
 });
 
 $gulp.task('copy-settings', function() {
-	return $gulp.src(project.paths.src.configs)
-		.pipe($gulp.dest(project.paths.dist.root));
+    return $gulp.src(project.paths.src.configs)
+        .pipe($gulp.dest(project.paths.dist.root));
 });
 
 $gulp.task('copy-cs', function() {
-	return $gulp.src(project.paths.src.csharp.binaries)
-		.pipe($gflat())
-		.pipe($gulp.dest(project.paths.dist.root));
+    return $gulp.src(project.paths.src.csharp.binaries)
+        .pipe($gflat())
+        .pipe($gulp.dest(project.paths.dist.root));
+});
+
+$gulp.task('copy-dbt', function() {
+    return $gulp.src(project.paths.src.dbt)
+        .pipe($gflat())
+        .pipe($gulp.dest(project.paths.dist.dbt));
 });
 
 $gulp.task('build-resources-meta', function() {
-	return $gulp.src(project.paths.src.public)
-		.pipe($__tasks.transformToGtmpResource({
-			info: { name: 'GTMP Evil Empire Server', author: 'lloyd', type: 'script' },
-			script: { src: './../../gtmp.evilempire.server.dll', type: 'server', lang: 'compiled' }
-		})).pipe($gulp.dest(project.paths.dist.root + '/resources/gtmp-server'));
+    return $gulp.src(project.paths.src.public)
+        .pipe($__tasks.transformToGtmpResource({
+            info: { name: 'GTMP Evil Empire Server', author: 'lloyd', type: 'script' },
+            script: { src: './../../gtmp.evilempire.server.dll', type: 'server', lang: 'compiled' }
+        })).pipe($gulp.dest(project.paths.dist.root + '/resources/gtmp-server'));
 });
 
 $gulp.task('extract-server', function() {
-	return $gulp.src(project.paths.libs.gtmp.serverzip)
-		.pipe($gdecompress())
-		.pipe($gulp.dest(project.paths.dist.root));
+    return $gulp.src(project.paths.libs.gtmp.serverzip)
+        .pipe($gdecompress())
+        .pipe($gulp.dest(project.paths.dist.root));
 });
 
 $gulp.task('cs', function() {
-	let msbuildConfig = Object.assign({ targets: ['Build'] }, project.msbuild);
-	return $gulp.src(project.paths.src.csharp.sln)
-		.pipe($gmsbuild(msbuildConfig));
+    let msbuildConfig = Object.assign({ targets: ['Build'] }, project.msbuild);
+    return $gulp.src(project.paths.src.csharp.sln)
+        .pipe($gmsbuild(msbuildConfig));
 });
 
 $gulp.task('dist', function() {
-	return $gulp.src([ project.paths.dist.root + '**/!(settings.user.xml)' ])
-		.pipe($gzip('server.zip'))
-		.pipe($gulp.dest(project.paths.dist.root));
+    return $gulp.src([ project.paths.dist.root + '**/!(settings.user.xml|users.xml)' ])
+        .pipe($gzip('server.zip'))
+        .pipe($gulp.dest(project.paths.dist.root));
 });
