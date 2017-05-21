@@ -44,6 +44,7 @@ function define(module)  {
 
         static onClientConnected(app) {
             app.client.setCamera(200, 200, 150, 1, 1, 1);
+            app.browser.addView('view-login');
             app.browser.show();
             app.client.cursor = true;
         }
@@ -51,7 +52,7 @@ function define(module)  {
         static onClientLoggedIn(app) {
             app.client.cursor = false;
             app.client.resetCamera();
-            app.browser.hide();
+            app.browser.removeView('view-login');
         }
     }
 

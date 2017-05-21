@@ -14,7 +14,22 @@ function define(module) {
         }
 
         navigate(url) {
-            API.loadPageCefBrowser(this._instance, url);
+            return new Promise(resolve => {
+                let instance = this._instance;
+                let watch = () => {
+                    try {
+                        if (!API.isCefBrowserLoading(instance)) {
+                            subscription.disconnect();
+                            resolve();
+                        }
+                    } catch (ex) {
+                        module.debugOut(ex);
+                        subscription.disconnect();
+                    }
+                };
+                API.loadPageCefBrowser(instance, url);
+                let subscription = API.onUpdate.connect(watch);
+            });
         }
 
         show() {
@@ -23,6 +38,14 @@ function define(module) {
 
         hide() {
             API.setCefBrowserHeadless(this._instance, true);
+        }
+
+        addView(viewName) {
+            this._instance.call('addView', JSON.stringify({ selector: viewName }));
+        }
+
+        removeView(viewName) {
+            this._instance.call('removeView', JSON.stringify({ selector: viewName }));
         }
 
         static create() {

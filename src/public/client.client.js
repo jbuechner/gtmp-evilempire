@@ -45,7 +45,6 @@ function define(module) {
         }
 
         _onCursorStateChanged() {
-            API.sendNotification('>' + (this._cursor || this._cursorToggle));
             API.showCursor(this._cursor || this._cursorToggle);
         }
     }

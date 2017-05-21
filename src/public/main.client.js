@@ -180,8 +180,9 @@ let boot = (function(resource) {
 			const self = this;
 			$browser.Browser.create().then(browser => {
                 this._browser = browser;
-                this.lifecycle.transit($lifecycle.ClientLifecycleState.Connected, this);
-                browser.navigate('index.html');
+                browser.navigate('index.html').then(() => {
+                    this.lifecycle.transit($lifecycle.ClientLifecycleState.Connected, this);
+                }).catch(debugOut);
             }).catch(debugOut);
 
 			this.proxy.knownRoots.set('app', new AppProxy(this));

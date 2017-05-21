@@ -38,5 +38,20 @@ function relay(raw) {
         window.app.proxy.relay(args);
     }
 }
+function addView(args) {
+    args = JSON.parse(args);
+    let el = document.createElement(args.selector);
+    document.body.appendChild(el);
+}
+function removeView(args) {
+    args = JSON.parse(args);
+    let elements = document.querySelectorAll(args.selector);
+    for (let i = 0; i < elements.length; i++) {
+         let el = elements[i];
+         if (el && el.parentNode) {
+             el.parentNode.removeChild(el);
+         }
+    }
+}
 
 window.app = new App();
