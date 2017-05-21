@@ -55,10 +55,12 @@
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />
+    <Compile Include="IClient.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
     <Compile Include="services\IDbService.cs" />
     <Compile Include="services\IJsonSerializer.cs" />
+    <Compile Include="services\ILoginService.cs" />
     <Compile Include="services\IServiceResult.cs" />
     <Compile Include="services\ServiceResultState.cs" />
     <Compile Include="TinyIoC.cs" />

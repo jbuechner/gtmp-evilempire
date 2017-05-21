@@ -95,8 +95,13 @@ namespace gtmp.evilempire.server
             var result = authorizationService.Authenticate(username as string, password as string);
             if (result.State == ServiceResultState.Success)
             {
-                client.dimension = 0;
-                client.freeze(false);
+                var loginService = services.Get<ILoginService>();
+                result = loginService.Login(username as string, new PlatformClient(client));
+                if (result.State == ServiceResultState.Success)
+                {
+                    client.dimension = 0;
+                    client.freeze(false);
+                }
             }
             return result;
         }

@@ -63,8 +63,10 @@
     <Compile Include="ClientEventCallbackExtensions.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="PlatformClient.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="services\AuthorizationService.cs" />
+    <Compile Include="services\LoginService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\gtmp.evilempire.db\gtmp.evilempire.db.csproj">

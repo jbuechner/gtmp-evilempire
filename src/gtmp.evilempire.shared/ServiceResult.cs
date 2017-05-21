@@ -9,9 +9,9 @@ namespace gtmp.evilempire
 {
     public class ServiceResult : IServiceResult
     {
-        public ServiceResultState State { get; private set; }
-        public Exception Exception { get; private set; }
-        public object Data { get; private set; }
+        public ServiceResultState State { get; protected set; }
+        public Exception Exception { get; protected set; }
+        public object Data { get; protected set; }
 
         protected ServiceResult()
         {
@@ -50,7 +50,7 @@ namespace gtmp.evilempire
             }
             private set
             {
-                this.Data = value;
+                base.Data = value;
             }
         }
 
@@ -58,9 +58,26 @@ namespace gtmp.evilempire
         {
         }
 
+        void SetBaseData(object data)
+        {
+            base.Data = data;
+        }
+
         public ServiceResult(ServiceResultState state, T data, Exception exception)
             : base(state, data, exception)
         {
+        }
+
+        public new static IServiceResult<T> AsError(string errorMessage)
+        {
+            var result = new ServiceResult<T> { State = ServiceResultState.Success };
+            result.SetBaseData(errorMessage);
+            return result;
+        }
+
+        public static IServiceResult<T> AsSuccess(T data)
+        {
+            return new ServiceResult<T> { State = ServiceResultState.Success, Data = data };
         }
     }
 }
