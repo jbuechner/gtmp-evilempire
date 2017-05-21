@@ -5,12 +5,15 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using gtmp.evilempire.services;
+using gtmp.evilempire.server.mapping;
 
 namespace gtmp.evilempire.server
 {
     public class Main : Script
     {
         public ServiceContainer Services { get; private set; }
+
+        public Map Map { get; private set; }
 
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
             { "login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("login:response") }
@@ -24,6 +27,8 @@ namespace gtmp.evilempire.server
                 System.Diagnostics.Debugger.Launch();
             }
 #endif
+            Map = MapLoader.LoadFrom("maps");
+            ServerMapLoader.Load(Map, API);
 
             this.API.onResourceStart += this.OnResourceStart;
             this.API.onResourceStop += this.OnResourceStop;
@@ -38,12 +43,16 @@ namespace gtmp.evilempire.server
         void OnResourceStart()
         {
             Services = ServiceContainer.Create();
+            Services.Register(Map);
+
             this.API.onClientEventTrigger += this.OnClientEventTrigger;
             this.API.onPlayerConnected += client =>
             {
+                var loadingPoint = Map.GetPoint(MapPointType.Loading, 0)?.Position ?? new Vector3(-500, -500, 0);
+
                 client.dimension = 1000;
                 client.freeze(false);
-                client.position = new Vector3(-500, -500, 0);
+                client.position = loadingPoint;
                 client.stopAnimation();
             };
         }
@@ -107,6 +116,12 @@ namespace gtmp.evilempire.server
                 result = loginService.Login(username as string, new PlatformClient(client));
                 if (result.State == ServiceResultState.Success)
                 {
+                    var map = services.Get<Map>();
+                    var startingPoint = map.GetPoint(MapPointType.Teleport, 0);
+                    if (startingPoint != null)
+                    {
+                        client.position = startingPoint.Position;
+                    }
                     client.dimension = 0;
                     client.freeze(false);
                 }

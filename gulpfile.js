@@ -14,7 +14,8 @@ const project = {
         dist: {
             root: './dist/',
             resources: './dist/resources',
-            dbt: './dist/dbt'
+            dbt: './dist/dbt',
+            maps: './dist/maps'
         },
         src: {
             configs: './src/configs/**/*',
@@ -24,7 +25,8 @@ const project = {
                 sln: './src/gtmp.evilempire.sln',
                 binaries: './src/gtmp.evilempire*/bin/debug/*'
             },
-            dbt: './src/db/templates/*'
+            dbt: './src/db/templates/*',
+            maps: './src/maps/*'
         },
         libs: {
             gtmp: {
@@ -91,7 +93,7 @@ $gulp.task('build', function(cb) {
 });
 
 $gulp.task('copy', function(cb) {
-    $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings', 'copy-dbt'], cb);
+    $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings', 'copy-dbt', 'copy-maps'], cb);
 });
 
 $gulp.task('clean', ['cs-clean'], function() {
@@ -128,6 +130,12 @@ $gulp.task('copy-dbt', function() {
     return $gulp.src(project.paths.src.dbt)
         .pipe($gflat())
         .pipe($gulp.dest(project.paths.dist.dbt));
+});
+
+$gulp.task('copy-maps', function() {
+    return $gulp.src(project.paths.src.maps)
+        .pipe($gflat())
+        .pipe($gulp.dest(project.paths.dist.maps));
 });
 
 $gulp.task('build-resources-meta', function() {
