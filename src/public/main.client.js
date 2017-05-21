@@ -73,6 +73,7 @@ let boot = (function(resource) {
     const $lifecycle = require('lifecycle');
     const $client = require('client');
     const $browser = require('browser');
+    const $controls = require('controls');
 
     const ServiceResultState = {
         None: 0,
@@ -174,6 +175,7 @@ let boot = (function(resource) {
 			this._serverEvents = new Map([
                 [ 'login:response', this.onLoginResponse ]
             ]);
+			this._input = new $controls.InputController();
 
 			const self = this;
 			$browser.Browser.create().then(browser => {
@@ -210,6 +212,10 @@ let boot = (function(resource) {
 
 		get browser() {
 		    return this._browser;
+        }
+
+        get input() {
+		    return this._input;
         }
 
         sendToServer(target, args) {
@@ -254,6 +260,10 @@ let boot = (function(resource) {
         }
 	}
 	let app = new App();
+
+    app.input.addMapping($controls.KEYS.CTRL, { onDown: () => app.client.cursorToggle = true, onUp: () => app.client.cursorToggle = false });
+    app.input.addMapping($controls.KEYS.F12, () => app.client.cursor = !app.client.cursor);
+
     resource.browser_client.cef_invoke = function app_cef_invoke() {
         let args = arguments;
         if (args && args.length === 1) {

@@ -45,11 +45,11 @@ function define(module)  {
         static onClientConnected(app) {
             app.client.setCamera(200, 200, 150, 1, 1, 1);
             app.browser.show();
-            app.client.cursor(true);
+            app.client.cursor = true;
         }
 
         static onClientLoggedIn(app) {
-            app.client.cursor(false);
+            app.client.cursor = false;
             app.client.resetCamera();
             app.browser.hide();
         }

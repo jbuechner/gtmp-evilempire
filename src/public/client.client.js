@@ -1,6 +1,11 @@
 'use strict';
 function define(module) {
     class Client {
+        constructor() {
+            this._cursor = false;
+            this._cursorToggle = false;
+        }
+
         // {or v3, v3}
         setCamera(x, y, z, rx, ry, rz) {
             let pos = x;
@@ -13,12 +18,35 @@ function define(module) {
             API.setActiveCamera(camera);
         }
 
+        get cursorToggle() {
+            return this._cursorToggle;
+        }
+
+        set cursorToggle(v) {
+            if (this._cursorToggle !== v) {
+                this._cursorToggle = v;
+                this._onCursorStateChanged();
+            }
+        }
+
+        get cursor() {
+            return this._cursor;
+        }
+
+        set cursor(v) {
+            if (this._cursor !== v) {
+                this._cursor = v;
+                this._onCursorStateChanged();
+            }
+        }
+
         resetCamera() {
             API.setActiveCamera(null);
         }
 
-        cursor(v) {
-            API.showCursor(v);
+        _onCursorStateChanged() {
+            API.sendNotification('>' + (this._cursor || this._cursorToggle));
+            API.showCursor(this._cursor || this._cursorToggle);
         }
     }
 
