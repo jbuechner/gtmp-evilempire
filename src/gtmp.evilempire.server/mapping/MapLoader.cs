@@ -122,6 +122,7 @@ namespace gtmp.evilempire.server.mapping
         {
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("LoadingPoint"));
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("TeleportPoint"));
+            LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("NewPlayerSpawnPoint"));
         }
 
         void LoadMapPoints(Map map, IEnumerable<XElement> elements)

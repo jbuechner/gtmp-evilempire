@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Metadata>
+    <Name>Spawnpunkte</Name>
+    <NewPlayerSpawnPoint>
+      <X>-1039.73</X>
+      <Y>-2740.55</Y>
+      <Z>13.88</Z>
+    </NewPlayerSpawnPoint>
+  </Metadata>
+</Map>

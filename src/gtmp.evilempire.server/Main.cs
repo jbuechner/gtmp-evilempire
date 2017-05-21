@@ -1,4 +1,4 @@
-﻿using GrandTheftMultiplayer.Server.API;
+﻿ using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Shared.Math;
 using GrandTheftMultiplayer.Server.Elements;
 using System;
@@ -48,7 +48,7 @@ namespace gtmp.evilempire.server
             this.API.onClientEventTrigger += this.OnClientEventTrigger;
             this.API.onPlayerConnected += client =>
             {
-                var loadingPoint = Map.GetPoint(MapPointType.Loading, 0)?.Position ?? new Vector3(-500, -500, 0);
+                var loadingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0)?.Position ?? new Vector3(0, 0, 0);
                 client.dimension = 1000;
                 client.freeze(false);
                 client.position = loadingPoint;
@@ -116,7 +116,7 @@ namespace gtmp.evilempire.server
                 if (result.State == ServiceResultState.Success)
                 {
                     var map = services.Get<Map>();
-                    var startingPoint = map.GetPoint(MapPointType.Teleport, 0);
+                    var startingPoint = map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
                     if (startingPoint != null)
                     {
                         client.position = startingPoint.Position;
