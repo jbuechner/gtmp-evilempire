@@ -12,7 +12,7 @@ namespace gtmp.evilempire.db
             _dbe = new DbEnvironment(databaseRootPath);
         }
 
-        public T Select<T, TKey>(TKey key)
+        public T SelectEntity<T, TKey>(TKey key)
         {
             return _dbe.Select<T, TKey>(key);
         }

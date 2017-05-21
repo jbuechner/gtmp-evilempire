@@ -2,7 +2,7 @@
 
 namespace gtmp.evilempire.server.launcher
 {
-    public class DelegatedDisposable : IDisposable
+    public sealed class DelegatedDisposable : IDisposable
     {
         readonly Action _action;
 

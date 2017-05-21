@@ -5,6 +5,13 @@
             <Word>db</Word>
             <Word>evilempire</Word>
             <Word>gtmp</Word>
+            <Word>entities</Word>
+            <Word>processors</Word>
+            <Word>services</Word>
+            <Word>shared</Word>
+            <Word>launcher</Word>
+            <Word>server</Word>
+            <Word>Stringify</Word>
         </Recognized>
     </Words>
     <Acronyms>
@@ -12,6 +19,12 @@
             <Acronym>db</Acronym>
             <Acronym>evilempire</Acronym>
             <Acronym>gtmp</Acronym>
+            <Acronym>entities</Acronym>
+            <Acronym>processors</Acronym>
+            <Acronym>services</Acronym>
+            <Acronym>shared</Acronym>
+            <Acronym>launcher</Acronym>
+            <Acronym>server</Acronym>
         </CasingExceptions>
     </Acronyms>
 </Dictionary>

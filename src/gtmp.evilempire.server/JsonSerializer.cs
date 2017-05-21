@@ -14,15 +14,15 @@ namespace gtmp.evilempire.server
             Settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
         }
 
-        public string Stringify(object o)
+        public string Stringify(object value)
         {
-            if (o == null)
+            if (value == null)
             {
                 return "{}";
             }
 
-            var type = o.GetType();
-            return JsonConvert.SerializeObject(o, type, Formatting.None, Settings);
+            var type = value.GetType();
+            return JsonConvert.SerializeObject(value, type, Formatting.None, Settings);
         }
 
         public dynamic Parse(string json)

@@ -8,6 +8,6 @@ namespace gtmp.evilempire.services
 {
     public interface IDbService
     {
-        T Select<T, TKey>(TKey key);
+        T SelectEntity<T, TKey>(TKey key);
     }
 }

@@ -2,7 +2,7 @@
 {
     public interface IJsonSerializer
     {
-        string Stringify(object o);
+        string Stringify(object value);
         dynamic Parse(string json);
     }
 }

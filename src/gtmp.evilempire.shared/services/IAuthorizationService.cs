@@ -8,6 +8,7 @@ namespace gtmp.evilempire.services
 {
     public interface IAuthorizationService
     {
-        IServiceResult Authenticate(string username, string password);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "login")]
+        IServiceResult Authenticate(string login, string password);
     }
 }

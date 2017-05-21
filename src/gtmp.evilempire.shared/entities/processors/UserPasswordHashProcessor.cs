@@ -15,7 +15,7 @@ namespace gtmp.evilempire.entities.processors
             }
         }
 
-        public void Process(User user)
+        public static void Process(User user)
         {
             if (user == null)
             {
@@ -25,11 +25,11 @@ namespace gtmp.evilempire.entities.processors
             user.Password = Hash(user.Password);
         }
 
-        public string Hash(string password)
+        public static string Hash(string password)
         {
             if (password != null && password.StartsWith("!", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException("Unable to hash raw password. Expect a cshash.");
+                throw new InvalidOperationException("Unable to hash raw defined password. Expected a client side hash.");
             }
 
             if (password != null && password.StartsWith("::", StringComparison.OrdinalIgnoreCase))

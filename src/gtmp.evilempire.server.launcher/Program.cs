@@ -5,27 +5,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using System.Xml.Xsl;
+using static System.FormattableString;
 
 namespace gtmp.evilempire.server.launcher
 {
-    static class Constants
-    {
-        public const string SettingsTemplateFile = "settings.template.xml";
-        public const string SettingsUserFile = "settings.user.xml";
-        public const string SettingsTransformationFile = "settings.xsl";
-        public const string SettingFile = "settings.xml";
-        public const string ServerExecutable = "GrandTheftMultiplayer.Server.exe";
-
-        internal static class ExitCodes
-        {
-            public const int ServerSettingsTransformationFailed = -100;
-            public const int DatabaseCheckFailed = -200;
-            public const int DatabasePopulationFailed = -201;
-        }
-    }
-
     static class Program
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         public static int Main()
         {
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -62,6 +48,7 @@ namespace gtmp.evilempire.server.launcher
             return exitCode;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         static void Logo()
         {
             using (ConsoleColor.Cyan.Foreground())
@@ -71,24 +58,25 @@ namespace gtmp.evilempire.server.launcher
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "gtmp.evilempire.server.launcher.Program.ExecuteWithConsoleOutput(System.String,gtmp.evilempire.server.launcher.Program+WrappedConsoleExecution)")]
         static bool TransformServerSettings()
         {
-            if (!ExecuteWithConsoleOutput("Check settings template file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsTemplateFile), $"{Constants.SettingsTemplateFile} file missing")))
+            if (!ExecuteWithConsoleOutput("Check settings template file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsTemplateFile), Invariant($"{Constants.SettingsTemplateFile} file missing"))))
             {
                 return false;
             }
-            if (!ExecuteWithConsoleOutput("Check settings user file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsUserFile), $"{Constants.SettingsUserFile} file missing")))
+            if (!ExecuteWithConsoleOutput("Check settings user file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsUserFile), Invariant($"{Constants.SettingsUserFile} file missing"))))
             {
                 return false;
             }
-            if (!ExecuteWithConsoleOutput("Check settings transformation file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsTransformationFile), $"{Constants.SettingsTransformationFile} file missing")))
+            if (!ExecuteWithConsoleOutput("Check settings transformation file ... ", WrapWithFailReason(() => CheckFile(Constants.SettingsTransformationFile), Invariant($"{Constants.SettingsTransformationFile} file missing"))))
             {
                 return false;
             }
 
             if (CheckFile(Constants.SettingFile))
             {
-                if (!ExecuteWithConsoleOutput("Remove existing transformation file ... ",  WrapWithFailReason(() => DeleteFile(Constants.SettingFile), $"Unable to delete existing {Constants.SettingsUserFile}")))
+                if (!ExecuteWithConsoleOutput("Remove existing transformation file ... ",  WrapWithFailReason(() => DeleteFile(Constants.SettingFile), Invariant($"Unable to delete existing {Constants.SettingsUserFile}"))))
                 {
                     return false;
                 }
@@ -102,6 +90,7 @@ namespace gtmp.evilempire.server.launcher
             return true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "gtmp.evilempire.server.launcher.Program.ExecuteWithConsoleOutput(System.String,gtmp.evilempire.server.launcher.Program+WrappedConsoleExecution)")]
         static void RunServer()
         {
             var processStartInfo = new ProcessStartInfo
@@ -113,6 +102,8 @@ namespace gtmp.evilempire.server.launcher
             ExecuteWithConsoleOutput("Starting GTMP server instance ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         static bool TransformSettingsFile(out string failReason)
         {
             try
@@ -142,13 +133,14 @@ namespace gtmp.evilempire.server.launcher
             }
             catch (Exception ex)
             {
-                failReason = $"Error during transformation\n{ex}";
+                failReason = Invariant($"Error during transformation\n{ex}");
                 return false;
             }
             failReason = null;
             return true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "gtmp.evilempire.server.launcher.Program.ExecuteWithConsoleOutput(System.String,gtmp.evilempire.server.launcher.Program+WrappedConsoleExecution)")]
         static bool CheckDatabase()
         {
             if (!ExecuteWithConsoleOutput("Check database directory and entity integrity ... ", WrapWithFailReason(() =>
@@ -166,9 +158,10 @@ namespace gtmp.evilempire.server.launcher
             return true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "gtmp.evilempire.server.launcher.Program.ExecuteWithConsoleOutput(System.String,gtmp.evilempire.server.launcher.Program+WrappedConsoleExecution)")]
         static bool DatabasePopulation()
         {
-            if (!ExecuteWithConsoleOutput("Check database template directory ... ", WrapWithFailReason(() => CheckDirectory(evilempire.Constants.Database.DatabaseTemplatePath), $"{evilempire.Constants.Database.DatabaseTemplatePath} missing")))
+            if (!ExecuteWithConsoleOutput("Check database template directory ... ", WrapWithFailReason(() => CheckDirectory(evilempire.Constants.Database.DatabaseTemplatePath), Invariant($"{evilempire.Constants.Database.DatabaseTemplatePath} missing"))))
             {
                 return false;
             }
@@ -178,7 +171,7 @@ namespace gtmp.evilempire.server.launcher
                 var dbt = new DbTemplate(evilempire.Constants.Database.DatabaseTemplatePath);
                 foreach(var template in dbt.Templates)
                 {
-                    if (!ExecuteWithConsoleOutput($"Populate db environment using template {template} ... ", WrapWithFailReason(() => dbt.PopulateByTemplate(template, dbe), "failed")))
+                    if (!ExecuteWithConsoleOutput(Invariant($"Populate db environment using template {template} ... "), WrapWithFailReason(() => DbTemplate.PopulateByTemplate(template, dbe), "failed")))
                     {
                         break;
                     }
@@ -189,6 +182,8 @@ namespace gtmp.evilempire.server.launcher
         }
 
         delegate bool WrappedConsoleExecution(out string failReason);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String)")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         static bool ExecuteWithConsoleOutput(string message, WrappedConsoleExecution fn)
         {
             Console.Write(message);
