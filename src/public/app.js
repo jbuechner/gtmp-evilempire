@@ -7,7 +7,7 @@ const ClientLifecycleState = {
 
 class Proxy {
     invoke(target, args) {
-        resourceCall('invoke', JSON.stringify({target, args}));
+        resourceCall('cef_invoke', JSON.stringify({target, args}));
     }
 
     relay(args) {

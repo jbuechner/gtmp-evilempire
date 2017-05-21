@@ -7,15 +7,14 @@
  * @license MIT
  */
 /*jslint bitwise: true */
-function define() {
+function define(module) {
     'use strict';
-
     var root = {};
     var NODE_JS = !root.JS_SHA512_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
     if (NODE_JS) {
         root = global;
     }
-    var COMMON_JS = !root.JS_SHA512_NO_COMMON_JS && typeof module === 'object' && module.exports;
+    var COMMON_JS = true; // !root.JS_SHA512_NO_COMMON_JS && typeof module === 'object' && module.exports;
     var AMD = typeof define === 'function' && define.amd;
     var HEX_CHARS = '0123456789abcdef'.split('');
     var EXTRA = [-2147483648, 8388608, 32768, 128];
@@ -600,7 +599,4 @@ function define() {
         }
       return root;
     }
-}
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    define();
 }
