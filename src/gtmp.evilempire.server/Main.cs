@@ -117,11 +117,12 @@ namespace gtmp.evilempire.server
                 {
                     var map = services.Get<Map>();
                     var startingPoint = map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
+                    Console.WriteLine($"Position player {client.name} at {startingPoint.Position}");
+                    client.dimension = 0;
                     if (startingPoint != null)
                     {
                         client.position = startingPoint.Position;
                     }
-                    client.dimension = 0;
                     client.freeze(false);
                 }
             }
