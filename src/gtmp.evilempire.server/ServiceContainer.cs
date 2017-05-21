@@ -6,7 +6,7 @@ using TinyIoC;
 
 namespace gtmp.evilempire.server
 {
-    public class ServiceContainer : IDisposable
+    public sealed class ServiceContainer : IDisposable
     {
         TinyIoCContainer container = new TinyIoCContainer();
 
@@ -16,6 +16,7 @@ namespace gtmp.evilempire.server
             return this.container.Resolve<T>();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
         public void Register<TType, TInstance>()
             where TType : class
             where TInstance : class, TType
@@ -29,6 +30,7 @@ namespace gtmp.evilempire.server
             this.container.Register(instance);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public static ServiceContainer Create()
         {
             var services = new ServiceContainer();
@@ -38,6 +40,7 @@ namespace gtmp.evilempire.server
             return services;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "container")]
         public void Dispose()
         {
             this.container?.Dispose();

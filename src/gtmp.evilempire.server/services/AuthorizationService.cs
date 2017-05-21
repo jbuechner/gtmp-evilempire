@@ -4,6 +4,7 @@ using gtmp.evilempire.services;
 
 namespace gtmp.evilempire.server.services
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     class AuthorizationService : IAuthorizationService
     {
         IDbService DbService { get; }

@@ -12,7 +12,7 @@ namespace gtmp.evilempire.server
         public ServiceContainer Services { get; private set; }
 
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
-            { "login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailSafeResponse("login:response") }
+            { "login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("login:response") }
         };
 
         public Main()
@@ -85,11 +85,11 @@ namespace gtmp.evilempire.server
             }
             if (!(username is string))
             {
-                throw new ArgumentOutOfRangeException(nameof(username), "username is not a string");
+                throw new ArgumentOutOfRangeException(nameof(args), "username is not a string");
             }
             if (!(password is string))
             {
-                throw new ArgumentOutOfRangeException(nameof(password), "password is not a string");
+                throw new ArgumentOutOfRangeException(nameof(args), "password is not a string");
             }
             var authorizationService = services.Get<IAuthorizationService>();
             var result = authorizationService.Authenticate(username as string, password as string);

@@ -12,7 +12,9 @@ namespace gtmp.evilempire.server
     {
         class ServiceTransferResult
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public ServiceResultState State { get; set; }
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public object Data { get; set; }
 
             public ServiceTransferResult(IServiceResult serviceResult)
@@ -22,7 +24,8 @@ namespace gtmp.evilempire.server
             }
         }
 
-        public static ClientEventCallback WrapIntoFailSafeResponse(this ClientEventCallbackWithResponse callback, string response)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public static ClientEventCallback WrapIntoFailsafeResponse(this ClientEventCallbackWithResponse callback, string response)
         {
             ClientEventCallback cb = (services, client, args) =>
             {
