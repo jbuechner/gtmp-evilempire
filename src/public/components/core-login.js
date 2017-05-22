@@ -1,17 +1,11 @@
 Slim.tag('core-login', class extends Slim {
-    constructor() {
-        super();
-    }
-
-    get isInteractive() {
-        return true;
-    }
+    get isVirtual() { return false; }
+    get isInteractive() { return true; }
 
     onBeforeCreated() {
         this.app = window.app;
         let self = this;
         document.addEventListener('relay', (ev) => {
-            console.log(ev);
             if (ev.detail.target === 'login:response') {
                 if (ev.detail.args.state !== ClientLifecycleState.Success) {
                     self.message = ev.detail.args.data;
@@ -26,18 +20,25 @@ Slim.tag('core-login', class extends Slim {
 
     get template() {
         return `<form>
-    <div class="form-group">
-        <label for="User name">User Name</label>
-        <input type="text" class="form-control" slim-id="username" placeholder="User Name"
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" slim-id="password" placeholder="Password">
-    </div>
-    <button type="submit" click="login" class="btn btn-default">Login</button>
-    <button type="button" click="disconnect" class="btn btn-default">Disconnect</button>
-    <p>&nbsp;</p>
-    <p bind>[[message]]</p>
+<div class="field">
+  <label class="label">Name</label>
+  <p class="control">
+    <input class="input" type="text" slim-id="username" placeholder="User Name">
+  </p>
+  <label class="label">Password</label>
+  <p class="control">
+    <input class="input" type="password" slim-id="password" placeholder="Password">
+  </p>
+  </div>
+<div class="field is-grouped">
+  <p class="control">
+    <button class="button is-primary" click="login">Login</button>
+  </p>
+  <p class="control">
+    <button class="button" click="disconnect">Disconnect</button>
+  </p>
+</div>
+     <p bind>[[message]]</p>
 </form>`;
     }
 
@@ -51,7 +52,8 @@ Slim.tag('core-login', class extends Slim {
         this.username.value = this.password.value = null;
     }
 
-    disconnect() {
+    disconnect(e) {
+        e.preventDefault();
         this.app.disconnect();
     }
 });

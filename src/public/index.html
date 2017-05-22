@@ -2,28 +2,18 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="bulma.css">
+	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="colors.css">
-	<style>
-		html, body {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			overflow: hidden;
-			background: transparent !important;
-			cursor: default;
-			user-select: none;
-		}
-	</style>
-	<script src="libs/slim.min.js"></script>
+	<script src="libs/slim.js"></script>
+	<script src="components/core-watermark.js"></script>
 	<script src="components/core-login.js"></script>
+	<script src="components/view-status.js"></script>
 	<script src="components/view-login.js"></script>
 </head>
 <body>
-	<div style="position: absolute; left: 5px; top: 5px; background-color: #ff6f00; font-size: 11px; padding: 3px; color: #f0f0f0; opacity: 0.6">GTMP Evil Empire Tec Demo</div>
+	<core-watermark></core-watermark>
 	<script src="app.js"></script>
-<script></script>
+<view-status></view-status>
 </body>
 </html>

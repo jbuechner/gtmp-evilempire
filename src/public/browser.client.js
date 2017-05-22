@@ -1,6 +1,5 @@
 'use strict';
 const debug = false;
-
 function cef_invoke() {
     API.sendNotification('stub');
 }
@@ -33,10 +32,16 @@ function define(module) {
         }
 
         show() {
+            if (debug) {
+                API.sendNotification('show browser');
+            }
             API.setCefBrowserHeadless(this._instance, false);
         }
 
         hide() {
+            if (debug) {
+                API.sendNotification('hide browser');
+            }
             API.setCefBrowserHeadless(this._instance, true);
         }
 
@@ -52,7 +57,13 @@ function define(module) {
             return new Promise((resolve) => {
                 let browser = new Browser();
                 browser.hide();
+                if (debug) {
+                    API.sendNotification('browser initializing');
+                }
                 API.waitUntilCefBrowserInit(browser._instance);
+                if (debug) {
+                    API.sendNotification('browser initialized');
+                }
                 resolve(browser);
             }).catch(module.debugOut);
         }

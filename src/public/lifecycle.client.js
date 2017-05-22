@@ -1,4 +1,5 @@
 'use strict';
+const debug = false;
 function define(module)  {
     const ClientLifecycleState = {
         None: 0,
@@ -29,6 +30,10 @@ function define(module)  {
         }
 
         invokeStateTransition(from, to, context) {
+            if (debug) {
+                API.sendNotification(`from ${from} to ${to}`);
+            }
+
             const key = ClientLifecycle.getStateTransitionKey(from, to);
             const transition = this._transitions.get(key);
             if (transition !== undefined && typeof transition === 'function') {
@@ -53,6 +58,7 @@ function define(module)  {
             app.client.cursor = false;
             app.client.resetCamera();
             app.browser.removeView('view-login');
+            app.browser.addView('view-status');
         }
     }
 

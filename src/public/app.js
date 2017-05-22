@@ -38,11 +38,16 @@ function relay(raw) {
         window.app.proxy.relay(args);
     }
 }
+
 function addView(args) {
-    args = JSON.parse(args);
+    if (typeof args !== 'object') {
+        args = JSON.parse(args);
+    }
+    console.log('addView', args);
     let el = document.createElement(args.selector);
     document.body.appendChild(el);
 }
+
 function removeView(args) {
     args = JSON.parse(args);
     let elements = document.querySelectorAll(args.selector);
