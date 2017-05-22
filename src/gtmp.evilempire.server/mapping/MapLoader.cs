@@ -162,7 +162,7 @@ namespace gtmp.evilempire.server.mapping
                 var g = marker.Element("Green").ToByte() ?? 0;
                 var b = marker.Element("Blue").ToByte() ?? 0;
 
-                var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, g, b);
+                var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, b, g);
                 map.AddMarker(mapMarker);
             }
         }

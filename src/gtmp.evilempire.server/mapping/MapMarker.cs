@@ -19,7 +19,7 @@ namespace gtmp.evilempire.server.mapping
         public byte Blue { get; }
         public byte Green { get; }
 
-        public MapMarker(MarkerType markerType, Vector3 position, Vector3 direction, Vector3 rotation, Vector3 scale, byte alpha, byte red, byte blue, byte green)
+        public MapMarker(MarkerType markerType, Vector3 position, Vector3 direction, Vector3 rotation, Vector3 scale, byte alpha, byte red, byte green, byte blue)
         {
             MarkerType = markerType;
             Position = position;
