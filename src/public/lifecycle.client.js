@@ -48,6 +48,7 @@ function define(module)  {
         }
 
         static onClientConnected(app) {
+            app.client.isHudVisible = debug;
             app.client.setCamera(200, 200, 150, 1, 1, 1);
             app.browser.addView('view-login');
             app.browser.show();

@@ -50,6 +50,9 @@
     <Reference Include="DBreeze">
       <HintPath>..\..\libs\dbreeze\1_085_2017_0515\DBreeze.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\libs\gtmp\v0.1.501.566\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

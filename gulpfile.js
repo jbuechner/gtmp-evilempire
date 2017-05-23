@@ -1,5 +1,6 @@
 'use strict';
 
+const $childproc = require('child_process');
 const $stream = require('stream');
 const $gulp = require('gulp');
 const $gflat = require('gulp-flatten');
@@ -81,6 +82,11 @@ const $__tasks = {
 };
 
 $gulp.task('default', ['rebuild']);
+
+$gulp.task('run', function(cb) {
+    $childproc.exec(__dirname + '/dist/gtmp.evilempire.server.launcher.exe', { cwd: __dirname +'/dist/' });
+    cb();
+});
 
 $gulp.task('rebuild', function(cb) {
     $runseq('clean', 'build', cb);

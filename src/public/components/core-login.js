@@ -6,9 +6,9 @@ Slim.tag('core-login', class extends Slim {
         this.app = window.app;
         let self = this;
         document.addEventListener('relay', (ev) => {
-            if (ev.detail.target === 'login:response') {
-                if (ev.detail.args.state !== ClientLifecycleState.Success) {
-                    self.message = ev.detail.args.data;
+            if (ev.detail.event === 'res:login') {
+                if (ev.detail.status !== ClientLifecycleState.Success) {
+                    self.message = ev.detail.data;
                 }
             }
         });

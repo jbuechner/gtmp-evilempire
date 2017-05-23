@@ -8,5 +8,10 @@
             public static readonly string DatabasePath = "db"; // todo: by config
             public static readonly string DatabaseTemplatePath = "dbt";
         }
+
+        public static class DataSerialization
+        {
+            public static readonly string ClientServerJsonPrefix = "$obj";
+        }
     }
 }

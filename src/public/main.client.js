@@ -52,6 +52,50 @@ const debugOut = function(ex) {
     API.sendNotification(msg);
 };
 
+const debugPrint = function(text, args) {
+    if (!debug) {
+        return;
+    }
+
+    if (text) {
+        API.sendChatMessage(text);
+    }
+    if (args) {
+        for (let i = 0; i < args.length; i++) {
+            let v = args[i];
+            let t = typeof(v);
+            if (typeof v === 'object') {
+                v = '[object]=' + JSON.stringify(v);
+            }
+            if (typeof v === 'undefined') {
+                v = '[undefined]';
+            }
+            if (v === undefined) {
+                v = '(undefined)';
+            }
+            if (v === null) {
+                v = '(null)';
+            }
+            API.sendChatMessage('' + i + ':[' + t + ']' + v);
+        }
+    }
+};
+
+const toClientArgs = function(args) {
+    for (let i = 0; i < args.length; i++) {
+        let arg = args[i];
+        if (typeof arg === 'string' && arg.startsWith('$obj')) {
+            args[i] = JSON.parse(arg.substring('$obj'.length));
+        }
+    }
+};
+
+const bind = function(t, fn) {
+    return function() {
+        fn.apply(t, arguments);
+    }
+};
+
 const loader = new ModuleLoader();
 const require = function() {
     return loader.require.apply(loader, arguments);
@@ -84,35 +128,21 @@ let boot = (function(resource) {
     class Proxy {
 	    constructor() {
 	        this.knownRoots = new Map();
+	        this._serverEventHandlers = new Map();
         }
 
-        relay(browser, target, args) {
-	        if (typeof args !== 'object') {
-	            args = { value: args };
-            }
-            browser._instance.call('relay', JSON.stringify({ target, args }) );
+        addServerEventHandler(ev, handler) {
+	        this._serverEventHandlers.set(ev, handler);
         }
 
-	    onReceived(args) {
+        onCefInvocation(target) {
 	        if (debug) {
-                API.sendNotification('proxy received');
-                API.sendNotification('' + arguments.length);
-                API.sendNotification('' + typeof arguments[0]);
-                API.sendNotification('' + arguments[0]);
+                debugPrint('onCefInvocation', arguments);
             }
-	        args = args || {};
-            let target = args.target;
-            args = args.args;
-
             if (!target) {
                 API.sendNotification('received invalid invocation target (null/undefined).');
                 return;
             }
-            if (debug) {
-                API.sendNotification('' + target);
-                API.sendNotification('' + args);
-            }
-
             let paths = target.split('.');
             let current = null;
             let previous = null;
@@ -134,10 +164,31 @@ let boot = (function(resource) {
             }
 
             if (typeof current === 'function') {
-                current.call(previous, args);
+                let args = Array.prototype.slice.call(arguments, 1);
+                current.apply(previous, args);
             } else {
                 API.sendNotification(`received invocation where path select not a function. Path was ${target}.`);
             }
+        }
+
+        onServerEventTrigger(ev, args) {
+	        if (debug) {
+	            debugPrint('proxy onServerEventTrigger', arguments);
+            }
+
+	        if (!this._serverEventHandlers.has(ev)) {
+	            API.sendNotification('no server event handler for ' + ev);
+                return;
+            }
+
+            let handler = this._serverEventHandlers.get(ev);
+	        if (typeof handler !== 'function') {
+                API.sendNotification('server event handler for ' + ev + ' is not a function.');
+                return;
+            }
+
+            toClientArgs(args);
+	        handler.apply(null, args);
         }
     }
 
@@ -146,23 +197,22 @@ let boot = (function(resource) {
             this._app = app;
         }
 
-        disconnect(args) {
-            args = args || {};
-            API.disconnect(args.reason);
+        disconnect(reason) {
+            API.disconnect(reason);
         }
 
-        login(args) {
-            args = args || {};
-            if (args) {
-                if (args && args.password) {
-                        let a = '__' + args.password + '::0';
-                        for (let i = 0; i < 10; i++) {
-                            a = $sha.sha512(a);
-                        }
-                        args.password = '::' + a;
-                }
+        login(username, password) {
+            if (debug) {
+                debugPrint('login', arguments);
             }
-            this._app.sendToServer('login', args);
+            if (password) {
+                    let a = '__' + password + '::0';
+                    for (let i = 0; i < 10; i++) {
+                        a = $sha.sha512(a);
+                    }
+                password = '::' + a;
+            }
+            this._app.sendToServer('req:login', username, password);
         }
     }
 
@@ -176,8 +226,6 @@ let boot = (function(resource) {
                 [ 'login:response', this.onLoginResponse ]
             ]);
 			this._input = new $controls.InputController();
-
-			const self = this;
 			$browser.Browser.create().then(browser => {
                 this._browser = browser;
                 browser.navigate('index.html').then(() => {
@@ -186,17 +234,8 @@ let boot = (function(resource) {
             }).catch(debugOut);
 
 			this.proxy.knownRoots.set('app', new AppProxy(this));
-
-            API.onServerEventTrigger.connect(function(ev, args) {
-                try {
-                    if (args && args[0]) {
-                        args = args[0];
-                    }
-                    self.onServerEventTrigger(ev, args);
-                } catch(ex) {
-                    debugOut(ex);
-                }
-            });
+			this.proxy.addServerEventHandler('update', bind(this, this.onServerUpdate));
+			this.proxy.addServerEventHandler('res:login', bind(this, this.onLoginResponse));
 		}
 
 		get proxy() {
@@ -219,45 +258,48 @@ let boot = (function(resource) {
 		    return this._input;
         }
 
-        sendToServer(target, args) {
-		    let raw = '';
-		    if (args) {
-    		    raw = JSON.stringify(args);
+        sendToServer() {
+            if (debug) {
+                debugPrint('sendToServer', arguments);
             }
+            let eventName = arguments[0];
+            let args = Array.prototype.slice.call(arguments, 1);
+            args.forEach((arg, index, arr) => {
+                if (typeof arg === 'object') {
+                    arr[index] = '$obj' + JSON.stringify(arg);
+                }
+            });
 		    try {
-                API.triggerServerEvent(target, raw);
+		        // bitch switch because the triggerServerEvent is not a real JavaScript function and it does not have a apply function in addition the
+                // function can not take simple arrays and serialize on its own ...
+		        switch(args.length) {
+                    case 0:
+                        API.triggerServerEvent(eventName);
+                        break;
+                    case 1:
+                        API.triggerServerEvent(eventName, args[0]);
+                        break;
+                    case 2:
+                        API.triggerServerEvent(eventName, args[0], args[1]);
+                        break;
+                    default:
+                        API.sendNotification('sendToServer invalid args count');
+                }
             }catch(ex) {
                 debugOut(ex);
             }
         }
 
-        onServerEventTrigger(target, args) {
-            if (typeof args === 'string') {
-		        args = JSON.parse(args);
-            }
-            if (args && (args.state === ServiceResultState.Error)) {
-                API.sendNotification(`error from server "${target}"`);
-                if (args.data) {
-                    API.sendNotification('>' + args.data);
-                }
-            }
-            this.proxy.relay(this.browser, target, args);
-            if (this._serverEvents.has(target)) {
-                let handler = this._serverEvents.get(target);
-                if (typeof handler === 'function') {
-                    handler.call(this, args);
-                } else {
-                    API.sendNotification(`server event handler for ${target} is not a function.`)
-                }
-            } else {
-                API.sendNotification(`missing server event handler for ${target}.`);
-            }
-        }
-
-        onLoginResponse(args) {
-            if (args.state === ServiceResultState.Success) {
+        onLoginResponse(status, response) {
+		    debugPrint('onLoginResponse', arguments);
+            if (status === ServiceResultState.Success) {
                 this.lifecycle.transit($lifecycle.ClientLifecycleState.LoggedIn, this);
             }
+            this.browser._instance.call('relay', JSON.stringify({ event: 'res:login', status: status, data: response }));
+        }
+
+        onServerUpdate(what, v) {
+		    this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what, value: v })));
         }
 	}
 	let app = new App();
@@ -266,12 +308,26 @@ let boot = (function(resource) {
     app.input.addMapping($controls.KEYS.F12, () => app.client.cursor = !app.client.cursor);
 
     resource.browser_client.cef_invoke = function app_cef_invoke() {
-        let args = arguments;
-        if (args && args.length === 1) {
-            if (typeof args[0] === 'string') {
-                args = [ JSON.parse(arguments[0]) ];
-            }
+        if (debug) {
+            API.sendNotification('cef_invoke');
         }
-        app.proxy.onReceived.apply(app.proxy, args);
-    }
+        toClientArgs(arguments);
+        app.proxy.onCefInvocation.apply(app.proxy, arguments);
+    };
+
+    API.onServerEventTrigger.connect(function(ev, args) {
+        debugPrint('onServerEventTrigger', arguments);
+        try {
+            let newArgs = [];
+            for(let arg in args) {
+                let v = args[arg];
+                if (typeof v !== 'function') {
+                    newArgs.push(v);
+                }
+            }
+            app.proxy.onServerEventTrigger(ev, newArgs);
+        } catch(ex) {
+            debugOut(ex);
+        }
+    });
 });

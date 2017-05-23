@@ -18,6 +18,14 @@ function define(module) {
             API.setActiveCamera(camera);
         }
 
+        get isHudVisible() {
+            return API.getHudVisible();
+        }
+
+        set isHudVisible(v) {
+            API.setHudVisible(v);
+        }
+
         get cursorToggle() {
             return this._cursorToggle;
         }

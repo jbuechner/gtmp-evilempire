@@ -64,7 +64,7 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Prop"))
             {
-                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var hash = mapObject.Element("Hash")?.Value.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3();
                 var rotation = mapObject.Element("Rotation")?.ToVector3();
 
@@ -77,10 +77,10 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach(var mapObject in SelectMapObjectsByType(xdoc, "Ped"))
             {
-                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3();
                 var rotation = mapObject.Element("Rotation")?.ToVector3();
-                var isInvincible = mapObject.Element("Invicible")?.ToBool() ?? false;
+                var isInvincible = mapObject.Element("Invicible")?.Value?.AsBool() ?? false;
 
                 var ped = new MapPed(hash, position, rotation.Z, isInvincible);
                 map.AddPed(ped);
@@ -91,11 +91,11 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Vehicle"))
             {
-                var hash = mapObject.Element("Hash")?.ToInt() ?? 0;
+                var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3();
                 var rotation = mapObject.Element("Rotation")?.ToVector3();
-                var color1 = mapObject.Element("PrimaryColor")?.ToInt() ?? 0;
-                var color2 = mapObject.Element("SecondaryColor")?.ToInt() ?? 0;
+                var color1 = mapObject.Element("PrimaryColor")?.Value?.AsInt() ?? 0;
+                var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
                 var vehicle = new MapVehicle(hash, position, rotation, color1, color2);
                 map.AddVehicle(vehicle);
@@ -135,7 +135,7 @@ namespace gtmp.evilempire.server.mapping
             foreach (var metapoint in elements)
             {
                 var mapPointType = metapoint.ToMapPointType() ?? MapPointType.None;
-                var id = metapoint.Element("id").ToInt() ?? 0;
+                var id = metapoint.Element("id")?.Value?.AsInt() ?? 0;
                 var position = metapoint.ToVector3() ?? new Vector3();
 
                 var mapPoint = new MapPoint(mapPointType, id, position);
@@ -157,10 +157,10 @@ namespace gtmp.evilempire.server.mapping
                 var direction = marker.Element("Direction")?.ToVector3() ?? new Vector3();
                 var rotation = marker.Element("Rotation")?.ToVector3() ?? new Vector3();
                 var scale = marker.Element("Scale")?.ToVector3() ?? new Vector3(1, 1, 1);
-                var alpha = marker.Element("Alpha").ToByte() ?? 0;
-                var r = marker.Element("Red").ToByte() ?? 0;
-                var g = marker.Element("Green").ToByte() ?? 0;
-                var b = marker.Element("Blue").ToByte() ?? 0;
+                var alpha = marker.Element("Alpha")?.Value?.AsByte() ?? 0;
+                var r = marker.Element("Red")?.Value?.AsByte() ?? 0;
+                var g = marker.Element("Green")?.Value?.AsByte() ?? 0;
+                var b = marker.Element("Blue")?.Value?.AsByte() ?? 0;
 
                 var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, b, g);
                 map.AddMarker(mapMarker);
@@ -213,66 +213,10 @@ namespace gtmp.evilempire.server.mapping
             {
                 return null;
             }
-            var x = element?.Element("X").ToFloat() ?? 0;
-            var y = element?.Element("Y").ToFloat() ?? 0;
-            var z = element?.Element("Z").ToFloat() ?? 0;
+            var x = element?.Element("X")?.Value?.AsFloat() ?? 0;
+            var y = element?.Element("Y")?.Value?.AsFloat() ?? 0;
+            var z = element?.Element("Z")?.Value?.AsFloat() ?? 0;
             return new Vector3(x, y, z);
-        }
-
-        internal static int? ToInt(this XElement element)
-        {
-            if (element == null)
-            {
-                return null;
-            }
-            int v;
-            if (int.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
-            {
-                return v;
-            }
-            return null;
-        }
-
-        internal static byte? ToByte(this XElement element)
-        {
-            if (element == null)
-            {
-                return null;
-            }
-            byte v;
-            if (byte.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
-            {
-                return v;
-            }
-            return null;
-        }
-
-        internal static bool? ToBool(this XElement element)
-        {
-            if (element == null)
-            {
-                return null;
-            }
-            bool v;
-            if (bool.TryParse(element.Value, out v))
-            {
-                return v;
-            }
-            return null;
-        }
-
-        internal static float? ToFloat(this XElement element)
-        {
-            if (element == null)
-            {
-                return null;
-            }
-            float v;
-            if (float.TryParse(element.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
-            {
-                return v;
-            }
-            return null;
         }
 
         internal static string GetSubElementValue(this XElement element, XName subElementName)

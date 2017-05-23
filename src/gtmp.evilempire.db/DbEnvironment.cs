@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace gtmp.evilempire.db
 {
@@ -30,6 +31,8 @@ namespace gtmp.evilempire.db
                 throw;
             }
             _engine = new DBreezeEngine(_configuration);
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_engine")]
@@ -52,7 +55,9 @@ namespace gtmp.evilempire.db
         {
             using (var t = _engine.GetTransaction())
             {
-                t.Insert<TKey, DbMJSON<T>>(tableName, key, value);
+                byte[] r;
+                bool wasUpdated;
+                t.Insert<TKey, DbMJSON<T>>(tableName, key, value, out r, out wasUpdated, true);
                 t.Commit();
             }
         }

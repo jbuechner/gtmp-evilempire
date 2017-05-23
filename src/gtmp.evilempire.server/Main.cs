@@ -1,4 +1,4 @@
-﻿ using GrandTheftMultiplayer.Server.API;
+﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Shared.Math;
 using GrandTheftMultiplayer.Server.Elements;
 using System;
@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
 using static System.FormattableString;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace gtmp.evilempire.server
 {
@@ -17,7 +19,7 @@ namespace gtmp.evilempire.server
         public Map Map { get; private set; }
 
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
-            { "login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("login:response") }
+            { "req:login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("res:login") }
         };
 
         public Main()
@@ -62,17 +64,38 @@ namespace gtmp.evilempire.server
             ClientEventCallback eventCallback = null;
             if (ClientEventCallbacks.TryGetValue(eventName, out eventCallback) && eventCallback != null)
             {
-                dynamic args = null;
-                if (arguments != null && arguments.Length == 1 && arguments[0] is string)
+                SanitizeClientArguments(arguments);
+                eventCallback(Services, sender, arguments);
+            }
+            else
+            {
+                using (ConsoleColor.Yellow.Foreground())
                 {
-                    var jsonSerializer = Services.Get<IJsonSerializer>();
-                    args = jsonSerializer.Parse(arguments[0].ToString());
+                    Console.WriteLine($"Received unknown event {eventName} from client {sender.name}.");
                 }
-                eventCallback(Services, sender, args);
             }
         }
 
-        static IServiceResult OnClientLogin(ServiceContainer services, Client client, dynamic args) // todo: less boilerplate request processing
+        static void SanitizeClientArguments(params object[] arguments)
+        {
+            if (arguments != null)
+            {
+                for (var i = 0; i < arguments.Length; i++)
+                {
+                    var arg = arguments[i];
+                    if (arg != null && arg is string)
+                    {
+                        var argAsString = (string)arg;
+                        if (argAsString.StartsWith(Constants.DataSerialization.ClientServerJsonPrefix, StringComparison.Ordinal))
+                        {
+                            arguments[i] = JsonConvert.DeserializeObject(argAsString);
+                        }
+                    }
+                }
+            }
+        }
+
+        static IServiceResult OnClientLogin(ServiceContainer services, Client client, params object[] args) // todo: less boilerplate request processing
         {
             if (services == null)
             {
@@ -86,12 +109,8 @@ namespace gtmp.evilempire.server
             {
                 throw new ArgumentNullException(nameof(args));
             }
-            if (args.credentials != null)
-            {
-                args = args.credentials;
-            }
-            string username = args.username;
-            string password = args.password;
+            var username = args.ElementAtOrDefault(0).AsString();
+            var password = args.ElementAtOrDefault(1).AsString();
             if (username == null)
             {
                 throw new ArgumentOutOfRangeException(nameof(args), "username missing");
@@ -124,6 +143,17 @@ namespace gtmp.evilempire.server
                     {
                         client.position = startingPoint.Position;
                     }
+                    client.setData("cash", (double)1293481.43);
+                    Task.Delay(1000).ContinueWith(t =>
+                    {
+                        while (!client.IsNull)
+                        {
+                            double m = (double)client.getData("cash");
+                            client.setData("cash", m + 200);
+                            client.triggerEvent("update", "cash", m);
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                    });
                     client.freeze(false);
                 }
             }

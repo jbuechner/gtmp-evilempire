@@ -5,25 +5,11 @@ using System.Collections.Generic;
 
 namespace gtmp.evilempire.server
 {
-    public delegate void ClientEventCallback(ServiceContainer services, Client client, dynamic args);
-    public delegate IServiceResult ClientEventCallbackWithResponse(ServiceContainer services, Client client, dynamic args);
+    public delegate void ClientEventCallback(ServiceContainer services, Client client, params object[] args);
+    public delegate IServiceResult ClientEventCallbackWithResponse(ServiceContainer services, Client client, params object[] args);
 
     public static class ClientEventCallbackExtensions
     {
-        class ServiceTransferResult
-        {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-            public ServiceResultState State { get; set; }
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-            public object Data { get; set; }
-
-            public ServiceTransferResult(IServiceResult serviceResult)
-            {
-                this.State = serviceResult.State;
-                this.Data = serviceResult.Data;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static ClientEventCallback WrapIntoFailsafeResponse(this ClientEventCallbackWithResponse callback, string response)
         {
@@ -40,8 +26,9 @@ namespace gtmp.evilempire.server
                 }
 
                 var jsonSerializer = services.Get<IJsonSerializer>();
-                var json = jsonSerializer.Stringify(new ServiceTransferResult(result));
-                client.triggerEvent(response, json);
+                var json = string.Concat(Constants.DataSerialization.ClientServerJsonPrefix, jsonSerializer.Stringify(result.Data));
+                client.triggerEvent(response, (int)result.State, json);
+
             };
             return cb;
         }

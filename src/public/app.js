@@ -6,8 +6,14 @@ const ClientLifecycleState = {
 };
 
 class Proxy {
-    invoke(target, args) {
-        resourceCall('cef_invoke', JSON.stringify({target, args}));
+    invoke() {
+        let args = Array.prototype.slice.call(arguments, 0);
+        args.forEach((arg, index, arr) => {
+            if (typeof arg === 'object') {
+                arr[index] = '$obj' + JSON.stringify(arg);
+            }
+        });
+        resourceCall.apply(null, ['cef_invoke'].concat(args));
     }
 
     relay(args) {
@@ -18,18 +24,22 @@ class Proxy {
 class App {
     constructor() {
         this.proxy = new Proxy();
+        this.formatters = {
+            currency:  new Intl.NumberFormat('en-US', { style: 'currency',  currency: 'USD',  minimumFractionDigits: 2, })
+        };
     }
 
     login(credentials) {
-        this.proxy.invoke('app.login', { username: credentials.username, password: credentials.password });
+        this.proxy.invoke('app.login', credentials.username, credentials.password);
     }
 
     disconnect() {
-        this.proxy.invoke('app.disconnect', { reason: 'client disconnected.' });
+        this.proxy.invoke('app.disconnect', 'disconnect at login screen');
     }
 }
 
 function relay(raw) {
+    console.log(arguments);
     if (window.app) {
         let args = {};
         if (typeof raw === 'string') {
