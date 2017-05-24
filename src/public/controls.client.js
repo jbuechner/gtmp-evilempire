@@ -1,5 +1,5 @@
 'use strict';
-const debug = false;
+const debug = true;
 function define(module) {
 
     const KEYS = {
@@ -81,7 +81,7 @@ function define(module) {
         }
 
         areKeysPressed(keys) {
-            return keys.every(p => this._pressed.has(p));
+            return keys.every(p => this._pressed.has(p) && this._pressed.get(p));
         }
 
         isKeyPressed(key) {
@@ -107,8 +107,10 @@ function define(module) {
             if (debug) {
                 API.sendNotification('key up: ' + e.KeyValue);
             }
-            this.setKeyPressed(e.KeyValue, false);
-            this.triggerActions(KeyPhase.Up);
+            if (this.isKeyPressed(e.KeyValue)) {
+                this.triggerActions(KeyPhase.Up);
+                this.setKeyPressed(e.KeyValue, false);
+            }
         }
 
         triggerActions(phase) {

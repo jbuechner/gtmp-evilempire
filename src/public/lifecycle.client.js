@@ -1,5 +1,5 @@
 'use strict';
-const debug = false;
+const debug = true;
 function define(module)  {
     const ClientLifecycleState = {
         None: 0,
