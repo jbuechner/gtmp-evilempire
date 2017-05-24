@@ -41,7 +41,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GrandTheftMultiplayer.Server">
-      <HintPath>..\..\libs\gtmp\v0.1.501.566\GrandTheftMultiplayer.Server.exe</HintPath>
+      <HintPath>..\..\libs\gtmp\v0.1.508.640\GrandTheftMultiplayer.Server.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
