@@ -13,7 +13,7 @@ namespace gtmp.evilempire.server
         public T Get<T>()
             where T : class
         {
-            return this.container.Resolve<T>();
+            return container.Resolve<T>();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
@@ -21,13 +21,13 @@ namespace gtmp.evilempire.server
             where TType : class
             where TInstance : class, TType
         {
-            this.container.Register<TType, TInstance>();
+            container.Register<TType, TInstance>();
         }
 
         public void Register<T>(T instance)
             where T : class
         {
-            this.container.Register(instance);
+            container.Register(instance);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -36,6 +36,8 @@ namespace gtmp.evilempire.server
             var services = new ServiceContainer();
             services.Register<IJsonSerializer>(new JsonSerializer());
             services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
+            services.Register<IClientService, ClientService>();
+            services.Register<IClientLifecycleService, ClientLifecycleService>();
             services.Register<IAuthorizationService, AuthorizationService>();
             services.Register<ILoginService, LoginService>();
             return services;
@@ -44,8 +46,8 @@ namespace gtmp.evilempire.server
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "container")]
         public void Dispose()
         {
-            this.container?.Dispose();
-            this.container = null;
+            container?.Dispose();
+            container = null;
         }
     }
 }

@@ -76,6 +76,8 @@
     <Compile Include="PlatformClient.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="services\AuthorizationService.cs" />
+    <Compile Include="services\ClientLifecycleService.cs" />
+    <Compile Include="services\ClientService.cs" />
     <Compile Include="services\LoginService.cs" />
   </ItemGroup>
   <ItemGroup>

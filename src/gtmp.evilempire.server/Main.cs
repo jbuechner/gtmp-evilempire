@@ -1,13 +1,10 @@
 ﻿using GrandTheftMultiplayer.Server.API;
-using GrandTheftMultiplayer.Shared.Math;
 using GrandTheftMultiplayer.Server.Elements;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
-using static System.FormattableString;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace gtmp.evilempire.server
@@ -30,11 +27,9 @@ namespace gtmp.evilempire.server
                 System.Diagnostics.Debugger.Launch();
             }
 #endif
-            Map = MapLoader.LoadFrom("maps");
-            ServerMapLoader.Load(Map, API);
 
-            this.API.onResourceStart += this.OnResourceStart;
-            this.API.onResourceStop += this.OnResourceStop;
+            API.onResourceStart += OnResourceStart;
+            API.onResourceStop += OnResourceStop;
         }
 
         void OnResourceStop()
@@ -45,28 +40,37 @@ namespace gtmp.evilempire.server
 
         void OnResourceStart()
         {
+            Map = MapLoader.LoadFrom("maps");
+            ServerMapLoader.Load(Map, API);
+
             Services = ServiceContainer.Create();
             Services.Register(Map);
 
-            this.API.onClientEventTrigger += this.OnClientEventTrigger;
-            this.API.onPlayerConnected += client =>
-            {
-                var loadingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0)?.Position ?? new Vector3(0, 0, 0);
-                client.nametagVisible = false;
-                client.dimension = 1000;
-                client.freeze(false);
-                client.position = loadingPoint;
-                client.stopAnimation();
-            };
+            API.onClientEventTrigger += OnClientEventTrigger;
+            API.onPlayerConnected += OnPlayerConnected;
+        }
+
+        void OnPlayerConnected(Client client)
+        {
+            var clientService = Services.Get<IClientService>();
+            var clientLifecycleService = Services.Get<IClientLifecycleService>();
+
+            var managedClient = clientService.CreateFromPlatformObject(client);
+            clientService.RegisterTuple(managedClient, client);
+
+            clientLifecycleService.OnClientConnect(managedClient);
         }
 
         void OnClientEventTrigger(Client sender, string eventName, params object[] arguments)
         {
+            var clientService = Services.Get<IClientService>();
+            var managedClient = clientService.FindByPlatformObject(sender);
+
             ClientEventCallback eventCallback = null;
             if (ClientEventCallbacks.TryGetValue(eventName, out eventCallback) && eventCallback != null)
             {
                 SanitizeClientArguments(arguments);
-                eventCallback(Services, sender, arguments);
+                eventCallback(Services, managedClient, arguments);
             }
             else
             {
@@ -96,7 +100,7 @@ namespace gtmp.evilempire.server
             }
         }
 
-        static IServiceResult OnClientLogin(ServiceContainer services, Client client, params object[] args) // todo: less boilerplate request processing
+        static IServiceResult OnClientLogin(ServiceContainer services, IClient client, params object[] args) // todo: less boilerplate request processing
         {
             if (services == null)
             {
@@ -132,30 +136,13 @@ namespace gtmp.evilempire.server
             var result = authorizationService.Authenticate(username as string, password as string);
             if (result.State == ServiceResultState.Success)
             {
+                var clientService = services.Get<IClientService>();
                 var loginService = services.Get<ILoginService>();
-                result = loginService.Login(username as string, new PlatformClient(client));
+                result = loginService.Login(username as string, client);
                 if (result.State == ServiceResultState.Success)
                 {
-                    var map = services.Get<Map>();
-                    var startingPoint = map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
-                    Console.WriteLine(Invariant($"Position player {client.name} at {startingPoint.Position}"));
-                    client.dimension = 0;
-                    if (startingPoint != null)
-                    {
-                        client.position = startingPoint.Position;
-                    }
-                    client.setData("cash", (double)1293481.43);
-                    Task.Delay(1000).ContinueWith(t =>
-                    {
-                        while (!client.IsNull)
-                        {
-                            double m = (double)client.getData("cash");
-                            client.setData("cash", m + 200);
-                            client.triggerEvent("update", "cash", m);
-                            System.Threading.Thread.Sleep(1000);
-                        }
-                    });
-                    client.freeze(false);
+                    var clientLifecycleService = services.Get<IClientLifecycleService>();
+                    clientLifecycleService.OnClientLoggedIn(client);
                 }
             }
             return result;

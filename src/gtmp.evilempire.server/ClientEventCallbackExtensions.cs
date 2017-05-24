@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace gtmp.evilempire.server
 {
-    public delegate void ClientEventCallback(ServiceContainer services, Client client, params object[] args);
-    public delegate IServiceResult ClientEventCallbackWithResponse(ServiceContainer services, Client client, params object[] args);
+    public delegate void ClientEventCallback(ServiceContainer services, IClient client, params object[] args);
+    public delegate IServiceResult ClientEventCallbackWithResponse(ServiceContainer services, IClient client, params object[] args);
 
     public static class ClientEventCallbackExtensions
     {
@@ -27,7 +27,7 @@ namespace gtmp.evilempire.server
 
                 var jsonSerializer = services.Get<IJsonSerializer>();
                 var json = string.Concat(Constants.DataSerialization.ClientServerJsonPrefix, jsonSerializer.Stringify(result.Data));
-                client.triggerEvent(response, (int)result.State, json);
+                client.TriggerClientEvent(response, (int)result.State, json);
 
             };
             return cb;

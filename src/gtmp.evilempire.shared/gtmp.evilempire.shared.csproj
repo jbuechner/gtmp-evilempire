@@ -62,6 +62,8 @@
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
+    <Compile Include="services\IClientLifecycleService.cs" />
+    <Compile Include="services\IClientService.cs" />
     <Compile Include="services\IDbService.cs" />
     <Compile Include="services\IJsonSerializer.cs" />
     <Compile Include="services\ILoginService.cs" />
