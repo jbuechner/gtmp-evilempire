@@ -16,7 +16,7 @@ namespace gtmp.evilempire.server.services
 
         public IServiceResult Authenticate(string login, string password)
         {
-            var user = DbService.SelectEntity<User, string>(login);
+            var user = DbService.Select<User, string>(login);
             password = UserPasswordHashProcessor.Hash(password);
             if (user != null && string.CompareOrdinal(user.Password, password) == 0)
             {

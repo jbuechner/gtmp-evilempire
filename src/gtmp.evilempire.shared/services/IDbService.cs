@@ -1,13 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace gtmp.evilempire.services
 {
-    public interface IDbService
+    public interface IDbService : IDisposable
     {
-        T SelectEntity<T, TKey>(TKey key);
+        void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName);
+
+        T Insert<T>(T element);
+        T Select<T, TKey>(TKey key);
+        T Update<T>(T element);
+
+        object InsertOrUpdate(object element);
+
+        int NextValueFor(string sequence);
+        int? ValueFor(string sequence);
     }
 }

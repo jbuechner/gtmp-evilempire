@@ -23,7 +23,7 @@ namespace gtmp.evilempire.server.services
 
         public IServiceResult<User> Login(string login, IClient client)
         {
-            var user = DbService.SelectEntity<User, string>(login);
+            var user = DbService.Select<User, string>(login);
             if (user == null)
             {
                 return ServiceResult<User>.AsError("Failed login");

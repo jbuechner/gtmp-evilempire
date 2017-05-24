@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.entities.processors;
+using gtmp.evilempire.services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +36,7 @@ namespace gtmp.evilempire.db
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static bool PopulateByTemplate(string template, DbEnvironment dbEnvironment)
+        public static bool PopulateByTemplate(string template, IDbService dbEnvironment)
         {
             if (!File.Exists(template))
             {

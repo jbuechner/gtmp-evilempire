@@ -1,5 +1,8 @@
-﻿using gtmp.evilempire.services;
+﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.services;
 using System;
+using System.IO;
+using System.Linq.Expressions;
 
 namespace gtmp.evilempire.db
 {
@@ -7,14 +10,56 @@ namespace gtmp.evilempire.db
     {
         DbEnvironment _dbe;
 
+        public DbService(Stream stream)
+        {
+            _dbe = new DbEnvironment(stream);
+            AddKnownEntities();
+        }
+
         public DbService(string databaseRootPath)
         {
             _dbe = new DbEnvironment(databaseRootPath);
+            AddKnownEntities();
         }
 
-        public T SelectEntity<T, TKey>(TKey key)
+        void AddKnownEntities()
+        {
+            _dbe.AddKnownEntity<User, string>("user", ks => ks.Login, ks => ks.Login);
+        }
+
+        public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName)
+        {
+            _dbe.AddKnownEntity<T, TKey>(name, uniqueKeySelector, uniqueKeyFieldName);
+        }
+
+        public T Insert<T>(T element)
+        {
+            return _dbe.Insert<T>(element);
+        }
+
+        public T Select<T, TKey>(TKey key)
         {
             return _dbe.Select<T, TKey>(key);
+        }
+
+        public T Update<T>(T element)
+        {
+            return _dbe.Update<T>(element);
+        }
+
+        public object InsertOrUpdate(object element)
+        {
+            return _dbe.InsertOrUpdate(element);
+        }
+
+        public int NextValueFor(string sequence)
+        {
+            return _dbe.NextValueFor(sequence);
+        }
+
+        public int? ValueFor(string sequence)
+        {
+            return _dbe.ValueFor(sequence);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_dbe")]

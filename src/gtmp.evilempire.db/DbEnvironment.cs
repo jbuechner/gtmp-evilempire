@@ -1,188 +1,199 @@
-﻿using DBreeze;
-using DBreeze.DataTypes;
-using gtmp.evilempire.entities;
+﻿using LiteDB;
 using System;
 using System.Linq;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
-using Newtonsoft.Json;
+using System.IO;
 
 namespace gtmp.evilempire.db
 {
     public sealed class DbEnvironment : IDisposable
     {
-        DBreezeConfiguration _configuration;
-        DBreezeEngine _engine;
-        ConcurrentDictionary<Type, EntityStorageAttribute> _entityStorageDescriptionCache = new ConcurrentDictionary<Type, EntityStorageAttribute>();
-        ConcurrentDictionary<Type, Func<object, object>> _entityKeySelectorCache = new ConcurrentDictionary<Type, Func<object, object>>();
-
-        public DbEnvironment(string databaseRootPath)
+        class KnownEntity
         {
-            _configuration = new DBreezeConfiguration();
-            try
-            {
-                _configuration.Storage = DBreezeConfiguration.eStorage.DISK;
-                _configuration.DBreezeDataFolderName = databaseRootPath;
-            }
-            catch
-            {
-                _configuration?.Dispose();
-                throw;
-            }
-            _engine = new DBreezeEngine(_configuration);
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
-            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
+            public Type EntityType { get; set; }
+            public string Name { get; set; }
+            public string UniqueKeyFieldName { get; set; }
+            public Func<object, object> UniqueKeyValueSelector { get; set; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_engine")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_configuration")]
-        public void Dispose()
+        readonly object _syncRoot = new object();
+
+        LiteDatabase _db;
+
+        Dictionary<string, KnownEntity> _known = new Dictionary<string, KnownEntity>();
+
+        internal DbEnvironment(Stream stream)
         {
-            _engine?.Dispose();
-            _configuration?.Dispose();
-            _engine = null;
-            _configuration = null;
+            _db = new LiteDatabase(stream);
+        }
+
+        internal DbEnvironment(string databaseRootPath)
+        {
+            if (databaseRootPath.Contains(Path.DirectorySeparatorChar) || databaseRootPath.Contains(Path.AltDirectorySeparatorChar))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(databaseRootPath));
+            }
+            _db = new LiteDatabase(databaseRootPath);
+        }
+
+        public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName)
+        {
+            lock (_syncRoot)
+            {
+                if (_known.ContainsKey(name))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(name), "Only one entity for each unique name is allowed.");
+                }
+                Func<object, object> kvs = element => uniqueKeySelector((T)element);
+                var entity = new KnownEntity { EntityType = typeof(T), Name = name, UniqueKeyValueSelector = kvs, UniqueKeyFieldName = uniqueKeyFieldName.MemberName() };
+                _known.Add(name, entity);
+
+                var collection = _db.GetCollection(entity.Name);
+                collection.EnsureIndex(entity.UniqueKeyFieldName, true);
+            }
+        }
+
+        public T Insert<T>(T element)
+        {
+            var collection = GetCollection<T>();
+            collection.Insert(element);
+            return element;
         }
 
         public T Select<T, TKey>(TKey key)
         {
-            var reflectedTableName = GetReflectedTableName<T>();
-            return Select<T, TKey>(reflectedTableName, key);
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
+            var collection = _db.GetCollection<T>(knownEntity.Name);
+            var element = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            return element;
         }
 
-        public void Insert<T, TKey>(string tableName, TKey key, T value)
+        public T Update<T>(T element)
         {
-            using (var t = _engine.GetTransaction())
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
+            var collection = _db.GetCollection(knownEntity.Name);
+            var key = knownEntity.UniqueKeyValueSelector(element);
+            var target = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            if (target == null)
             {
-                byte[] r;
-                bool wasUpdated;
-                t.Insert<TKey, DbMJSON<T>>(tableName, key, value, out r, out wasUpdated, true);
-                t.Commit();
+                throw new InvalidOperationException("Element is not part of collection");
             }
+            var documentId = target["_id"];
+            var document = _db.Mapper.ToDocument<T>(element);
+            if (collection.Update(documentId, document))
+            {
+                return element;
+            }
+            throw new InvalidOperationException("Element is not part of collection");
         }
 
-        public T Select<T, TKey>(string tableName, TKey key)
+        public int? ValueFor(string sequence)
         {
-            if (string.IsNullOrEmpty(tableName))
-            {
-                throw new ArgumentNullException(nameof(tableName));
-            }
-
-            using (var t = _engine.GetTransaction())
-            {
-                var row = t.Select<TKey, DbMJSON<T>>(tableName, key);
-                if (row != null && row.Exists)
-                {
-                    var o = row.Value;
-                    if (o != null)
-                    {
-                        return o.Get;
-                    }
-                }
-            }
-            return default(T);
-        }
-
-        internal void InsertOrUpdate(object entity)
-        {
-            var key = SelectKey(entity);
-            InsertOrUpdate(key, entity);
-        }
-
-        internal void InsertOrUpdate(object key, object entity) // todo: performance, heavy reflection
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            var keyType = key.GetType();
-            var entityType = entity.GetType();
-            var reflectedTableName = GetEntityStorageDescription(entityType)?.Storage;
-
-            using (var t = _engine.GetTransaction())
-            {
-                var dbmJsonType = typeof(DBreezeEngine).Assembly.GetTypes().First(p => p.Name == "DbMJSON`1").MakeGenericType(entityType);
-                var dbmJson = Activator.CreateInstance(dbmJsonType, entity);
-                var insert = t.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(p => p.Name == "Insert" && p.GetParameters().Count() == 3).MakeGenericMethod(keyType, dbmJsonType);
-                insert.Invoke(t, new[] { reflectedTableName, key, dbmJson });
-                t.Commit();
-            }
-        }
-
-        public object SelectKey(object entity)
-        {
-            if (entity == null)
+            var collection = _db.GetCollection(string.Concat("__sequence_", sequence));
+            var bson = collection.FindOne(p => true);
+            if (bson == null)
             {
                 return null;
             }
+            return bson["value"].AsInt32;
+        }
 
-            var keySelector = GetEntityKeySelector(entity.GetType());
-            if (keySelector != null)
+        public int NextValueFor(string sequence)
+        {
+            var collection = _db.GetCollection(string.Concat("__sequence_", sequence));
+            using (var t = _db.BeginTrans())
             {
-                return keySelector(entity);
+                var bson = collection.FindOne(p => true);
+                if (bson == null)
+                {
+                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue(0) } });
+                    collection.Insert(bson);
+                    t.Commit();
+                    return 0;
+                }
+                else
+                {
+                    var next = bson["value"].AsInt32 + 1;
+                    bson["value"] = new BsonValue(next);
+                    collection.Update(bson);
+                    t.Commit();
+                    return next;
+                }
+            }
+        }
+
+        public object InsertOrUpdate(object element)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            var type = element.GetType();
+            var knownEntity = GetKnownEntity(type);
+            CheckKnownEntity(knownEntity);
+
+            var collection = _db.GetCollection(knownEntity.Name);
+            var document = _db.Mapper.ToDocument(knownEntity.EntityType, element);
+            var key = knownEntity.UniqueKeyValueSelector(element);
+            var target = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            if (target == null)
+            {
+                collection.Insert(document);
+            }
+            else
+            {
+                var documentId = target["_id"];
+                collection.Update(documentId, document);
+            }
+            return element;
+        }
+
+        KnownEntity GetKnownEntity<T>()
+        {
+            return GetKnownEntity(typeof(T));
+        }
+
+        KnownEntity GetKnownEntity(Type type)
+        {
+            return _known.FirstOrDefault(p => p.Value.EntityType == type).Value;
+        }
+
+        KnownEntity GetKnownEntity(string name)
+        {
+            KnownEntity v;
+            if (_known.TryGetValue(name, out v))
+            {
+                return v;
             }
             return null;
         }
 
-        string GetReflectedTableName<T>()
+        LiteCollection<T> GetCollection<T>()
         {
-            var description = GetEntityStorageDescription<T>();
-            if (description == null)
-            {
-                return null;
-            }
-            return description.Storage;
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
+            return _db.GetCollection<T>(knownEntity.Name);
         }
 
-        EntityStorageAttribute GetEntityStorageDescription<T>()
+        void CheckKnownEntity(KnownEntity knownEntity)
         {
-            return GetEntityStorageDescription(typeof(T));
-        }
-
-        EntityStorageAttribute GetEntityStorageDescription(Type t)
-        {
-            EntityStorageAttribute v;
-            if (_entityStorageDescriptionCache.TryGetValue(t, out v))
+            if (knownEntity == null)
             {
-                return v;
-            }
-            else
-            {
-                v = t.GetCustomAttributes(typeof(EntityStorageAttribute), false).Select(s => s as EntityStorageAttribute).FirstOrDefault();
-                _entityStorageDescriptionCache.TryAdd(t, v);
-                return v;
+                throw new InvalidOperationException("T is not a known entity. T = " + knownEntity.EntityType.Name);
             }
         }
 
-        Func<object, object> GetEntityKeySelector(Type t)
+        public void Dispose()
         {
-            Func<object, object> keySelector;
-            if (_entityKeySelectorCache.TryGetValue(t, out keySelector))
-            {
-                return keySelector;
-            }
-            else
-            {
-                var entityStorageDescription = GetEntityStorageDescription(t);
-                var keyMember = entityStorageDescription.KeyMember;
-                var keyProperty = t.GetProperty(keyMember);
-
-                var p = Expression.Parameter(typeof(object));
-                var castedParameter = Expression.TypeAs(p, t);
-                var call = Expression.Call(castedParameter, keyProperty.GetMethod);
-                var cast = Expression.TypeAs(call, typeof(object));
-                var lambda = Expression.Lambda(cast, p);
-                keySelector = (Func<object, object>)lambda.Compile();
-
-                _entityKeySelectorCache.TryAdd(t, keySelector);
-                return keySelector;
-            }
+            _db?.Dispose();
+            _db = null;
         }
     }
 }

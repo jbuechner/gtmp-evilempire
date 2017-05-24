@@ -146,9 +146,9 @@ namespace gtmp.evilempire.server.launcher
         {
             if (!ExecuteWithConsoleOutput("Check database directory and entity integrity ... ", WrapWithFailReason(() =>
                 {
-                    using (var dbe = new DbEnvironment(evilempire.Constants.Database.DatabasePath))
+                    using (var db = new DbService(evilempire.Constants.Database.DatabasePath))
                     {
-                        dbe.Select<User, string>("0");
+                        db.Select<User, string>("0");
                     }
                     return true;
                 },
@@ -167,12 +167,12 @@ namespace gtmp.evilempire.server.launcher
                 return false;
             }
 
-            using (var dbe = new DbEnvironment(evilempire.Constants.Database.DatabasePath))
+            using (var db = new DbService(evilempire.Constants.Database.DatabasePath))
             {
                 var dbt = new DbTemplate(evilempire.Constants.Database.DatabaseTemplatePath);
                 foreach(var template in dbt.Templates)
                 {
-                    if (!ExecuteWithConsoleOutput(Invariant($"Populate db environment using template {template} ... "), WrapWithFailReason(() => DbTemplate.PopulateByTemplate(template, dbe), "failed")))
+                    if (!ExecuteWithConsoleOutput(Invariant($"Populate db environment using template {template} ... "), WrapWithFailReason(() => DbTemplate.PopulateByTemplate(template, db), "failed")))
                     {
                         break;
                     }
