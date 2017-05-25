@@ -13,8 +13,15 @@ namespace gtmp.evilempire.db
         {
             public Type EntityType { get; set; }
             public string Name { get; set; }
-            public string UniqueKeyFieldName { get; set; }
-            public Func<object, object> UniqueKeyValueSelector { get; set; }
+
+            public EntityKey PrimaryKey { get; set; }
+        }
+
+        class EntityKey
+        {
+            public string Name { get; set; }
+            public Func<object, object> ValueSelector { get; set; }
+            public bool IsUnique { get; set; }
         }
 
         readonly object _syncRoot = new object();
@@ -37,7 +44,7 @@ namespace gtmp.evilempire.db
             _db = new LiteDatabase(databaseRootPath);
         }
 
-        public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName)
+        public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> primaryKeySelector, Expression<Func<T, TKey>> primaryKeyNameExpression, bool isPrimaryKeyUnique)
         {
             lock (_syncRoot)
             {
@@ -45,19 +52,22 @@ namespace gtmp.evilempire.db
                 {
                     throw new ArgumentOutOfRangeException(nameof(name), "Only one entity for each unique name is allowed.");
                 }
-                Func<object, object> kvs = element => uniqueKeySelector((T)element);
-                var entity = new KnownEntity { EntityType = typeof(T), Name = name, UniqueKeyValueSelector = kvs, UniqueKeyFieldName = uniqueKeyFieldName.MemberName() };
+                Func<object, object> kvs = element => primaryKeySelector((T)element);
+                var primaryKey = new EntityKey { Name = primaryKeyNameExpression.MemberName(), ValueSelector = kvs, IsUnique = isPrimaryKeyUnique };
+                var entity = new KnownEntity { EntityType = typeof(T), Name = name, PrimaryKey = primaryKey };
                 _known.Add(name, entity);
 
                 var collection = _db.GetCollection(entity.Name);
-                collection.EnsureIndex(entity.UniqueKeyFieldName, true);
+                collection.EnsureIndex(primaryKey.Name, primaryKey.IsUnique);
             }
         }
 
         public T Insert<T>(T element)
         {
-            var collection = GetCollection<T>();
-            collection.Insert(element);
+            var type = typeof(T);
+            var collection = GetCollection(type);
+            var document = _db.Mapper.ToDocument(type, element);
+            collection.Insert(document);
             return element;
         }
 
@@ -67,8 +77,19 @@ namespace gtmp.evilempire.db
             CheckKnownEntity(knownEntity);
 
             var collection = _db.GetCollection<T>(knownEntity.Name);
-            var element = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            var element = collection.FindOne(Query.EQ(knownEntity.PrimaryKey.Name, new BsonValue(key)));
             return element;
+        }
+
+        public IEnumerable<T> SelectMany<T, TKey>(TKey key)
+        {
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
+            var collection = _db.GetCollection<T>(knownEntity.Name);
+
+            var elements = collection.Find(Query.EQ(knownEntity.PrimaryKey.Name, new BsonValue(key)));
+            return elements;
         }
 
         public T Update<T>(T element)
@@ -77,8 +98,8 @@ namespace gtmp.evilempire.db
             CheckKnownEntity(knownEntity);
 
             var collection = _db.GetCollection(knownEntity.Name);
-            var key = knownEntity.UniqueKeyValueSelector(element);
-            var target = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            var key = knownEntity.PrimaryKey.ValueSelector(element);
+            var target = collection.FindOne(Query.EQ(knownEntity.PrimaryKey.Name, new BsonValue(key)));
             if (target == null)
             {
                 throw new InvalidOperationException("Element is not part of collection");
@@ -140,8 +161,8 @@ namespace gtmp.evilempire.db
 
             var collection = _db.GetCollection(knownEntity.Name);
             var document = _db.Mapper.ToDocument(knownEntity.EntityType, element);
-            var key = knownEntity.UniqueKeyValueSelector(element);
-            var target = collection.FindOne(Query.EQ(knownEntity.UniqueKeyFieldName, new BsonValue(key)));
+            var key = knownEntity.PrimaryKey.ValueSelector(element);
+            var target = collection.FindOne(Query.EQ(knownEntity.PrimaryKey.Name, new BsonValue(key)));
             if (target == null)
             {
                 collection.Insert(document);
@@ -180,6 +201,14 @@ namespace gtmp.evilempire.db
             CheckKnownEntity(knownEntity);
 
             return _db.GetCollection<T>(knownEntity.Name);
+        }
+
+        LiteCollection<BsonDocument> GetCollection(Type type)
+        {
+            var knownEntity = GetKnownEntity(type);
+            CheckKnownEntity(knownEntity);
+
+            return _db.GetCollection(knownEntity.Name);
         }
 
         void CheckKnownEntity(KnownEntity knownEntity)

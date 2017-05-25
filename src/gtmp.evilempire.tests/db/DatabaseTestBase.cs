@@ -23,11 +23,6 @@ namespace gtmp.evilempire.tests.db
                 _decorated = new DbService(_stream);
             }
 
-            public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName)
-            {
-                _decorated.AddKnownEntity<T, TKey>(name, uniqueKeySelector, uniqueKeyFieldName);
-            }
-
             public void Dispose()
             {
                 _stream?.Dispose();
@@ -54,6 +49,11 @@ namespace gtmp.evilempire.tests.db
             public T Select<T, TKey>(TKey key)
             {
                 return _decorated.Select<T, TKey>(key);
+            }
+
+            public IEnumerable<T> SelectMany<T, TKey>(TKey key)
+            {
+                return _decorated.SelectMany<T, TKey>(key);
             }
 
             public T Update<T>(T element)

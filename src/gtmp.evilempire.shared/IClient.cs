@@ -1,4 +1,5 @@
-﻿using System;
+﻿using gtmp.evilempire.entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,8 @@ namespace gtmp.evilempire
         bool IsConnected { get; }
 
         string Name { get; }
+
+        string Login { get; set; }
 
         void StopAnimation();
 

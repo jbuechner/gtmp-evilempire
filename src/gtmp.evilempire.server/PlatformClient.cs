@@ -21,6 +21,8 @@ namespace gtmp.evilempire.server
             }
         }
 
+        public string Login { get; set; }
+
         public bool IsNametagVisible
         {
             get

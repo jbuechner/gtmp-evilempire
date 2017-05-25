@@ -54,7 +54,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="ConversionExtensions.cs" />
     <Compile Include="DelegatedDisposable.cs" />
-    <Compile Include="entities\EntityStorageAttribute.cs" />
+    <Compile Include="entities\Character.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
+    <Compile Include="services\ICharacterService.cs" />
     <Compile Include="services\IClientLifecycleService.cs" />
     <Compile Include="services\IClientService.cs" />
     <Compile Include="services\IDbService.cs" />

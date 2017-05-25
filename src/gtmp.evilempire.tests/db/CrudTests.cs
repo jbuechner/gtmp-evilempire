@@ -142,5 +142,32 @@ namespace gtmp.evilempire.tests.db
                 Assert.AreEqual(user2.Password, selected.Password);
             }
         }
+
+        [TestMethod]
+        public void SelectMany()
+        {
+            using (var db = DbServiceFactory())
+            {
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "xyz" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "asd" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "asd" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "523" });
+
+                var characters = db.SelectMany<Character, string>("abc").ToList();
+
+                Assert.AreEqual(5, characters.Count);
+                HashSet<int> ids = new HashSet<int>();
+                foreach (var character in characters)
+                {
+                    Assert.IsTrue(ids.Add(character.Id));
+                    Assert.AreEqual("abc", character.AssociatedLogin);
+                }
+            }
+        }
     }
 }

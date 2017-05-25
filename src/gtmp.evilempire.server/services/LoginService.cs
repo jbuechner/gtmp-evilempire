@@ -34,6 +34,8 @@ namespace gtmp.evilempire.server.services
             {
                 if (!client.Equals(loggedInClient))
                 {
+                    user.NumberOfInvalidLoginAttempts += 1;
+                    DbService.Update(user);
                     return ServiceResult<User>.AsError("Failed login");
                 }
                 else
@@ -45,6 +47,15 @@ namespace gtmp.evilempire.server.services
             {
                 LoggedInClients.AddOrUpdate(login, client, (key, value) => client);
             }
+
+            if (user.FirstLogin == null)
+            {
+                user.FirstLogin = DateTime.Now;
+            }
+            user.NumberOfInvalidLoginAttempts = 0;
+            user.LastSuccessfulLogin = DateTime.Now;
+            client.Login = login;
+            DbService.Update(user);
 
             return ServiceResult<User>.AsSuccess(user);
         }

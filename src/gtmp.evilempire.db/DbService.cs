@@ -1,6 +1,7 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.services;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 
@@ -24,12 +25,8 @@ namespace gtmp.evilempire.db
 
         void AddKnownEntities()
         {
-            _dbe.AddKnownEntity<User, string>("user", ks => ks.Login, ks => ks.Login);
-        }
-
-        public void AddKnownEntity<T, TKey>(string name, Func<T, TKey> uniqueKeySelector, Expression<Func<T, TKey>> uniqueKeyFieldName)
-        {
-            _dbe.AddKnownEntity<T, TKey>(name, uniqueKeySelector, uniqueKeyFieldName);
+            _dbe.AddKnownEntity<User, string>("user", ks => ks.Login, ks => ks.Login, true);
+            _dbe.AddKnownEntity<Character, string>("character", ks => ks.AssociatedLogin, ks => ks.AssociatedLogin, false);
         }
 
         public T Insert<T>(T element)
@@ -40,6 +37,11 @@ namespace gtmp.evilempire.db
         public T Select<T, TKey>(TKey key)
         {
             return _dbe.Select<T, TKey>(key);
+        }
+
+        public IEnumerable<T> SelectMany<T, TKey>(TKey key)
+        {
+            return _dbe.SelectMany<T, TKey>(key);
         }
 
         public T Update<T>(T element)
