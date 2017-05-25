@@ -1,9 +1,4 @@
-﻿using GrandTheftMultiplayer.Shared.Math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.server.mapping
 {
@@ -11,9 +6,9 @@ namespace gtmp.evilempire.server.mapping
     {
         public int Id { get; }
         public MapPointType PointType { get; }
-        public Vector3 Position { get; }
+        public Vector3f Position { get; }
 
-        public MapPoint(MapPointType type, int id, Vector3 position)
+        public MapPoint(MapPointType type, int id, Vector3f position)
         {
             PointType = type;
             Id = id;

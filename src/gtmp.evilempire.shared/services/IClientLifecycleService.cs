@@ -9,6 +9,7 @@ namespace gtmp.evilempire.services
     public interface IClientLifecycleService
     {
         void OnClientConnect(IClient client);
+        void OnClientDisconnect(IClient client);
         void OnClientLoggedIn(IClient client);
     }
 }

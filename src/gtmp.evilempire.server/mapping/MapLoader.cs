@@ -1,7 +1,4 @@
-﻿using GrandTheftMultiplayer.Server.API;
-using GrandTheftMultiplayer.Server.Elements;
-using GrandTheftMultiplayer.Shared;
-using GrandTheftMultiplayer.Shared.Math;
+﻿using gtmp.evilempire.entities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -65,8 +62,8 @@ namespace gtmp.evilempire.server.mapping
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Prop"))
             {
                 var hash = mapObject.Element("Hash")?.Value.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3();
-                var rotation = mapObject.Element("Rotation")?.ToVector3();
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
 
                 var obj = new MapObject(hash, position, rotation);
                 map.AddObject(obj);
@@ -78,8 +75,8 @@ namespace gtmp.evilempire.server.mapping
             foreach(var mapObject in SelectMapObjectsByType(xdoc, "Ped"))
             {
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3();
-                var rotation = mapObject.Element("Rotation")?.ToVector3();
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
                 var isInvincible = mapObject.Element("Invicible")?.Value?.AsBool() ?? false;
 
                 var ped = new MapPed(hash, position, rotation.Z, isInvincible);
@@ -92,8 +89,8 @@ namespace gtmp.evilempire.server.mapping
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Vehicle"))
             {
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3();
-                var rotation = mapObject.Element("Rotation")?.ToVector3();
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
                 var color1 = mapObject.Element("PrimaryColor")?.Value?.AsInt() ?? 0;
                 var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
@@ -136,7 +133,7 @@ namespace gtmp.evilempire.server.mapping
             {
                 var mapPointType = metapoint.ToMapPointType() ?? MapPointType.None;
                 var id = metapoint.Element("id")?.Value?.AsInt() ?? 0;
-                var position = metapoint.ToVector3() ?? new Vector3();
+                var position = metapoint.ToVector3f() ?? Vector3f.One;
 
                 var mapPoint = new MapPoint(mapPointType, id, position);
                 map.AddPoint(mapPoint);
@@ -153,10 +150,10 @@ namespace gtmp.evilempire.server.mapping
             foreach (var marker in markers)
             {
                 var markerType = marker.Element("Type")?.ToMarkerType() ?? MarkerType.UpsideDownCone;
-                var position = marker.Element("Position")?.ToVector3() ?? new Vector3();
-                var direction = marker.Element("Direction")?.ToVector3() ?? new Vector3();
-                var rotation = marker.Element("Rotation")?.ToVector3() ?? new Vector3();
-                var scale = marker.Element("Scale")?.ToVector3() ?? new Vector3(1, 1, 1);
+                var position = marker.Element("Position")?.ToVector3f() ?? Vector3f.One;
+                var direction = marker.Element("Direction")?.ToVector3f() ?? Vector3f.One;
+                var rotation = marker.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
+                var scale = marker.Element("Scale")?.ToVector3f() ?? Vector3f.One;
                 var alpha = marker.Element("Alpha")?.Value?.AsByte() ?? 0;
                 var r = marker.Element("Red")?.Value?.AsByte() ?? 0;
                 var g = marker.Element("Green")?.Value?.AsByte() ?? 0;
@@ -207,7 +204,7 @@ namespace gtmp.evilempire.server.mapping
             return null;
         }
 
-        internal static Vector3 ToVector3(this XElement element)
+        internal static Vector3f? ToVector3f(this XElement element)
         {
             if (element == null)
             {
@@ -216,7 +213,7 @@ namespace gtmp.evilempire.server.mapping
             var x = element?.Element("X")?.Value?.AsFloat() ?? 0;
             var y = element?.Element("Y")?.Value?.AsFloat() ?? 0;
             var z = element?.Element("Z")?.Value?.AsFloat() ?? 0;
-            return new Vector3(x, y, z);
+            return new Vector3f(x, y, z);
         }
 
         internal static string GetSubElementValue(this XElement element, XName subElementName)

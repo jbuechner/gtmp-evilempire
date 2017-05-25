@@ -16,11 +16,47 @@ namespace gtmp.evilempire.server.services
 
         ConcurrentDictionary<string, IClient> LoggedInClients { get; } = new ConcurrentDictionary<string, IClient>();
 
+        public DateTime LastLoggedInClientsChangeTime { get; private set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public LoginService(IDbService dbService, ICharacterService characterService)
         {
             DbService = dbService;
             CharacterService = characterService;
+            LastLoggedInClientsChangeTime = DateTime.MinValue;
+        }
+
+        public bool IsLoggedIn(IClient client)
+        {
+            if (client == null || client.Login == null)
+            {
+                return false;
+            }
+
+            return LoggedInClients.ContainsKey(client.Login);
+        }
+
+        public void Purge()
+        {
+            var changed = false;
+            var keys = LoggedInClients.Keys.ToList();
+            foreach(var key in keys)
+            {
+                IClient client;
+                if (LoggedInClients.TryGetValue(key, out client))
+                {
+                    if (client == null || !client.IsConnected)
+                    {
+                        Logout(client);
+                        changed = true;
+                        continue;
+                    }
+                }
+            }
+            if (changed)
+            {
+                LastLoggedInClientsChangeTime = DateTime.Now;
+            }
         }
 
         public IServiceResult<User> Login(string login, IClient client)
@@ -43,11 +79,13 @@ namespace gtmp.evilempire.server.services
                 else
                 {
                     LoggedInClients.AddOrUpdate(login, client, (key, value) => client);
+                    LastLoggedInClientsChangeTime = DateTime.Now;
                 }
             }
             else
             {
                 LoggedInClients.AddOrUpdate(login, client, (key, value) => client);
+                LastLoggedInClientsChangeTime = DateTime.Now;
             }
 
             if (user.FirstLogin == null)
@@ -64,6 +102,18 @@ namespace gtmp.evilempire.server.services
             DbService.Update(user);
 
             return ServiceResult<User>.AsSuccess(user);
+        }
+
+        public void Logout(IClient client)
+        {
+            LoggedInClients.TryRemove(client.Login, out client);
+        }
+
+        public IList<IClient> GetLoggedInClients()
+        {
+            var list = new List<IClient>(LoggedInClients.Count);
+            list.AddRange(LoggedInClients.Values);
+            return list;
         }
     }
 }

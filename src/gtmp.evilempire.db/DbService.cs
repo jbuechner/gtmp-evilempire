@@ -39,6 +39,10 @@ namespace gtmp.evilempire.db
             return _dbe.Select<T, TKey>(key);
         }
 
+        public T Select<T, TKey>(Expression<Func<T, TKey>> keySelector, TKey key)
+        {
+            return _dbe.Select<T, TKey>(keySelector, key);
+        }
         public IEnumerable<T> SelectMany<T, TKey>(TKey key)
         {
             return _dbe.SelectMany<T, TKey>(key);

@@ -169,5 +169,24 @@ namespace gtmp.evilempire.tests.db
                 }
             }
         }
+
+        [TestMethod]
+        public void SelectSingleCharacterById()
+        {
+            using (var db = DbServiceFactory())
+            {
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "abc" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "def" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "geg" });
+                db.Insert(new Character { Id = db.NextValueFor("character"), AssociatedLogin = "asd" });
+
+                var character = db.Select<Character, int>(ks => ks.Id, 1);
+                Assert.AreEqual("def", character.AssociatedLogin);
+                Assert.AreEqual(null, character.Position);
+
+                character = db.Select<Character, int>(ks => ks.Id, 3);
+                Assert.AreEqual("asd", character.AssociatedLogin);
+            }
+        }
     }
 }

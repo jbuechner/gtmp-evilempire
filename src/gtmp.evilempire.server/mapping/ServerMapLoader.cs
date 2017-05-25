@@ -12,11 +12,11 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach(var marker in map.Markers)
             {
-                api.createMarker((int)marker.MarkerType, marker.Position, marker.Direction, marker.Rotation, marker.Scale, marker.Alpha, marker.Red, marker.Green, marker.Blue);
+                api.createMarker((int)marker.MarkerType, marker.Position.ToVector3(), marker.Direction.ToVector3(), marker.Rotation.ToVector3(), marker.Scale.ToVector3(), marker.Alpha, marker.Red, marker.Green, marker.Blue);
             }
             foreach(var obj in map.Objects)
             {
-                api.createObject(obj.Hash, obj.Position, obj.Rotation);
+                api.createObject(obj.Hash, obj.Position.ToVector3(), obj.Rotation.ToVector3());
             }
             foreach(var ped in map.Peds)
             {
@@ -30,7 +30,7 @@ namespace gtmp.evilempire.server.mapping
                 }
 
                 var hash = (PedHash)ped.Hash;
-                var r = api.createPed(hash, ped.Position, ped.Rotation);
+                var r = api.createPed(hash, ped.Position.ToVector3(), ped.Rotation);
                 r.invincible = ped.IsInvincible;
             }
             foreach(var vehicle in map.Vehicles)
@@ -44,7 +44,7 @@ namespace gtmp.evilempire.server.mapping
                     continue;
                 }
                 var hash = (VehicleHash)vehicle.Hash;
-                api.createVehicle(hash, vehicle.Position, vehicle.Rotation, vehicle.Color1, vehicle.Color2);
+                api.createVehicle(hash, vehicle.Position.ToVector3(), vehicle.Rotation.ToVector3(), vehicle.Color1, vehicle.Color2);
             }
         }
     }

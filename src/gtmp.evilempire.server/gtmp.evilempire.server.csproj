@@ -74,6 +74,7 @@
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
     <Compile Include="PlatformClient.cs" />
+    <Compile Include="PlatformConversions.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="services\AuthorizationService.cs" />
     <Compile Include="services\CharacterService.cs" />

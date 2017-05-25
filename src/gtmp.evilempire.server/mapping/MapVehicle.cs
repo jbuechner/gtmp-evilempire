@@ -1,17 +1,17 @@
-﻿using GrandTheftMultiplayer.Shared.Math;
+﻿using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.server.mapping
 {
     public class MapVehicle
     {
         public int Hash { get; }
-        public Vector3 Position { get; }
-        public Vector3 Rotation { get; }
+        public Vector3f Position { get; }
+        public Vector3f Rotation { get; }
 
         public int Color1 { get; }
         public int Color2 { get; }
 
-        public MapVehicle(int hash, Vector3 position, Vector3 rotation, int color1, int color2)
+        public MapVehicle(int hash, Vector3f position, Vector3f rotation, int color1, int color2)
         {
             Hash = hash;
             Position = position;

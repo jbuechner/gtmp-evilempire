@@ -14,7 +14,7 @@ namespace gtmp.evilempire
         bool IsNametagVisible { get; set; }
         int Dimension { get; set; }
         bool CanMove { get; set; }
-        object Position { get; set; }
+        Vector3f Position { get; set; }
         bool IsConnected { get; }
 
         string Name { get; }

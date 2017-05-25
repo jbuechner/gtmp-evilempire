@@ -1,27 +1,29 @@
-﻿using GrandTheftMultiplayer.Shared.Math;
+﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static System.FormattableString;
 
 namespace gtmp.evilempire.server.services
 {
     class ClientLifecycleService : IClientLifecycleService
     {
+        IDbService DbService { get; }
+        ILoginService LoginService { get; }
+        ICharacterService CharacterService { get; }
         Map Map { get; set; }
 
-        public ClientLifecycleService(Map map)
+        public ClientLifecycleService(IDbService dbService, ILoginService loginService, ICharacterService characterService, Map map)
         {
+            DbService = dbService;
+            LoginService = loginService;
+            CharacterService = characterService;
             Map = map;
         }
 
         public void OnClientConnect(IClient client)
         {
-            var loadingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0)?.Position ?? new Vector3(0, 0, 0);
+            var loadingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0)?.Position ?? Vector3f.One;
             client.IsNametagVisible = false;
             client.Dimension = 1000;
             client.CanMove = false;
@@ -29,20 +31,27 @@ namespace gtmp.evilempire.server.services
             client.StopAnimation();
         }
 
+        public void OnClientDisconnect(IClient client)
+        {
+            if (LoginService.IsLoggedIn(client))
+            {
+                LoginService.Logout(client);
+
+                var character = CharacterService.GetActiveCharacter(client);
+                character.Position = client.Position;
+                DbService.Update<Character>(character);
+            }
+        }
+
         public void OnClientLoggedIn(IClient client)
         {
-            var startingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
             using (ConsoleColor.Cyan.Foreground())
             {
                 Console.WriteLine($"{client.Name} logged in using character id {client.CharacterId}");
-                Console.WriteLine(Invariant($"Position player {client.Name} at {startingPoint.Position}"));
             }
 
             client.Dimension = 0;
-            if (startingPoint != null)
-            {
-                client.Position = startingPoint.Position;
-            }
+            UpdateClientPositionWithLastKnownPosition(client);
 
             //todo: remove example update
             client.SetData("cash", (double)1293481.43);
@@ -57,6 +66,26 @@ namespace gtmp.evilempire.server.services
                 }
             });
             client.CanMove = true;
+        }
+
+        void UpdateClientPositionWithLastKnownPosition(IClient client)
+        {
+            var character = CharacterService.GetActiveCharacter(client);
+
+            if (character.Position.HasValue)
+            {
+                var vector = character.Position.Value;
+                vector.Z += 0.2f;
+                client.Position = vector;
+            }
+            else
+            {
+                var startingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
+                if (startingPoint != null)
+                {
+                    client.Position = startingPoint.Position;
+                }
+            }
         }
     }
 }

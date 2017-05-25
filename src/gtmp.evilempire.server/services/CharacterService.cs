@@ -36,5 +36,12 @@ namespace gtmp.evilempire.server.services
 
             return character;
         }
+
+        public void UpdatePosition(int characterId, Vector3f position)
+        {
+            var character = DbService.Select<Character, int>(ks => ks.Id, characterId);
+            character.Position = position;
+            DbService.Update<Character>(character);
+        }
     }
 }

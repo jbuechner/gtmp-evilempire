@@ -6,11 +6,16 @@ using System.Collections.Generic;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace gtmp.evilempire.server
 {
     public class Main : Script
     {
+        static readonly bool SavePositionsDuringHeartbeat = true;
+
+        readonly object _syncRoot = new object();
+
         public ServiceContainer Services { get; private set; }
 
         public Map Map { get; private set; }
@@ -18,6 +23,9 @@ namespace gtmp.evilempire.server
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
             { "req:login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("res:login") }
         };
+
+        CancellationTokenSource HeartbeatCancellationTokenSource { get; set; }
+        Thread HeartbeatThread { get; set; }
 
         public Main()
         {
@@ -32,8 +40,73 @@ namespace gtmp.evilempire.server
             API.onResourceStop += OnResourceStop;
         }
 
+        void RunHeartbeat()
+        {
+            lock(_syncRoot)
+            {
+                if (HeartbeatThread != null)
+                {
+                    throw new InvalidOperationException("Can not start heartbeat twice.");
+                }
+                HeartbeatCancellationTokenSource = new CancellationTokenSource();
+                var thread = new Thread(() => this.Heartbeat(HeartbeatCancellationTokenSource.Token));
+                thread.Start();
+            }
+        }
+
+        void StopHeartbeat()
+        {
+            HeartbeatCancellationTokenSource.Cancel();
+            HeartbeatThread.Join();
+            HeartbeatThread = null;
+            HeartbeatCancellationTokenSource?.Dispose();
+            HeartbeatCancellationTokenSource = null;
+        }
+
+        void Heartbeat(CancellationToken cancellationToken)
+        {
+            var loginService = Services.Get<ILoginService>();
+            var characterService = Services.Get<ICharacterService>();
+
+            const int maxDirtyCounts = 200;
+            int dirtyCounts = 0;
+            DateTime lastLoggedInClientsRetreived = DateTime.MinValue;
+            IList<IClient> loggedInClients = null;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (dirtyCounts++ > maxDirtyCounts)
+                {
+                    loginService.Purge();
+
+                    if (SavePositionsDuringHeartbeat)
+                    {
+                        if (loginService.LastLoggedInClientsChangeTime != lastLoggedInClientsRetreived)
+                        {
+                            loggedInClients = loginService.GetLoggedInClients();
+                        }
+                        if (loggedInClients != null)
+                        {
+                            foreach (var loggedInClient in loggedInClients)
+                            {
+                                if (loggedInClient == null || !loggedInClient.IsConnected)
+                                {
+                                    continue;
+                                }
+                                var position = loggedInClient.Position;
+                                characterService.UpdatePosition(loggedInClient.CharacterId, position);
+                            }
+                        }
+                    }
+                    dirtyCounts = 0;
+                }
+                Thread.Sleep(100);
+            }
+        }
+
         void OnResourceStop()
         {
+            StopHeartbeat();
             Services?.Dispose();
             Services = null;
         }
@@ -46,8 +119,11 @@ namespace gtmp.evilempire.server
             Services = ServiceContainer.Create();
             Services.Register(Map);
 
+            RunHeartbeat();
+
             API.onClientEventTrigger += OnClientEventTrigger;
             API.onPlayerConnected += OnPlayerConnected;
+            API.onPlayerDisconnected += OnPlayerDisconnected;
         }
 
         void OnPlayerConnected(Client client)
@@ -59,6 +135,15 @@ namespace gtmp.evilempire.server
             clientService.RegisterTuple(managedClient, client);
 
             clientLifecycleService.OnClientConnect(managedClient);
+        }
+
+        void OnPlayerDisconnected(Client client, string reason)
+        {
+            var clientService = Services.Get<IClientService>();
+            var clientLifecycleService = Services.Get<IClientLifecycleService>();
+
+            var managedClient = clientService.FindByPlatformObject(client);
+            clientLifecycleService.OnClientDisconnect(managedClient);
         }
 
         void OnClientEventTrigger(Client sender, string eventName, params object[] arguments)

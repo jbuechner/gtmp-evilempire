@@ -58,6 +58,7 @@
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />
+    <Compile Include="entities\Vector3f.cs" />
     <Compile Include="IClient.cs" />
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />

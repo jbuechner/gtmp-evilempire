@@ -10,5 +10,7 @@ namespace gtmp.evilempire.entities
     {
         public int Id { get; set; }
         public string AssociatedLogin { get; set; }
+
+        public Vector3f? Position { get; set; }
     }
 }

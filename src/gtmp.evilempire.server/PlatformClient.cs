@@ -1,10 +1,6 @@
 ﻿using GrandTheftMultiplayer.Server.Elements;
-using GrandTheftMultiplayer.Shared.Math;
+using gtmp.evilempire.entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server
 {
@@ -66,15 +62,15 @@ namespace gtmp.evilempire.server
             }
         }
 
-        public object Position
+        public Vector3f Position
         {
             get
             {
-                return _client.position;
+                return _client.position.ToVector3f();
             }
             set
             {
-                _client.position = (Vector3)value;
+                _client.position = value.ToVector3();
             }
         }
 
@@ -82,7 +78,7 @@ namespace gtmp.evilempire.server
         {
             get
             {
-                return !_client.IsNull;
+                return !_client.IsNull && _client.exists;
             }
         }
 

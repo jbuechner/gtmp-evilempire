@@ -15,6 +15,19 @@ namespace gtmp.evilempire.db
             public string Name { get; set; }
 
             public EntityKey PrimaryKey { get; set; }
+
+            public EntityKey GetKey(string memberName)
+            {
+                if (PrimaryKey.Name == memberName)
+                {
+                    return PrimaryKey;
+                }
+                if (memberName == "Id")
+                {
+                    return new EntityKey { Name = "Id", IsUnique = true };
+                }
+                throw new NotImplementedException();
+            }
         }
 
         class EntityKey
@@ -29,6 +42,7 @@ namespace gtmp.evilempire.db
         LiteDatabase _db;
 
         Dictionary<string, KnownEntity> _known = new Dictionary<string, KnownEntity>();
+        Dictionary<Type, KnownEntity> _knownByType = new Dictionary<Type, KnownEntity>();
 
         internal DbEnvironment(Stream stream)
         {
@@ -52,10 +66,12 @@ namespace gtmp.evilempire.db
                 {
                     throw new ArgumentOutOfRangeException(nameof(name), "Only one entity for each unique name is allowed.");
                 }
+                var type = typeof(T);
                 Func<object, object> kvs = element => primaryKeySelector((T)element);
                 var primaryKey = new EntityKey { Name = primaryKeyNameExpression.MemberName(), ValueSelector = kvs, IsUnique = isPrimaryKeyUnique };
-                var entity = new KnownEntity { EntityType = typeof(T), Name = name, PrimaryKey = primaryKey };
+                var entity = new KnownEntity { EntityType = type, Name = name, PrimaryKey = primaryKey };
                 _known.Add(name, entity);
+                _knownByType.Add(type, entity);
 
                 var collection = _db.GetCollection(entity.Name);
                 collection.EnsureIndex(primaryKey.Name, primaryKey.IsUnique);
@@ -76,9 +92,34 @@ namespace gtmp.evilempire.db
             var knownEntity = GetKnownEntity<T>();
             CheckKnownEntity(knownEntity);
 
+            return Select<T, TKey>(knownEntity.PrimaryKey, key);
+        }
+
+        public T Select<T, TKey>(Expression<Func<T, TKey>> keySelector, TKey key)
+        {
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
+            var entityKey = knownEntity.GetKey(keySelector.MemberName());
+            return Select<T, TKey>(entityKey, key);
+        }
+
+        T Select<T, TKey>(EntityKey entityKey, TKey keyValue)
+        {
+            var knownEntity = GetKnownEntity<T>();
+            CheckKnownEntity(knownEntity);
+
             var collection = _db.GetCollection<T>(knownEntity.Name);
-            var element = collection.FindOne(Query.EQ(knownEntity.PrimaryKey.Name, new BsonValue(key)));
-            return element;
+            if (entityKey.Name == "Id")
+            {
+                var element = collection.FindById(new BsonValue(keyValue));
+                return element;
+            }
+            else
+            {
+                var element = collection.FindOne(Query.EQ(entityKey.Name, new BsonValue(keyValue)));
+                return element;
+            }
         }
 
         public IEnumerable<T> SelectMany<T, TKey>(TKey key)
@@ -182,15 +223,10 @@ namespace gtmp.evilempire.db
 
         KnownEntity GetKnownEntity(Type type)
         {
-            return _known.FirstOrDefault(p => p.Value.EntityType == type).Value;
-        }
-
-        KnownEntity GetKnownEntity(string name)
-        {
-            KnownEntity v;
-            if (_known.TryGetValue(name, out v))
+            KnownEntity knownEntity;
+            if (_knownByType.TryGetValue(type, out knownEntity))
             {
-                return v;
+                return knownEntity;
             }
             return null;
         }
