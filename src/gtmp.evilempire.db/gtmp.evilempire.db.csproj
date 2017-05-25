@@ -76,6 +76,7 @@
     <ProjectReference Include="..\gtmp.evilempire.shared\gtmp.evilempire.shared.csproj">
       <Project>{c568b8a5-b498-4e89-8047-598393d73edc}</Project>
       <Name>gtmp.evilempire.shared</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

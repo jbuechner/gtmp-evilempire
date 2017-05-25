@@ -21,8 +21,6 @@ namespace gtmp.evilempire.server
             }
         }
 
-        public string Login { get; set; }
-
         public bool IsNametagVisible
         {
             get
@@ -93,26 +91,6 @@ namespace gtmp.evilempire.server
             _client = client;
         }
 
-        public bool Equals(IClient other)
-        {
-            var otherClient = other as PlatformClient;
-            if (otherClient != null)
-            {
-                return Equals(otherClient);
-            }
-            return false;
-        }
-
-        public bool Equals(PlatformClient client)
-        {
-            var a = _client;
-            var b = client._client;
-            return string.Equals(a.socialClubName, b.socialClubName, StringComparison.Ordinal)
-                && string.Equals(a.address, b.address, StringComparison.Ordinal)
-                && !a.IsNull && !b.IsNull
-                && (a.exists && !b.exists || (!a.handle.IsNull && !b.handle.IsNull) && a.handle.Value == b.handle.Value);
-        }
-
         public void StopAnimation()
         {
             _client.stopAnimation();
@@ -132,5 +110,32 @@ namespace gtmp.evilempire.server
         {
             return _client.getData(key);
         }
+
+        #region Non GTMP
+        public string Login { get; set; }
+        public int CharacterId { get; set; }
+        #endregion
+
+        #region IEquatable
+        public bool Equals(IClient other)
+        {
+            var otherClient = other as PlatformClient;
+            if (otherClient != null)
+            {
+                return Equals(otherClient);
+            }
+            return false;
+        }
+
+        public bool Equals(PlatformClient client)
+        {
+            var a = _client;
+            var b = client._client;
+            return string.Equals(a.socialClubName, b.socialClubName, StringComparison.Ordinal)
+                && string.Equals(a.address, b.address, StringComparison.Ordinal)
+                && !a.IsNull && !b.IsNull
+                && (a.exists && !b.exists || (!a.handle.IsNull && !b.handle.IsNull) && a.handle.Value == b.handle.Value);
+        }
+        #endregion
     }
 }

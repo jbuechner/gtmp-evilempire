@@ -19,7 +19,6 @@ namespace gtmp.evilempire
 
         string Name { get; }
 
-        string Login { get; set; }
 
         void StopAnimation();
 
@@ -27,5 +26,9 @@ namespace gtmp.evilempire
 
         void SetData(string key, object value);
         object GetData(string key);
+
+        // Additional non GTMP properties /methods
+        string Login { get; set; }
+        int CharacterId { get; set; }
     }
 }

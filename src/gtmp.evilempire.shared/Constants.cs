@@ -7,6 +7,11 @@
         {
             public static readonly string DatabasePath = "db/data.db"; // todo: by config
             public static readonly string DatabaseTemplatePath = "dbt";
+
+            public static class Sequences
+            {
+                public static readonly string CharacterIdSequence = "characterId";
+            }
         }
 
         public static class DataSerialization

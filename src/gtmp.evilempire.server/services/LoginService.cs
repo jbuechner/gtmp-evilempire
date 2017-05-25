@@ -12,13 +12,15 @@ namespace gtmp.evilempire.server.services
     class LoginService : ILoginService
     {
         IDbService DbService { get; }
+        ICharacterService CharacterService { get; }
 
         ConcurrentDictionary<string, IClient> LoggedInClients { get; } = new ConcurrentDictionary<string, IClient>();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public LoginService(IDbService dbService)
+        public LoginService(IDbService dbService, ICharacterService characterService)
         {
             DbService = dbService;
+            CharacterService = characterService;
         }
 
         public IServiceResult<User> Login(string login, IClient client)
@@ -52,9 +54,13 @@ namespace gtmp.evilempire.server.services
             {
                 user.FirstLogin = DateTime.Now;
             }
+
+            client.Login = login;
+            var activeCharacter = CharacterService.GetActiveCharacter(client);
+
             user.NumberOfInvalidLoginAttempts = 0;
             user.LastSuccessfulLogin = DateTime.Now;
-            client.Login = login;
+            client.CharacterId = activeCharacter.Id;
             DbService.Update(user);
 
             return ServiceResult<User>.AsSuccess(user);

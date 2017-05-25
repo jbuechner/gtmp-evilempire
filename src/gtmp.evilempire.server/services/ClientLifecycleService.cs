@@ -32,7 +32,12 @@ namespace gtmp.evilempire.server.services
         public void OnClientLoggedIn(IClient client)
         {
             var startingPoint = Map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
-            Console.WriteLine(Invariant($"Position player {client.Name} at {startingPoint.Position}"));
+            using (ConsoleColor.Cyan.Foreground())
+            {
+                Console.WriteLine($"{client.Name} logged in using character id {client.CharacterId}");
+                Console.WriteLine(Invariant($"Position player {client.Name} at {startingPoint.Position}"));
+            }
+
             client.Dimension = 0;
             if (startingPoint != null)
             {

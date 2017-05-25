@@ -82,19 +82,21 @@
     <Compile Include="services\LoginService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">
+      <Link>CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\gtmp.evilempire.db\gtmp.evilempire.db.csproj">
       <Project>{ee61ae9b-af33-4741-b1d3-bd4a4bea38f9}</Project>
       <Name>gtmp.evilempire.db</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\gtmp.evilempire.shared\gtmp.evilempire.shared.csproj">
       <Project>{c568b8a5-b498-4e89-8047-598393d73edc}</Project>
       <Name>gtmp.evilempire.shared</Name>
+      <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">
-      <Link>CustomDictionary.xml</Link>
-    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

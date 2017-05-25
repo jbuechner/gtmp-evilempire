@@ -63,10 +63,12 @@
     <ProjectReference Include="..\gtmp.evilempire.db\gtmp.evilempire.db.csproj">
       <Project>{ee61ae9b-af33-4741-b1d3-bd4a4bea38f9}</Project>
       <Name>gtmp.evilempire.db</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\gtmp.evilempire.shared\gtmp.evilempire.shared.csproj">
       <Project>{c568b8a5-b498-4e89-8047-598393d73edc}</Project>
       <Name>gtmp.evilempire.shared</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

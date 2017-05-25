@@ -8,12 +8,12 @@ namespace gtmp.evilempire.server
 
         public DelegatedDisposable(Action action)
         {
-            this._action = action;
+            _action = action;
         }
 
         public void Dispose()
         {
-            this._action?.Invoke();
+            _action?.Invoke();
         }
     }
 }

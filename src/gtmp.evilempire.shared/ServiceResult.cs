@@ -19,9 +19,9 @@ namespace gtmp.evilempire
 
         public ServiceResult(ServiceResultState state, object data, Exception exception)
         {
-            this.State = state;
-            this.Data = data;
-            this.Exception = exception;
+            State = state;
+            Data = data;
+            Exception = exception;
         }
 
         public static IServiceResult AsSuccess()
@@ -31,7 +31,7 @@ namespace gtmp.evilempire
 
         public static IServiceResult AsError(Exception ex)
         {
-            return new ServiceResult { State = ServiceResultState.Error, Exception = ex };
+            return new ServiceResult(ServiceResultState.Error, "Internal Server Error", ex);
         }
 
         public static IServiceResult AsError(string errorMessage)

@@ -159,7 +159,7 @@ $gulp.task('extract-server', function() {
 });
 
 $gulp.task('cs', function() {
-    let msbuildConfig = Object.assign({ targets: ['Build'] }, project.msbuild);
+    let msbuildConfig = Object.assign({ targets: ['Rebuild'] }, project.msbuild);
     return $gulp.src(project.paths.src.csharp.sln)
         .pipe($gmsbuild(msbuildConfig));
 });
