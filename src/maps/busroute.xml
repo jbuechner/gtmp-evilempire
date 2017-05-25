@@ -1,21 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Objects>
+        <MapObject>
+            <Type>Vehicle</Type>
+            <TemplateName>Busroute1_Bus</TemplateName>
+            <Position>
+                <X>456.1364</X>
+                <Y>-1023.8819</Y>
+                <Z>28.0831451</Z>
+            </Position>
+            <Rotation>
+                <X>-2.06382442</X>
+                <Y>1.20620728</Y>
+                <Z>3.888613</Z>
+            </Rotation>
+            <Hash>-713569950</Hash>
+            <Dynamic>true</Dynamic>
+            <Quaternion>
+                <X>-0.0183549933</X>
+                <Y>0.009907198</Y>
+                <Z>0.0341101177</Z>
+                <W>0.9992004</W>
+            </Quaternion>
+            <SirensActive>false</SirensActive>
+            <PrimaryColor>111</PrimaryColor>
+            <SecondaryColor>0</SecondaryColor>
+        </MapObject>
+    </Objects>
     <Metadata>
         <Route>
-            <Name>Busroute 1</Name>
+            <Name>Busroute1</Name>
             <Iterations>Infinite</Iterations>
             <Points>
                 <Point Start="true">BusRoute1_1</Point>
-                <Point>BusRoute1_2</Point>
-                <Point>BusRoute1_3</Point>
-                <Point>BusRoute1_4</Point>
-                <Point>BusRoute1_5</Point>
-                <Point>BusRoute1_6</Point>
-                <Point>BusRoute1_7</Point>
-                <Point>BusRoute1_8</Point>
-                <Point>BusRoute1_9</Point>
-                <Point>BusRoute1_10</Point>
+                <Point Duration="1000">BusRoute1_1</Point>
+                <Point Duration="2000">BusRoute1_2</Point>
+                <Point Duration="3000">BusRoute1_3</Point>
+                <Point Duration="4000">BusRoute1_4</Point>
+                <Point Duration="5000">BusRoute1_5</Point>
+                <Point Duration="1000">BusRoute1_6</Point>
+                <Point Duration="2000">BusRoute1_7</Point>
+                <Point Duration="3000">BusRoute1_8</Point>
+                <Point Duration="4000">BusRoute1_9</Point>
+                <Point Duration="5000">BusRoute1_10</Point>
             </Points>
+            <Objects>
+                <Object Type="Vehicle" TemplateName="Busroute1_Bus"></Object>
+            </Objects>
         </Route>
     </Metadata>
 </Map>

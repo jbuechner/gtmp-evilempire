@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.db;
+using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.server.services;
 using gtmp.evilempire.services;
 using System;
@@ -42,6 +43,7 @@ namespace gtmp.evilempire.server
             services.Register<IClientLifecycleService, ClientLifecycleService>();
             services.Register<IAuthorizationService, AuthorizationService>();
             services.Register<ILoginService, LoginService>();
+            services.Register<MapObjectService, MapObjectService>();
             return services;
         }
 

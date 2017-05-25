@@ -4,6 +4,7 @@ namespace gtmp.evilempire.server.mapping
 {
     public class MapVehicle
     {
+        public string TemplateName { get; set; }
         public int Hash { get; }
         public Vector3f Position { get; }
         public Vector3f Rotation { get; }
@@ -11,8 +12,17 @@ namespace gtmp.evilempire.server.mapping
         public int Color1 { get; }
         public int Color2 { get; }
 
-        public MapVehicle(int hash, Vector3f position, Vector3f rotation, int color1, int color2)
+        public bool IsTemplate
         {
+            get
+            {
+                return !string.IsNullOrEmpty(TemplateName);
+            }
+        }
+
+        public MapVehicle(string templateName, int hash, Vector3f position, Vector3f rotation, int color1, int color2)
+        {
+            TemplateName = templateName;
             Hash = hash;
             Position = position;
             Rotation = rotation;

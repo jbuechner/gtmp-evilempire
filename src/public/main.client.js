@@ -319,7 +319,14 @@ let boot = (function(resource) {
             if (this.pushViewDataTickCount++ > 360) {
                 this.pushViewDataTickCount = 0;
                 let coordinates = this.client.coordinates;
-                this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what: 'coordinates', value: { x: coordinates.X, y: coordinates.Y, z: coordinates.Z }})));
+                let rotation = this.client.rotation;
+
+                let value = {
+                    coord: { x: coordinates.X, y: coordinates.Y, z: coordinates.Z },
+                    rot: { x: rotation.X, y: rotation.Y, z: rotation.Z }
+                };
+
+                this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what: 'coordinates', value: value })));
             }
         }
 	}

@@ -98,6 +98,10 @@ $gulp.task('build', function(cb) {
     $runseq('cs', 'copy', 'build-resources', 'dist', cb);
 });
 
+$gulp.task('build-cs', function(cb) {
+    $runseq('cs', 'copy-cs', cb);
+});
+
 $gulp.task('copy', function(cb) {
     $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings', 'copy-dbt', 'copy-maps'], cb);
 });

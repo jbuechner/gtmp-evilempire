@@ -10,7 +10,7 @@ namespace gtmp.evilempire.server.mapping
     {
         public IList<MapPoint> Points { get; } = new List<MapPoint>();
         public IList<MapMarker> Markers { get; } = new List<MapMarker>();
-        public IList<MapObject> Objects { get; } = new List<MapObject>();
+        public IList<MapProp> Props { get; } = new List<MapProp>();
         public IList<MapVehicle> Vehicles { get; } = new List<MapVehicle>();
 
         public IList<MapPed> Peds { get; } = new List<MapPed>();
@@ -19,6 +19,8 @@ namespace gtmp.evilempire.server.mapping
 
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
         Dictionary<string, MapPoint> NamedMapPointMap { get; } = new Dictionary<string, MapPoint>();
+
+        Dictionary<string, MapVehicle> TemplatedMapVehicles { get; } = new Dictionary<string, MapVehicle>();
 
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
@@ -30,6 +32,16 @@ namespace gtmp.evilempire.server.mapping
                 {
                     return mapPoint;
                 }
+            }
+            return null;
+        }
+
+        public MapVehicle FindVehicleByTemplateName(string templateName)
+        {
+            MapVehicle templateVehicle;
+            if (TemplatedMapVehicles.TryGetValue(templateName, out templateVehicle))
+            {
+                return templateVehicle;
             }
             return null;
         }
@@ -78,19 +90,32 @@ namespace gtmp.evilempire.server.mapping
             Markers.Add(mapMarker);
         }
 
-        public void AddObject(MapObject mapObject)
+        public void AddProp(MapProp mapProp)
         {
-            Objects.Add(mapObject);
+            if (!mapProp.IsTemplate)
+            {
+                Props.Add(mapProp);
+            }
         }
 
         public void AddPed(MapPed mapPed)
         {
-            Peds.Add(mapPed);
+            if (!mapPed.IsTemplate)
+            {
+                Peds.Add(mapPed);
+            }
         }
 
         public void AddVehicle(MapVehicle mapVehicle)
         {
-            Vehicles.Add(mapVehicle);
+            if (mapVehicle.IsTemplate)
+            {
+                TemplatedMapVehicles.Add(mapVehicle.TemplateName, mapVehicle);
+            }
+            else
+            {
+                Vehicles.Add(mapVehicle);
+            }
         }
     }
 }

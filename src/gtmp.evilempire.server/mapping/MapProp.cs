@@ -1,19 +1,13 @@
 ﻿using gtmp.evilempire.entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.mapping
 {
-    public class MapPed
+    public class MapProp
     {
         public string TemplateName { get; }
         public int Hash { get; }
         public Vector3f Position { get; }
-        public float Rotation { get; }
-        public bool IsInvincible { get; }
+        public Vector3f Rotation { get; }
 
         public bool IsTemplate
         {
@@ -23,13 +17,12 @@ namespace gtmp.evilempire.server.mapping
             }
         }
 
-        public MapPed(string templateName, int hash, Vector3f position, float rotation, bool isInvincible)
+        public MapProp(string templateName, int hash, Vector3f position, Vector3f rotation)
         {
             TemplateName = templateName;
             Hash = hash;
             Position = position;
             Rotation = rotation;
-            IsInvincible = isInvincible;
         }
     }
 }

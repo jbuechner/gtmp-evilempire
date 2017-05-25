@@ -121,6 +121,8 @@ namespace gtmp.evilempire.server
             Services = ServiceContainer.Create();
             Services.Register(Map);
 
+            StartMapRoutes();
+
             RegisterCommands();
 
             RunHeartbeat();
@@ -129,6 +131,12 @@ namespace gtmp.evilempire.server
             API.onClientEventTrigger += OnClientEventTrigger;
             API.onPlayerConnected += OnPlayerConnected;
             API.onPlayerDisconnected += OnPlayerDisconnected;
+        }
+
+        void StartMapRoutes()
+        {
+            var mapObjectService = Services.Get<MapObjectService>();
+            mapObjectService.StartAllRoutes();
         }
 
         void RegisterCommands()

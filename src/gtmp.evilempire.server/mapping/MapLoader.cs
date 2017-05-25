@@ -16,7 +16,7 @@ namespace gtmp.evilempire.server.mapping
 
         public MapLoader()
         {
-            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadObjects, LoadPeds, LoadVehicles, LoadRoutes };
+            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadProps, LoadPeds, LoadVehicles, LoadRoutes };
         }
 
         public static Map LoadFrom(string directory)
@@ -77,16 +77,17 @@ namespace gtmp.evilempire.server.mapping
             }
         }
 
-        void LoadObjects(Map map, XDocument xdoc)
+        void LoadProps(Map map, XDocument xdoc)
         {
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Prop"))
             {
+                var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
                 var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
 
-                var obj = new MapObject(hash, position, rotation);
-                map.AddObject(obj);
+                var obj = new MapProp(templateName, hash, position, rotation);
+                map.AddProp(obj);
             }
         }
 
@@ -94,12 +95,13 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach(var mapObject in SelectMapObjectsByType(xdoc, "Ped"))
             {
+                var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
                 var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
                 var isInvincible = mapObject.Element("Invicible")?.Value?.AsBool() ?? false;
 
-                var ped = new MapPed(hash, position, rotation.Z, isInvincible);
+                var ped = new MapPed(templateName, hash, position, rotation.Z, isInvincible);
                 map.AddPed(ped);
             }
         }
@@ -108,13 +110,14 @@ namespace gtmp.evilempire.server.mapping
         {
             foreach (var mapObject in SelectMapObjectsByType(xdoc, "Vehicle"))
             {
+                var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
                 var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
                 var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
                 var color1 = mapObject.Element("PrimaryColor")?.Value?.AsInt() ?? 0;
                 var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
-                var vehicle = new MapVehicle(hash, position, rotation, color1, color2);
+                var vehicle = new MapVehicle(templateName, hash, position, rotation, color1, color2);
                 map.AddVehicle(vehicle);
             }
         }
@@ -155,9 +158,10 @@ namespace gtmp.evilempire.server.mapping
                 var mapPointType = metapoint.ToMapPointType() ?? MapPointType.None;
                 var id = metapoint.Element("id")?.Value?.AsInt() ?? 0;
                 var position = metapoint.ToVector3f() ?? Vector3f.One;
+                var rotation = metapoint.Element("Rotation")?.ToVector3f();
                 var name = metapoint.Element("Name")?.Value?.AsString();
 
-                var mapPoint = new MapPoint(mapPointType, id, name, position);
+                var mapPoint = new MapPoint(mapPointType, id, name, position, rotation);
                 map.AddPoint(mapPoint);
             }
         }
@@ -198,7 +202,7 @@ namespace gtmp.evilempire.server.mapping
                 var name = route.Element("Name")?.Value;
                 var iterations = route.Element("Iterations").AsInt() ?? int.MaxValue;
 
-                var mapRoute = new MapRoute { Name = name, Iterations = iterations };
+                var mapRoute = new MapRoute(name, iterations);
 
                 var points = route.Element("Points")?.Elements("Point");
                 if (points != null)
@@ -207,9 +211,33 @@ namespace gtmp.evilempire.server.mapping
                     {
                         var pointName = point.Value;
                         var isStart = point.Attribute("Start")?.Value.AsBool() ?? false;
-                        var mapRoutePoint = new MapRoutePoint { Name = pointName, IsStart = isStart };
+                        var duration = point.Attribute("Duration")?.Value.AsInt() ?? 0;
+                        var mapRoutePoint = new MapRoutePoint(pointName, isStart, duration);
 
                         mapRoute.Points.Add(mapRoutePoint);
+                    }
+                }
+
+                var objects = route.Element("Objects")?.Elements("Object");
+                if (objects != null)
+                {
+                    foreach(var obj in objects)
+                    {
+                        var objectType = obj.Attribute("Type")?.Value.ToObjectType();
+                        var templateName = obj.Attribute("TemplateName")?.Value;
+
+                        if (objectType == null)
+                        {
+                            using (ConsoleColor.Yellow.Foreground())
+                            {
+                                Console.WriteLine($"Unknown object type \"{obj.Attribute("Type")?.Value}\" used as object template for route {route.Name}.");
+                            }
+                        }
+                        else
+                        {
+                            var mapTemplateReference = new MapTemplateReference(objectType.Value, templateName);
+                            mapRoute.Objects.Add(mapTemplateReference);
+                        }
                     }
                 }
 
@@ -231,6 +259,16 @@ namespace gtmp.evilempire.server.mapping
             if (Enum.TryParse(v, out markerType))
             {
                 return markerType;
+            }
+            return null;
+        }
+
+        internal static MapObjectType? ToObjectType(this string objectTypeValue)
+        {
+            MapObjectType mapObjectType;
+            if (Enum.TryParse(objectTypeValue, out mapObjectType))
+            {
+                return mapObjectType;
             }
             return null;
         }

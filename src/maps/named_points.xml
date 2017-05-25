@@ -13,18 +13,27 @@
             <X>-1005.35</X>
             <Y>-2739.01</Y>
             <Z>12.68</Z>
+            <Rotation>
+                <Y>-70</Y>
+            </Rotation>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_2</Name>
             <X>-993.74</X>
             <Y>-2743.2</Y>
             <Z>12.7</Z>
+            <Rotation>
+                <Y>-90</Y>
+            </Rotation>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_3</Name>
             <X>-978.92</X>
             <Y>-2746.1</Y>
             <Z>12.72</Z>
+            <Rotation>
+                <Y>40</Y>
+            </Rotation>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_4</Name>
@@ -55,6 +64,9 @@
             <X>-913.45</X>
             <Y>-2701.27</Y>
             <Z>12.82</Z>
+            <Rotation>
+                <Y>24.5</Y>
+            </Rotation>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_9</Name>

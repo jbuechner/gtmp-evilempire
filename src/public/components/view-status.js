@@ -12,9 +12,13 @@ Slim.tag('view-status', class extends Slim {
                         this.cash = ev.detail.value;
                         break;
                     case 'coordinates':
-                        this.coordinateX = ev.detail.value.x;
-                        this.coordinateY = ev.detail.value.y;
-                        this.coordinateZ = ev.detail.value.z;
+                        let v = ev.detail.value;
+                        this.coordinateX = v.coord.x;
+                        this.coordinateY = v.coord.y;
+                        this.coordinateZ = v.coord.z;
+                        this.rotationX = v.rot.x;
+                        this.rotationY = v.rot.y;
+                        this.rotationZ = v.rot.z;
                         break;
                 }
             }
@@ -25,6 +29,7 @@ Slim.tag('view-status', class extends Slim {
         this.cash = 'n/a';
         this.displayCoordinates = false;
         this.coordinateX = this.coordinateY = this.coordinateZ = 0;
+        this.rotationX = this.rotationY = this.rotationZ = 0;
     }
 
     asCurrency(v) {
@@ -38,7 +43,7 @@ Slim.tag('view-status', class extends Slim {
         if (typeof v === 'string') {
             return v;
         }
-        let s = v.toLocaleString('en-US', { minimumFractionDigits: 3, minimumIntegerDigits: 5, useGrouping: false });
+        let s = v.toLocaleString('en-US', { minimumFractionDigits: 3, minimumIntegerDigits: 4, useGrouping: false });
         if (v >= 0) {
             return '+' + s;
         }
@@ -53,12 +58,22 @@ Slim.tag('view-status', class extends Slim {
     }
 
     get template() {
-        return `<div class="bg-teal lighten-1 fg-white" style="position: absolute; bottom: 0; left: 0; right: 0; height: 32px; font-size: 16px; padding: 6px;">
-    <span bind>[[asCurrency(cash)]]</span>
-    <span slim-if="displayCoordinates" class="is-pulled-right monospace">
-        <span>X</span><span bind>[[formatCoordinate(coordinateX)]]</span>
-        <span>Y</span><span bind>[[formatCoordinate(coordinateY)]]</span>
-        <span>Z</span><span bind>[[formatCoordinate(coordinateZ)]]</span>
-</span></div>`;
+        return `
+<div class="ui-big with-shadow" style="position: absolute; left: 12px; bottom: 0;">
+<span bind>[[asCurrency(cash)]]</span>
+</div>
+<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 0;">
+ <span>C</span>
+ <span>X</span><span bind>[[formatCoordinate(coordinateX)]]</span>
+ <span>Y</span><span bind>[[formatCoordinate(coordinateY)]]</span>
+ <span>Z</span><span bind>[[formatCoordinate(coordinateZ)]]</span>
+</div>
+<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 22px;">
+ <span>R</span>
+ <span>X</span><span bind>[[formatCoordinate(rotationX)]]</span>
+ <span>Y</span><span bind>[[formatCoordinate(rotationZ)]]</span>
+ <span>Z</span><span bind>[[formatCoordinate(rotationY)]]</span>
+</div>
+`;
     }
 });

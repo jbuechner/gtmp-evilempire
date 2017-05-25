@@ -9,12 +9,15 @@ namespace gtmp.evilempire.server.mapping
         public MapPointType PointType { get; }
         public Vector3f Position { get; }
 
-        public MapPoint(MapPointType type, int id, string name, Vector3f position)
+        public Vector3f? Rotation { get; set; }
+
+        public MapPoint(MapPointType type, int id, string name, Vector3f position, Vector3f? rotation)
         {
             PointType = type;
             Id = id;
             Name = name;
             Position = position;
+            Rotation = rotation;
         }
     }
 }

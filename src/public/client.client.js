@@ -48,6 +48,12 @@ function define(module) {
             return c;
         }
 
+        get rotation() {
+            let player = API.getLocalPlayer()
+            let r = API.returnNative('0xAFBD61CC738D9EB9', 5, player, 0);
+            return r;
+        }
+
         set isRadarVisible(v) {
             API.callNative('0xA0EBB943C300E693', v);
         }
