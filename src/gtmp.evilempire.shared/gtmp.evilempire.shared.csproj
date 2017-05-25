@@ -50,6 +50,9 @@
     <Compile Include="..\shared\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="AuthExtensions.cs" />
+    <Compile Include="CommandInfo.cs" />
     <Compile Include="ConsoleExtensions.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ConversionExtensions.cs" />
@@ -61,12 +64,14 @@
     <Compile Include="entities\User.cs" />
     <Compile Include="entities\Vector3f.cs" />
     <Compile Include="IClient.cs" />
+    <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
     <Compile Include="services\ICharacterService.cs" />
     <Compile Include="services\IClientLifecycleService.cs" />
     <Compile Include="services\IClientService.cs" />
+    <Compile Include="services\ICommandService.cs" />
     <Compile Include="services\IDbService.cs" />
     <Compile Include="services\IJsonSerializer.cs" />
     <Compile Include="services\ILoginService.cs" />

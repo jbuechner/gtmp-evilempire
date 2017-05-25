@@ -18,12 +18,24 @@ function define(module) {
             API.setActiveCamera(camera);
         }
 
+        set canOpenChat(v) {
+            API.SetCanOpenChat(true);
+        }
+
         get isHudVisible() {
             return API.getHudVisible();
         }
 
         set isHudVisible(v) {
             API.setHudVisible(v);
+        }
+
+        get isRadarVisible() {
+            return !API.callNative('0x157F93B036700462');
+        }
+
+        set isRadarVisible(v) {
+            API.callNative('0xA0EBB943C300E693', v);
         }
 
         get cursorToggle() {

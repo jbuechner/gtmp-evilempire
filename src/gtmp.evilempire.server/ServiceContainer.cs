@@ -36,6 +36,7 @@ namespace gtmp.evilempire.server
             var services = new ServiceContainer();
             services.Register<IJsonSerializer>(new JsonSerializer());
             services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
+            services.Register<ICommandService, CommandService>();
             services.Register<IClientService, ClientService>();
             services.Register<ICharacterService, CharacterService>();
             services.Register<IClientLifecycleService, ClientLifecycleService>();
@@ -52,3 +53,4 @@ namespace gtmp.evilempire.server
         }
     }
 }
+

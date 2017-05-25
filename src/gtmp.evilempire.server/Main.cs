@@ -7,6 +7,7 @@ using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
 using Newtonsoft.Json;
 using System.Threading;
+using gtmp.evilempire.server.commands;
 
 namespace gtmp.evilempire.server
 {
@@ -35,7 +36,7 @@ namespace gtmp.evilempire.server
                 System.Diagnostics.Debugger.Launch();
             }
 #endif
-
+            API.onChatCommand += OnChatCommand;
             API.onResourceStart += OnResourceStart;
             API.onResourceStop += OnResourceStop;
         }
@@ -120,11 +121,27 @@ namespace gtmp.evilempire.server
             Services = ServiceContainer.Create();
             Services.Register(Map);
 
+            RegisterCommands();
+
             RunHeartbeat();
 
+            API.setCommandErrorMessage(string.Empty);
             API.onClientEventTrigger += OnClientEventTrigger;
             API.onPlayerConnected += OnPlayerConnected;
             API.onPlayerDisconnected += OnPlayerDisconnected;
+        }
+
+        void RegisterCommands()
+        {
+            var commandService = Services.Get<ICommandService>();
+            var commandTypes = typeof(Main).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(Command)));
+
+            foreach(var commandType in commandTypes)
+            {
+                var command = Activator.CreateInstance(commandType, new[] { Services }) as Command;
+                var commandInfo = command?.Info;
+                commandService.RegisterCommand(commandInfo);
+            }
         }
 
         void OnPlayerConnected(Client client)
@@ -136,6 +153,19 @@ namespace gtmp.evilempire.server
             clientService.RegisterTuple(managedClient, client);
 
             clientLifecycleService.OnClientConnect(managedClient);
+        }
+
+        void OnChatCommand(Client client, string command, CancelEventArgs e)
+        {
+            var clientService = Services.Get<IClientService>();
+            var managedClient = clientService.FindByPlatformObject(client);
+            var commandService = Services.Get<ICommandService>();
+            var result = commandService.ExecuteCommand(managedClient, command);
+            if (result.State == ServiceResultState.Error)
+            {
+                e.Reason = result.Data?.AsString();
+                e.Cancel = true;
+            }
         }
 
         void OnPlayerDisconnected(Client client, string reason)

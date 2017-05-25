@@ -59,9 +59,15 @@ namespace gtmp.evilempire.server.services
             }
         }
 
-        public IServiceResult<User> Login(string login, IClient client)
+        public User FindUserByLogin(string login)
         {
             var user = DbService.Select<User, string>(login);
+            return user;
+        }
+
+        public IServiceResult<User> Login(string login, IClient client)
+        {
+            var user = FindUserByLogin(login);
             if (user == null)
             {
                 return ServiceResult<User>.AsError("Failed login");

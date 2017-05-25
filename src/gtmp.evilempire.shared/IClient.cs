@@ -28,6 +28,8 @@ namespace gtmp.evilempire
         void SetData(string key, object value);
         object GetData(string key);
 
+        void SendChatMessage(string message);
+
         // Additional non GTMP properties /methods
         string Login { get; set; }
         int CharacterId { get; set; }

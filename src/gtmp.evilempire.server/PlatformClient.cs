@@ -119,6 +119,11 @@ namespace gtmp.evilempire.server
             return _client.getData(key);
         }
 
+        public void SendChatMessage(string message)
+        {
+            _client.sendChatMessage(message);
+        }
+
         #region Non GTMP
         public string Login { get; set; }
         public int CharacterId { get; set; }
