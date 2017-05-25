@@ -94,6 +94,7 @@ namespace gtmp.evilempire.server.services
             }
 
             client.Login = login;
+            client.UserGroup = user.UserGroup;
             var activeCharacter = CharacterService.GetActiveCharacter(client);
 
             user.NumberOfInvalidLoginAttempts = 0;

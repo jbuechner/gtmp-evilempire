@@ -14,5 +14,7 @@ namespace gtmp.evilempire.entities
         public DateTime? FirstLogin { get; set; }
         public DateTime? LastSuccessfulLogin { get; set; }
         public int NumberOfInvalidLoginAttempts { get; set; }
+
+        public AuthUserGroup UserGroup { get; set; }
     }
 }

@@ -1,11 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <elements type="gtmp.evilempire.entities.User, gtmp.evilempire.shared" customProcessor="gtmp.evilempire.entities.processors.UserPasswordHashProcessor, gtmp.evilempire.shared">
     <User>
+        <Login>guest</Login>
+        <Password>::fe4873ee8e66fc12ff940d6a21e1ff73962874c56bbed7f41c95247a086ebb362797e60cd413e6f5ceada814d30a96349038686e365a09ecc030d9ad188286c3</Password>
+    </User>
+    <User>
         <Login>user</Login>
         <Password>::fe4873ee8e66fc12ff940d6a21e1ff73962874c56bbed7f41c95247a086ebb362797e60cd413e6f5ceada814d30a96349038686e365a09ecc030d9ad188286c3</Password>
+        <UserGroup>Player</UserGroup>
     </User>
     <User>
         <Login>admin</Login>
         <Password>::3fed5fe0a6b8bf9e8cf91e59647c9b2e8ff8394835f4d8f6a3db2b0a5c8875c0c5936e5b255b9158f03fe3561cd0585b13cfd617b9f23e8c9f464ec128b05bb3</Password>
+        <UserGroup>Admin</UserGroup>
     </User>
 </elements>

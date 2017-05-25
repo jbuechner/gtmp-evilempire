@@ -31,5 +31,6 @@ namespace gtmp.evilempire
         // Additional non GTMP properties /methods
         string Login { get; set; }
         int CharacterId { get; set; }
+        AuthUserGroup UserGroup { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 .git
 .idea
 .vs
+npm-debug.log
 node_modules
 packages
 testresults

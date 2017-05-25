@@ -44,7 +44,7 @@ namespace gtmp.evilempire.server.services
         {
             using (ConsoleColor.Cyan.Foreground())
             {
-                Console.WriteLine($"{client.Name} logged in using character id {client.CharacterId}");
+                Console.WriteLine($"{client.Name} logged in using character id {client.CharacterId} [{client.UserGroup}].");
             }
 
             client.Dimension = 0;

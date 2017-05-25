@@ -35,5 +35,15 @@ namespace gtmp.evilempire.server.services
             }
             return ServiceResult.AsError("Authentication failed.");
         }
+
+        public AuthUserGroup GetUserGroup(string login)
+        {
+            var user = DbService.Select<User, string>(login);
+            if (user == null)
+            {
+                return AuthUserGroup.Guest;
+            }
+            return user.UserGroup;
+        }
     }
 }
