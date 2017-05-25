@@ -36,10 +36,7 @@ namespace gtmp.evilempire.server.services
             if (LoginService.IsLoggedIn(client))
             {
                 LoginService.Logout(client);
-
-                var character = CharacterService.GetActiveCharacter(client);
-                character.Position = client.Position;
-                DbService.Update<Character>(character);
+                CharacterService.UpdatePosition(client.CharacterId, client.Position, client.Rotation);
             }
         }
 
@@ -85,6 +82,11 @@ namespace gtmp.evilempire.server.services
                 {
                     client.Position = startingPoint.Position;
                 }
+            }
+
+            if (character.Rotation.HasValue)
+            {
+                client.Rotation = character.Rotation.Value;
             }
         }
     }

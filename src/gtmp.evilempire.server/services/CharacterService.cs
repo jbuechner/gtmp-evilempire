@@ -37,10 +37,17 @@ namespace gtmp.evilempire.server.services
             return character;
         }
 
-        public void UpdatePosition(int characterId, Vector3f position)
+        public void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation)
         {
             var character = DbService.Select<Character, int>(ks => ks.Id, characterId);
-            character.Position = position;
+            if (position.HasValue)
+            {
+                character.Position = position;
+            }
+            if (rotation.HasValue)
+            {
+                character.Rotation = rotation;
+            }
             DbService.Update<Character>(character);
         }
     }

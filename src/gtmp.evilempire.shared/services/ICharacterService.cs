@@ -5,6 +5,6 @@ namespace gtmp.evilempire.services
     public interface ICharacterService
     {
         Character GetActiveCharacter(IClient client);
-        void UpdatePosition(int characterId, Vector3f position);
+        void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
     }
 }

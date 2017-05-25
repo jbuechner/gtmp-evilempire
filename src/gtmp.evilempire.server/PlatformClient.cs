@@ -74,6 +74,18 @@ namespace gtmp.evilempire.server
             }
         }
 
+        public Vector3f Rotation
+        {
+            get
+            {
+                return _client.rotation.ToVector3f();
+            }
+            set
+            {
+                _client.rotation = value.ToVector3();
+            }
+        }
+
         public bool IsConnected
         {
             get

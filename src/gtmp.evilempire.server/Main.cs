@@ -94,7 +94,8 @@ namespace gtmp.evilempire.server
                                     continue;
                                 }
                                 var position = loggedInClient.Position;
-                                characterService.UpdatePosition(loggedInClient.CharacterId, position);
+                                var rotation = loggedInClient.Rotation;
+                                characterService.UpdatePosition(loggedInClient.CharacterId, position, rotation);
                             }
                         }
                     }

@@ -15,6 +15,7 @@ namespace gtmp.evilempire
         int Dimension { get; set; }
         bool CanMove { get; set; }
         Vector3f Position { get; set; }
+        Vector3f Rotation { get; set; }
         bool IsConnected { get; }
 
         string Name { get; }
