@@ -1,6 +1,8 @@
 'use strict';
 const debug = false;
 function define(module)  {
+    const $client = module.require('client');
+
     const ClientLifecycleState = {
         None: 0,
         Connected: 1,
@@ -59,7 +61,8 @@ function define(module)  {
             app.client.cursor = false;
             app.client.resetCamera();
             app.browser.removeView('view-login');
-            app.browser.addView('view-status');
+            // serialize again because we are crossing the V8 again and objects arent marshalled by gtmp
+            app.browser.addView('view-status', JSON.stringify({ displayCoordinates: app.client.hasRequiredUserGroup($client.UserGroups.GameMaster) }) );
         }
     }
 

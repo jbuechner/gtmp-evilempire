@@ -17,7 +17,7 @@ namespace gtmp.evilempire.server.commands
         {
             LoginService = services.Get<ILoginService>();
 
-            Info = new CommandInfo { Name = "get-usergroup", Description = "Returns the user group for a player. If no name is specified the user group of your login is returned.", Usage = "/get-usergroup [ <player> ]", IsAuthorized = p => p.UserGroup.IsAuthGroupOrHigher(AuthUserGroup.Gamemaster), Execute = Execute };
+            Info = new CommandInfo { Name = "get-usergroup", Description = "Returns the user group for a player. If no name is specified the user group of your login is returned.", Usage = "/get-usergroup [ <player> ]", IsAuthorized = p => p.UserGroup.IsAuthGroupOrHigher(AuthUserGroup.GameMaster), Execute = Execute };
         }
 
         public bool Execute(IClient client, ParsedCommand parsedCommand)

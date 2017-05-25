@@ -11,6 +11,11 @@ Slim.tag('view-status', class extends Slim {
                     case 'cash':
                         this.cash = ev.detail.value;
                         break;
+                    case 'coordinates':
+                        this.coordinateX = ev.detail.value.x;
+                        this.coordinateY = ev.detail.value.y;
+                        this.coordinateZ = ev.detail.value.z;
+                        break;
                 }
             }
         });
@@ -18,6 +23,8 @@ Slim.tag('view-status', class extends Slim {
 
     onCreated() {
         this.cash = 'n/a';
+        this.displayCoordinates = false;
+        this.coordinateX = this.coordinateY = this.coordinateZ = 0;
     }
 
     asCurrency(v) {
@@ -27,9 +34,31 @@ Slim.tag('view-status', class extends Slim {
         return this.app.formatters.currency.format(v);
     }
 
+    formatCoordinate(v) {
+        if (typeof v === 'string') {
+            return v;
+        }
+        let s = v.toLocaleString('en-US', { minimumFractionDigits: 3, minimumIntegerDigits: 5, useGrouping: false });
+        if (v >= 0) {
+            return '+' + s;
+        }
+        return s;
+    }
+
+    toBool(v) {
+        if (typeof v === 'boolean') {
+            return v;
+        }
+        return v === 'true';
+    }
+
     get template() {
-        return `<div class="bg-teal lighten-1 fg-white" style="position: absolute; bottom: 0; left: 0; right: 0; height: 21px; font-size: 12px; padding: 3px;">
+        return `<div class="bg-teal lighten-1 fg-white" style="position: absolute; bottom: 0; left: 0; right: 0; height: 32px; font-size: 16px; padding: 6px;">
     <span bind>[[asCurrency(cash)]]</span>
-</div>`;
+    <span slim-if="displayCoordinates" class="is-pulled-right monospace">
+        <span>X</span><span bind>[[formatCoordinate(coordinateX)]]</span>
+        <span>Y</span><span bind>[[formatCoordinate(coordinateY)]]</span>
+        <span>Z</span><span bind>[[formatCoordinate(coordinateZ)]]</span>
+</span></div>`;
     }
 });

@@ -1,4 +1,6 @@
 'use strict';
+window.debug = false;
+
 const ClientLifecycleState = {
     None: 0,
     Connected: 1,
@@ -39,7 +41,9 @@ class App {
 }
 
 function relay(raw) {
-    console.log(arguments);
+    if (debug) {
+        console.log(arguments);
+    }
     if (window.app) {
         let args = {};
         if (typeof raw === 'string') {
@@ -53,8 +57,15 @@ function addView(args) {
     if (typeof args !== 'object') {
         args = JSON.parse(args);
     }
-    console.log('addView', args);
+    if (debug) {
+        console.log('addView', args);
+    }
     let el = document.createElement(args.selector);
+    if (args.options) {
+        Object.getOwnPropertyNames(args.options).forEach(propName => {
+            el[propName] = args.options[propName];
+        });
+    }
     document.body.appendChild(el);
 }
 

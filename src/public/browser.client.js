@@ -45,8 +45,15 @@ function define(module) {
             API.setCefBrowserHeadless(this._instance, true);
         }
 
-        addView(viewName) {
-            this._instance.call('addView', JSON.stringify({ selector: viewName }));
+        addView(viewName, options) {
+            if (typeof options === 'string') {
+                options = JSON.parse(options);
+            }
+            let args = JSON.stringify({ selector: viewName, options });
+            if (debug) {
+                API.sendNotification('addView=' + args);
+            }
+            this._instance.call('addView', args);
         }
 
         removeView(viewName) {

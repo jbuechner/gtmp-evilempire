@@ -38,7 +38,7 @@ class ModuleLoader {
     }
 
     _requireFromFile(res) {
-        let module = { exports: {}, require: this.require, debugOut: debugOut };
+        let module = { exports: {}, require: (moduleName) => this.require(moduleName), debugOut: debugOut };
         res.define(module);
         return module;
     }
@@ -50,6 +50,13 @@ const debugOut = function(ex) {
         msg += ex.stack;
     }
     API.sendNotification(msg);
+};
+
+const debugPrintObject = function(v) {
+    Object.getOwnPropertyNames(v).forEach(prop => {
+        let propV = v[prop];
+        API.sendNotification('' + prop + '[' + (typeof propV) + ']=' + propV);
+    });
 };
 
 const debugPrint = function(text, args) {
@@ -114,8 +121,8 @@ API.onResourceStart.connect(function onConnect() {
 
 let boot = (function(resource) {
     const $sha = require('sha512');
-    const $lifecycle = require('lifecycle');
     const $client = require('client');
+    const $lifecycle = require('lifecycle');
     const $browser = require('browser');
     const $controls = require('controls');
 
@@ -236,6 +243,8 @@ let boot = (function(resource) {
 			this.proxy.knownRoots.set('app', new AppProxy(this));
 			this.proxy.addServerEventHandler('update', bind(this, this.onServerUpdate));
 			this.proxy.addServerEventHandler('res:login', bind(this, this.onLoginResponse));
+
+			this.pushViewDataTickCount = 0;
 		}
 
 		get proxy() {
@@ -293,13 +302,25 @@ let boot = (function(resource) {
         onLoginResponse(status, response) {
 		    debugPrint('onLoginResponse', arguments);
             if (status === ServiceResultState.Success) {
+                this.client.user = { login: response.login, userGroup: response.userGroup };
                 this.lifecycle.transit($lifecycle.ClientLifecycleState.LoggedIn, this);
+
+                API.onUpdate.connect(() => app.pushViewData());
             }
             this.browser._instance.call('relay', JSON.stringify({ event: 'res:login', status: status, data: response }));
         }
 
         onServerUpdate(what, v) {
 		    this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what, value: v })));
+        }
+
+
+        pushViewData() {
+            if (this.pushViewDataTickCount++ > 360) {
+                this.pushViewDataTickCount = 0;
+                let coordinates = this.client.coordinates;
+                this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what: 'coordinates', value: { x: coordinates.X, y: coordinates.Y, z: coordinates.Z }})));
+            }
         }
 	}
 	let app = new App();

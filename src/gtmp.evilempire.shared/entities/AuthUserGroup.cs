@@ -4,7 +4,7 @@
     {
         Guest = 0,
         Player = 1,
-        Gamemaster = 100,
+        GameMaster = 100,
         Admin = 200
     }
 }

@@ -1,9 +1,17 @@
 'use strict';
 function define(module) {
+    const UserGroups = {
+        Guest: 0,
+        Player: 1,
+        GameMaster: 100,
+        Admin: 200
+    };
+
     class Client {
         constructor() {
             this._cursor = false;
             this._cursorToggle = false;
+            this.user = { login: null, userGroup: UserGroups.Guest };
         }
 
         // {or v3, v3}
@@ -31,7 +39,13 @@ function define(module) {
         }
 
         get isRadarVisible() {
-            return !API.callNative('0x157F93B036700462');
+            return !API.returnNative('0x157F93B036700462', 8);
+        }
+
+        get coordinates() {
+            let player = API.getLocalPlayer()
+            let c = API.returnNative('0x3FEF770D40960D5A', 5, player, false);
+            return c;
         }
 
         set isRadarVisible(v) {
@@ -60,6 +74,10 @@ function define(module) {
             }
         }
 
+        hasRequiredUserGroup(userGroup) {
+            return this.user && this.user.userGroup && this.user.userGroup >= userGroup;
+        }
+
         resetCamera() {
             API.setActiveCamera(null);
         }
@@ -70,6 +88,7 @@ function define(module) {
     }
 
     module.exports = {
-        Client
+        Client,
+        UserGroups
     };
 }

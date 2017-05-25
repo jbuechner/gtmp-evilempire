@@ -108,7 +108,9 @@ namespace gtmp.evilempire.server.services
             client.CharacterId = activeCharacter.Id;
             DbService.Update(user);
 
-            return ServiceResult<User>.AsSuccess(user);
+            // create a copy of the user because the result is serialized and send back to the client
+            var transferUser = new User { Login = user.Login, UserGroup = user.UserGroup };
+            return ServiceResult<User>.AsSuccess(transferUser);
         }
 
         public void Logout(IClient client)
