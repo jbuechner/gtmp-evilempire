@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using gtmp.evilempire.entities;
+using System.Globalization;
 
 namespace gtmp.evilempire
 {
@@ -93,6 +94,23 @@ namespace gtmp.evilempire
                 {
                     return v;
                 }
+            }
+            return null;
+        }
+
+        public static Vector3f? AsVector3f(this string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            var parts = value.Split(',');
+            if (parts != null && parts.Length == 3)
+            {
+                var x = parts[0].AsFloat() ?? 0;
+                var y = parts[1].AsFloat() ?? 0;
+                var z = parts[2].AsFloat() ?? 0;
+                return new Vector3f(x, y, z);
             }
             return null;
         }

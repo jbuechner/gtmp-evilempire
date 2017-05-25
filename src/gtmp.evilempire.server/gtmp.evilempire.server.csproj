@@ -64,6 +64,7 @@
     <Compile Include="commands\Command.cs" />
     <Compile Include="commands\GetUserGroupCommand.cs" />
     <Compile Include="commands\HelpCommand.cs" />
+    <Compile Include="commands\TeleportCommand.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="mapping\Map.cs" />

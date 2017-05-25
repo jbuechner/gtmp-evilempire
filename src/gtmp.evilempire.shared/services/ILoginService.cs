@@ -12,6 +12,8 @@ namespace gtmp.evilempire.services
     {
         User FindUserByLogin(string login);
 
+        IClient FindLoggedInClientByLogin(string login);
+
         DateTime LastLoggedInClientsChangeTime { get; }
         void Purge();
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "login")]

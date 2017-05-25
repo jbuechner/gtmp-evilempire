@@ -65,6 +65,16 @@ namespace gtmp.evilempire.server.services
             return user;
         }
 
+        public IClient FindLoggedInClientByLogin(string login)
+        {
+            IClient loggedInClient;
+            if (LoggedInClients.TryGetValue(login, out loggedInClient))
+            {
+                return loggedInClient;
+            }
+            return null;
+        }
+
         public IServiceResult<User> Login(string login, IClient client)
         {
             var user = FindUserByLogin(login);

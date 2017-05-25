@@ -1,66 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Metadata>
-        <Name>Benannte Punkte Busroute</Name>
+        <Name>Benannte Punkte</Name>
+        <NamedPoint>
+            <Name>Spawn</Name>
+            <X>-1039.73</X>
+            <Y>-2740.55</Y>
+            <Z>13.88</Z>
+        </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_1</Name>
-            <X>-1005,35</X>
-            <Y>-2739,01</Y>
-            <Z>12,68</Z>
+            <X>-1005.35</X>
+            <Y>-2739.01</Y>
+            <Z>12.68</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_2</Name>
-            <X>-993,74</X>
-            <Y>-2743,2</Y>
-            <Z>12,7</Z>
+            <X>-993.74</X>
+            <Y>-2743.2</Y>
+            <Z>12.7</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_3</Name>
-            <X>-978,92</X>
-            <Y>-2746,1</Y>
-            <Z>12,72</Z>
+            <X>-978.92</X>
+            <Y>-2746.1</Y>
+            <Z>12.72</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_4</Name>
-            <X>-959,79</X>
-            <Y>-2745,65</Y>
-            <Z>12,73</Z>
+            <X>-959.79</X>
+            <Y>-2745.65</Y>
+            <Z>12.73</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_5</Name>
-            <X>-947,3</X>
-            <Y>-2744,86</Y>
-            <Z>12,63</Z>
+            <X>-947.3</X>
+            <Y>-2744.86</Y>
+            <Z>12.63</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_6</Name>
-            <X>-937,93</X>
-            <Y>-2735,06</Y>
-            <Z>12,8</Z>
+            <X>-937.93</X>
+            <Y>-2735.06</Y>
+            <Z>12.8</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_7</Name>
-            <X>-929,43</X>
-            <Y>-2723,86</Y>
-            <Z>12,82</Z>
+            <X>-929.43</X>
+            <Y>-2723.86</Y>
+            <Z>12.82</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_8</Name>
-            <X>-913,45</X>
-            <Y>-2701,27</Y>
-            <Z>12,82</Z>
+            <X>-913.45</X>
+            <Y>-2701.27</Y>
+            <Z>12.82</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_9</Name>
-            <X>-872,19</X>
-            <Y>-2629,11</Y>
-            <Z>12,82</Z>
+            <X>-872.19</X>
+            <Y>-2629.11</Y>
+            <Z>12.82</Z>
         </NamedPoint>
         <NamedPoint>
             <Name>BusRoute1_10</Name>
-            <X>-838,69</X>
-            <Y>-2571,66</Y>
-            <Z>12,82</Z>
+            <X>-838.69</X>
+            <Y>-2571.66</Y>
+            <Z>12.82</Z>
         </NamedPoint>
     </Metadata>
 </Map>
