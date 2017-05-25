@@ -16,7 +16,7 @@ namespace gtmp.evilempire.server.mapping
 
         public MapLoader()
         {
-            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadObjects, LoadPeds, LoadVehicles };
+            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadObjects, LoadPeds, LoadVehicles, LoadRoutes };
         }
 
         public static Map LoadFrom(string directory)
@@ -33,6 +33,7 @@ namespace gtmp.evilempire.server.mapping
             {
                 mapLoader.Load(file, map);
             }
+            MapLoader.ResolveRoutePoints(map);
             return map;
         }
 
@@ -53,6 +54,25 @@ namespace gtmp.evilempire.server.mapping
                 foreach (var handler in Handlers)
                 {
                     handler(map, xdoc);
+                }
+            }
+        }
+
+        public static void ResolveRoutePoints(Map map)
+        {
+            foreach(var route in map.Routes)
+            {
+                foreach(var routePoint in route.Points)
+                {
+                    var namedPoint = map.GetPointByName(routePoint.Name);
+                    if (namedPoint == null)
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine($"Unknown named points \"{routePoint.Name}\" used inside route \"{route.Name}\".");
+                        }
+                    }
+                    routePoint.MapPoint = namedPoint;
                 }
             }
         }
@@ -163,6 +183,37 @@ namespace gtmp.evilempire.server.mapping
 
                 var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, b, g);
                 map.AddMarker(mapMarker);
+            }
+        }
+
+        void LoadRoutes(Map map, XDocument xdoc)
+        {
+            var routes = xdoc.Root?.Element("Metadata")?.Elements("Route");
+            if (routes == null)
+            {
+                return;
+            }
+            foreach(var route in routes)
+            {
+                var name = route.Element("Name")?.Value;
+                var iterations = route.Element("Iterations").AsInt() ?? int.MaxValue;
+
+                var mapRoute = new MapRoute { Name = name, Iterations = iterations };
+
+                var points = route.Element("Points")?.Elements("Point");
+                if (points != null)
+                {
+                    foreach(var point in points)
+                    {
+                        var pointName = point.Value;
+                        var isStart = point.Attribute("Start")?.Value.AsBool() ?? false;
+                        var mapRoutePoint = new MapRoutePoint { Name = pointName, IsStart = isStart };
+
+                        mapRoute.Points.Add(mapRoutePoint);
+                    }
+                }
+
+                map.AddRoute(mapRoute);
             }
         }
     }

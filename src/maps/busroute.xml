@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Metadata>
+        <Route>
+            <Name>Busroute 1</Name>
+            <Iterations>Infinite</Iterations>
+            <Points>
+                <Point Start="true">BusRoute1_1</Point>
+                <Point>BusRoute1_2</Point>
+                <Point>BusRoute1_3</Point>
+                <Point>BusRoute1_4</Point>
+                <Point>BusRoute1_5</Point>
+                <Point>BusRoute1_6</Point>
+                <Point>BusRoute1_7</Point>
+                <Point>BusRoute1_8</Point>
+                <Point>BusRoute1_9</Point>
+                <Point>BusRoute1_10</Point>
+            </Points>
+        </Route>
+    </Metadata>
+</Map>

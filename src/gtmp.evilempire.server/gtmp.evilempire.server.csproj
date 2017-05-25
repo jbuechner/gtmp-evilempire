@@ -74,6 +74,8 @@
     <Compile Include="mapping\MapPed.cs" />
     <Compile Include="mapping\MapPoint.cs" />
     <Compile Include="mapping\MapPointType.cs" />
+    <Compile Include="mapping\MapRoute.cs" />
+    <Compile Include="mapping\MapRoutePoint.cs" />
     <Compile Include="mapping\MapVehicle.cs" />
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
