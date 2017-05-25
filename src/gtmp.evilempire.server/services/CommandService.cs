@@ -29,8 +29,14 @@ namespace gtmp.evilempire.server.services
             CommandInfo info;
             if (_registered.TryGetValue(commandName, out info) && info != null)
             {
+                if (!info.IsAuthorized(client))
+                {
+                    return ServiceResult.AsSuccess();
+                }
+
                 var args = ParseCommand(command, l);
                 var parsedCommand = new ParsedCommand { Command = info, Args = args };
+
                 if (!info.Execute(client, parsedCommand))
                 {
                     return ServiceResult.AsError("Command failed.");

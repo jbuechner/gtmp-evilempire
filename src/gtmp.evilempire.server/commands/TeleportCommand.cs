@@ -81,7 +81,14 @@ namespace gtmp.evilempire.server.commands
                 return true;
             }
 
-            client.Position = targetClient.Position;
+            if (teleportToMe)
+            {
+                targetClient.Position = client.Position;
+            }
+            else
+            {
+                client.Position = targetClient.Position;
+            }
             return true;
         }
 
