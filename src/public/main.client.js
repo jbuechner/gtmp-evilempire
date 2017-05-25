@@ -243,6 +243,7 @@ let boot = (function(resource) {
 			this.proxy.knownRoots.set('app', new AppProxy(this));
 			this.proxy.addServerEventHandler('update', bind(this, this.onServerUpdate));
 			this.proxy.addServerEventHandler('res:login', bind(this, this.onLoginResponse));
+			this.proxy.addServerEventHandler('startCharacterCustomization', bind(this, this.onStartCharacterCustomization));
 
 			this.pushViewDataTickCount = 0;
 		}
@@ -306,6 +307,10 @@ let boot = (function(resource) {
                 this.lifecycle.transit($lifecycle.ClientLifecycleState.LoggedIn, this);
 
                 API.onUpdate.connect(() => app.pushViewData());
+
+                if (this.rawCharacterCustomizationData) {
+                    this.lifecycle.transit($lifecycle.ClientLifecycleState.CharacterCustomization, { app: this, data: this.rawCharacterCustomizationData} );
+                }
             }
             this.browser._instance.call('relay', JSON.stringify({ event: 'res:login', status: status, data: response }));
         }
@@ -314,6 +319,13 @@ let boot = (function(resource) {
 		    this.browser._instance.call('relay', JSON.stringify(({ event: 'update', what, value: v })));
         }
 
+        onStartCharacterCustomization(data) {
+		    if (this.lifecycle.state === $lifecycle.ClientLifecycleState.LoggedIn) {
+                this.lifecycle.transit($lifecycle.ClientLifecycleState.CharacterCustomization, { app: this,  data });
+            } else {
+                this.rawCharacterCustomizationData = data;
+            }
+        }
 
         pushViewData() {
             if (this.pushViewDataTickCount++ > 360) {

@@ -43,7 +43,7 @@ function define(module) {
         }
 
         get coordinates() {
-            let player = API.getLocalPlayer()
+            let player = API.getLocalPlayer();
             let c = API.returnNative('0x3FEF770D40960D5A', 5, player, false);
             return c;
         }

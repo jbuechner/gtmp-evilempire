@@ -43,11 +43,17 @@ Slim.tag('view-status', class extends Slim {
         if (typeof v === 'string') {
             return v;
         }
-        let s = v.toLocaleString('en-US', { minimumFractionDigits: 3, minimumIntegerDigits: 4, useGrouping: false });
-        if (v >= 0) {
-            return '+' + s;
+        if (v === undefined) {
+            return 'n/a';
         }
-        return s;
+        if (v.toLocaleString) {
+            let s = v.toLocaleString('en-US', {minimumFractionDigits: 3, minimumIntegerDigits: 4, useGrouping: false});
+            if (v >= 0) {
+                return '+' + s;
+            }
+            return s;
+        }
+        return 'n/a';
     }
 
     toBool(v) {

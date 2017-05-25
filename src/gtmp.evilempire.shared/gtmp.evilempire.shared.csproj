@@ -59,6 +59,9 @@
     <Compile Include="DelegatedDisposable.cs" />
     <Compile Include="entities\AuthUserGroup.cs" />
     <Compile Include="entities\Character.cs" />
+    <Compile Include="entities\CharacterCustomization.cs" />
+    <Compile Include="entities\CharacterFaceCustomization.cs" />
+    <Compile Include="entities\Gender.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />

@@ -120,6 +120,7 @@ namespace gtmp.evilempire.server
 
             Services = ServiceContainer.Create();
             Services.Register(Map);
+            Services.Register(new PlatformService());
 
             StartMapRoutes();
 

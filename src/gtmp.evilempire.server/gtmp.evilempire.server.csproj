@@ -60,6 +60,9 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="character\customization\FreeroamCustomizationData.cs" />
+    <Compile Include="character\customization\FreeroamFace.cs" />
+    <Compile Include="character\customization\FreeroamModel.cs" />
     <Compile Include="ClientEventCallbackExtensions.cs" />
     <Compile Include="commands\Command.cs" />
     <Compile Include="commands\GetUserGroupCommand.cs" />
@@ -85,6 +88,7 @@
     <Compile Include="mapping\ServerMapLoader.cs" />
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />
+    <Compile Include="PlatformService.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="services\AuthorizationService.cs" />
     <Compile Include="services\CharacterService.cs" />

@@ -6,14 +6,16 @@ function define(module)  {
     const ClientLifecycleState = {
         None: 0,
         Connected: 1,
-        LoggedIn: 2
+        LoggedIn: 2,
+        CharacterCustomization: 3
     };
 
     class ClientLifecycle {
         constructor() {
             this._transitions = new Map([
                 [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.None, ClientLifecycleState.Connected), ClientLifecycle.onClientConnected],
-                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.Connected, ClientLifecycleState.LoggedIn), ClientLifecycle.onClientLoggedIn]
+                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.Connected, ClientLifecycleState.LoggedIn), ClientLifecycle.onClientLoggedIn],
+                [ClientLifecycle.getStateTransitionKey(ClientLifecycleState.LoggedIn, ClientLifecycleState.CharacterCustomization), ClientLifecycle.onStartCharacterCustomization]
             ]);
             this._state = ClientLifecycleState.None;
         }
@@ -63,6 +65,17 @@ function define(module)  {
             app.browser.removeView('view-login');
             // serialize again because we are crossing the V8 again and objects arent marshalled by gtmp
             app.browser.addView('view-status', JSON.stringify({ displayCoordinates: app.client.hasRequiredUserGroup($client.UserGroups.GameMaster) }) );
+        }
+
+        static onStartCharacterCustomization(appAndData) {
+            if (debug) {
+                API.sendNotification('onStartCharacterCustomization:' + appAndData.data);
+            }
+            let app = appAndData.app;
+            let data = appAndData.data;
+            app.client.cursor = true;
+            app.browser.removeView('view-status');
+            app.browser.addView('view-character-customization', data);
         }
     }
 
