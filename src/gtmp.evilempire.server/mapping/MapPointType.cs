@@ -11,6 +11,7 @@ namespace gtmp.evilempire.server.mapping
         None = 0,
         Loading = 1,
         Teleport = 2,
-        NewPlayerSpawnPoint = 3
+        NewPlayerSpawnPoint = 3,
+        Named = 4
     }
 }

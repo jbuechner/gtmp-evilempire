@@ -16,6 +16,7 @@ namespace gtmp.evilempire.server.mapping
         public IList<MapPed> Peds { get; } = new List<MapPed>();
 
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
+        Dictionary<string, MapPoint> NamedMapPointMap { get; } = new Dictionary<string, MapPoint>();
 
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
@@ -31,6 +32,16 @@ namespace gtmp.evilempire.server.mapping
             return null;
         }
 
+        public MapPoint GetPointByName(string name)
+        {
+            MapPoint mapPoint;
+            if (NamedMapPointMap.TryGetValue(name, out mapPoint))
+            {
+                return mapPoint;
+            }
+            return null;
+        }
+
         public void AddPoint(MapPoint mapPoint)
         {
             if (mapPoint == null)
@@ -39,12 +50,20 @@ namespace gtmp.evilempire.server.mapping
             }
 
             Points.Add(mapPoint);
-            Dictionary<int, MapPoint> map;
-            if (!MapPointMap.TryGetValue(mapPoint.PointType, out map))
+
+            if (mapPoint.PointType == MapPointType.Named)
             {
-                map = MapPointMap[mapPoint.PointType] = new Dictionary<int, MapPoint>();
+                NamedMapPointMap[mapPoint.Name] = mapPoint;
             }
-            map[mapPoint.Id] = mapPoint;
+            else
+            {
+                Dictionary<int, MapPoint> map;
+                if (!MapPointMap.TryGetValue(mapPoint.PointType, out map))
+                {
+                    map = MapPointMap[mapPoint.PointType] = new Dictionary<int, MapPoint>();
+                }
+                map[mapPoint.Id] = mapPoint;
+            }
         }
 
         public void AddMarker(MapMarker mapMarker)

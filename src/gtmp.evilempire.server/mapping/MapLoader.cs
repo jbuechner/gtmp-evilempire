@@ -121,6 +121,7 @@ namespace gtmp.evilempire.server.mapping
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("LoadingPoint"));
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("TeleportPoint"));
             LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("NewPlayerSpawnPoint"));
+            LoadMapPoints(map, xdoc.Root?.Element("Metadata")?.Elements("NamedPoint"));
         }
 
         static void LoadMapPoints(Map map, IEnumerable<XElement> elements)
@@ -134,8 +135,9 @@ namespace gtmp.evilempire.server.mapping
                 var mapPointType = metapoint.ToMapPointType() ?? MapPointType.None;
                 var id = metapoint.Element("id")?.Value?.AsInt() ?? 0;
                 var position = metapoint.ToVector3f() ?? Vector3f.One;
+                var name = metapoint.Element("Name")?.Value?.AsString();
 
-                var mapPoint = new MapPoint(mapPointType, id, position);
+                var mapPoint = new MapPoint(mapPointType, id, name, position);
                 map.AddPoint(mapPoint);
             }
         }
@@ -194,6 +196,8 @@ namespace gtmp.evilempire.server.mapping
                     return MapPointType.Loading;
                 case "TELEPORTPOINT":
                     return MapPointType.Teleport;
+                case "NAMEDPOINT":
+                    return MapPointType.Named;
             }
 
             MapPointType mapPointType;
