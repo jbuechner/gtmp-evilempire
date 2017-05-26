@@ -21,19 +21,26 @@ Slim.tag('view-character-customization', class extends Slim {
         }
     }
 
-    selectPreviousModel() {
+    selectPreviousModel(e) {
+        e.preventDefault();
+
         if (this.selectedModelIndex !== null && --this.selectedModelIndex < 0) {
             this.selectedModelIndex = this.Models.length - 1;
         }
         this.selectedModel = this.Models[this.selectedModelIndex];
+
+        this.app.customizeCharacter('model', this.selectedModel.Hash);
     }
 
 
-    selectNextModel() {
+    selectNextModel(e) {
+        e.preventDefault();
         if (this.selectedModelIndex !== null && ++this.selectedModelIndex >= this.Models.length) {
             this.selectedModelIndex = 0;
         }
         this.selectedModel = this.Models[this.selectedModelIndex];
+
+        this.app.customizeCharacter('model', this.selectedModel.Hash);
     }
 
     get template() {

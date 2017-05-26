@@ -59,9 +59,7 @@ namespace gtmp.evilempire.server.services
             }
             else
             {
-                var customizationData = PlatformService.GetFreeroamCharacterCustomizationData();
-                var serializedCustomizationData = JsonConvert.SerializeObject(customizationData);
-                client.TriggerClientEvent("startCharacterCustomization", serializedCustomizationData);
+                // leave the client in its own dimension to allow character customization
             }
 
             ////todo: remove example update

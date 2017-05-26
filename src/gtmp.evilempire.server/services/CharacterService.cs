@@ -43,6 +43,12 @@ namespace gtmp.evilempire.server.services
             return character;
         }
 
+        public CharacterCustomization GetCharacterCustomizationById(int characterId)
+        {
+            var characterCustomization = DbService.Select<CharacterCustomization, int>(characterId);
+            return characterCustomization;
+        }
+
         public void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation)
         {
             var character = GetCharacterById(characterId);

@@ -84,6 +84,10 @@ const $__tasks = {
 $gulp.task('default', ['rebuild']);
 
 $gulp.task('run', function(cb) {
+    try {
+        $childproc.execSync('taskkill /im grandtheftmultiplayer.server.exe');
+    } catch(ex) {
+    }
     $childproc.exec(__dirname + '/dist/gtmp.evilempire.server.launcher.exe', { cwd: __dirname +'/dist/' });
     cb();
 });

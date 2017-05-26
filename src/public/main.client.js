@@ -60,10 +60,6 @@ const debugPrintObject = function(v) {
 };
 
 const debugPrint = function(text, args) {
-    if (!debug) {
-        return;
-    }
-
     if (text) {
         API.sendChatMessage(text);
     }
@@ -221,6 +217,13 @@ let boot = (function(resource) {
             }
             this._app.sendToServer('req:login', username, password);
         }
+
+        customizeCharacter(what, value) {
+            if (debug) {
+                debugPrint('customizeCharacter', arguments);
+            }
+            this._app.sendToServer('req:customizeCharacter', what, value);
+        }
     }
 
 	class App {
@@ -243,6 +246,7 @@ let boot = (function(resource) {
 			this.proxy.knownRoots.set('app', new AppProxy(this));
 			this.proxy.addServerEventHandler('update', bind(this, this.onServerUpdate));
 			this.proxy.addServerEventHandler('res:login', bind(this, this.onLoginResponse));
+			this.proxy.addServerEventHandler('res:customizeCharacter', bind(this, this.onCustomizeCharacterResponse));
 			this.proxy.addServerEventHandler('startCharacterCustomization', bind(this, this.onStartCharacterCustomization));
 
 			this.pushViewDataTickCount = 0;
@@ -301,18 +305,28 @@ let boot = (function(resource) {
         }
 
         onLoginResponse(status, response) {
-		    debugPrint('onLoginResponse', arguments);
+		    if (debug) {
+                debugPrint('onLoginResponse', arguments);
+            }
             if (status === ServiceResultState.Success) {
-                this.client.user = { login: response.login, userGroup: response.userGroup };
+                this.client.user = { login: response.login, userGroup: response.userGroup, hasBeenCharacterThroughInitialCustomization: response.hasBeenThroughInitialCustomization };
                 this.lifecycle.transit($lifecycle.ClientLifecycleState.LoggedIn, this);
 
                 API.onUpdate.connect(() => app.pushViewData());
 
-                if (this.rawCharacterCustomizationData) {
-                    this.lifecycle.transit($lifecycle.ClientLifecycleState.CharacterCustomization, { app: this, data: this.rawCharacterCustomizationData} );
+                if (!this.hasBeenCharacterThroughInitialCustomization) {
+                    this.client.character.customization.freeroamCustomizationData = response.freeroamCustomizationData;
+                    this.client.character.customization.data = response.characterCustomizationData;
+                    this.lifecycle.transit($lifecycle.ClientLifecycleState.CharacterCustomization, { app: this, data: this.client.character.customization.freeroamCustomizationData} );
                 }
             }
             this.browser._instance.call('relay', JSON.stringify({ event: 'res:login', status: status, data: response }));
+        }
+
+        onCustomizeCharacterResponse(status, response) {
+		    this.client.character.customization.data = response.characterCustomizationData;
+		    //todo: update ui ...
+		    //this.browser.updateView('view-character-customization', response.characterCustomizationData );
         }
 
         onServerUpdate(what, v) {
@@ -323,7 +337,7 @@ let boot = (function(resource) {
 		    if (this.lifecycle.state === $lifecycle.ClientLifecycleState.LoggedIn) {
                 this.lifecycle.transit($lifecycle.ClientLifecycleState.CharacterCustomization, { app: this,  data });
             } else {
-                this.rawCharacterCustomizationData = data;
+                this.client.character.customization.freeroamCustomizationData = data;
             }
         }
 
@@ -356,7 +370,9 @@ let boot = (function(resource) {
     };
 
     API.onServerEventTrigger.connect(function(ev, args) {
-        debugPrint('onServerEventTrigger', arguments);
+        if (debug) {
+            debugPrint('onServerEventTrigger', arguments);
+        }
         try {
             let newArgs = [];
             for(let arg in args) {

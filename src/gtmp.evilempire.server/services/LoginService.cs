@@ -1,5 +1,6 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,17 +14,19 @@ namespace gtmp.evilempire.server.services
     {
         IDbService DbService { get; }
         ICharacterService CharacterService { get; }
+        PlatformService PlatformService { get; }
 
         ConcurrentDictionary<string, IClient> LoggedInClients { get; } = new ConcurrentDictionary<string, IClient>();
 
         public DateTime LastLoggedInClientsChangeTime { get; private set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public LoginService(IDbService dbService, ICharacterService characterService)
+        public LoginService(IDbService dbService, ICharacterService characterService, PlatformService platformService)
         {
             DbService = dbService;
             CharacterService = characterService;
             LastLoggedInClientsChangeTime = DateTime.MinValue;
+            PlatformService = platformService;
         }
 
         public bool IsLoggedIn(IClient client)
@@ -75,12 +78,12 @@ namespace gtmp.evilempire.server.services
             return null;
         }
 
-        public IServiceResult<User> Login(string login, IClient client)
+        public IServiceResult<LoginResponse> Login(string login, IClient client)
         {
             var user = FindUserByLogin(login);
             if (user == null)
             {
-                return ServiceResult<User>.AsError("Failed login");
+                return ServiceResult<LoginResponse>.AsError("Failed login");
             }
 
             IClient loggedInClient;
@@ -90,7 +93,7 @@ namespace gtmp.evilempire.server.services
                 {
                     user.NumberOfInvalidLoginAttempts += 1;
                     DbService.Update(user);
-                    return ServiceResult<User>.AsError("Failed login");
+                    return ServiceResult<LoginResponse>.AsError("Failed login");
                 }
                 else
                 {
@@ -118,9 +121,22 @@ namespace gtmp.evilempire.server.services
             client.CharacterId = activeCharacter.Id;
             DbService.Update(user);
 
+            var characterCustomization = CharacterService.GetCharacterCustomizationById(activeCharacter.Id) ?? PlatformService.GetDefaultCharacterCustomization(activeCharacter.Id);
+            var freeroamCustomizationDataAsJson = JsonConvert.SerializeObject(PlatformService.GetFreeroamCharacterCustomizationData());
+            var characterCustomizationAsJson = JsonConvert.SerializeObject(characterCustomization);
+
+            client.CharacterModel = characterCustomization.ModelHash;
+
             // create a copy of the user because the result is serialized and send back to the client
-            var transferUser = new User { Login = user.Login, UserGroup = user.UserGroup };
-            return ServiceResult<User>.AsSuccess(transferUser);
+            var response = new LoginResponse
+            {
+                Login = user.Login,
+                UserGroup = user.UserGroup,
+                HasBeenThroughInitialCustomization = activeCharacter.HasBeenThroughInitialCustomization,
+                CharacterCustomizationData = characterCustomizationAsJson,
+                FreeroamCustomizationData = freeroamCustomizationDataAsJson
+            };
+            return ServiceResult<LoginResponse>.AsSuccess(response);
         }
 
         public void Logout(IClient client)

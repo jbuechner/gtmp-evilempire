@@ -34,5 +34,6 @@ namespace gtmp.evilempire
         string Login { get; set; }
         int CharacterId { get; set; }
         AuthUserGroup UserGroup { get; set; }
+        int CharacterModel { get; set; }
     }
 }

@@ -38,6 +38,10 @@ class App {
     disconnect() {
         this.proxy.invoke('app.disconnect', 'disconnect at login screen');
     }
+
+    customizeCharacter(what, value) {
+        this.proxy.invoke('app.customizeCharacter', what, value);
+    }
 }
 
 function relay(raw) {
@@ -67,6 +71,20 @@ function addView(args) {
         });
     }
     document.body.appendChild(el);
+}
+
+function updateView(args) {
+    if (typeof args !== 'object') {
+        args = JSON.parse(args);
+    }
+    let nodes = document.querySelectorAll(args.selector);
+    for (let i = 0; i < nodes.length; i++) {
+        if (args.options) {
+            Object.getOwnPropertyNames(args.options).forEach(propName => {
+                nodes[i][propName] = args.options.propName;
+            });
+        }
+    }
 }
 
 function removeView(args) {

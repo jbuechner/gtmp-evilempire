@@ -19,7 +19,7 @@ namespace gtmp.evilempire.services
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "login")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "0#")]
-        IServiceResult<User> Login(string login, IClient client);
+        IServiceResult<LoginResponse> Login(string login, IClient client);
         void Logout(IClient client);
 
         bool IsLoggedIn(IClient client);

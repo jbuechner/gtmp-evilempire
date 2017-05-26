@@ -22,7 +22,8 @@ namespace gtmp.evilempire.server
         public Map Map { get; private set; }
 
         IDictionary<string, ClientEventCallback> ClientEventCallbacks { get; } = new Dictionary<string, ClientEventCallback> {
-            { "req:login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("res:login") }
+            { "req:login", ((ClientEventCallbackWithResponse)OnClientLogin).WrapIntoFailsafeResponse("res:login") },
+            { "req:customizeCharacter", ((ClientEventCallbackWithResponse)OnClientCustomizeCharacter).WrapIntoFailsafeResponse("res:customizeCharacter") }
         };
 
         CancellationTokenSource HeartbeatCancellationTokenSource { get; set; }
@@ -43,7 +44,7 @@ namespace gtmp.evilempire.server
 
         void RunHeartbeat()
         {
-            lock(_syncRoot)
+            lock (_syncRoot)
             {
                 if (HeartbeatThread != null)
                 {
@@ -145,7 +146,7 @@ namespace gtmp.evilempire.server
             var commandService = Services.Get<ICommandService>();
             var commandTypes = typeof(Main).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(Command)));
 
-            foreach(var commandType in commandTypes)
+            foreach (var commandType in commandTypes)
             {
                 var command = Activator.CreateInstance(commandType, new[] { Services }) as Command;
                 var commandInfo = command?.Info;
@@ -225,7 +226,7 @@ namespace gtmp.evilempire.server
             }
         }
 
-        static IServiceResult OnClientLogin(ServiceContainer services, IClient client, params object[] args) // todo: less boilerplate request processing
+        static void CheckArgumentsForClientRequest(ServiceContainer services, IClient client, params object[] args)
         {
             if (services == null)
             {
@@ -239,6 +240,41 @@ namespace gtmp.evilempire.server
             {
                 throw new ArgumentNullException(nameof(args));
             }
+        }
+
+        static IServiceResult OnClientCustomizeCharacter(ServiceContainer services, IClient client, params object[] args)
+        {
+            CheckArgumentsForClientRequest(services, client, args);
+            var what = args.ElementAtOrDefault(0).AsString();
+            var value = args.ElementAtOrDefault(1).AsString();
+
+            //todo: check if client can customize character at the moment.
+
+            var characterService = services.Get<ICharacterService>();
+            var characterCustomization = characterService.GetCharacterCustomizationById(client.CharacterId);
+
+            switch (what.ToUpperInvariant())
+            {
+                case "MODEL":
+                    var modelHash = value.AsInt();
+                    if (modelHash.HasValue)
+                    {
+                        client.CharacterModel = modelHash.Value;
+                    }
+                    break;
+            }
+
+            var characterCutsomizationAsJson = JsonConvert.SerializeObject(characterCustomization);
+            var response = new CustomizeCharacterResponse
+            {
+                CharacterCustomizationData = characterCutsomizationAsJson
+            };
+            return ServiceResult<CustomizeCharacterResponse>.AsSuccess(response);
+        }
+
+        static IServiceResult OnClientLogin(ServiceContainer services, IClient client, params object[] args) // todo: less boilerplate request processing
+        {
+            CheckArgumentsForClientRequest(services, client, args);
             var username = args.ElementAtOrDefault(0).AsString();
             var password = args.ElementAtOrDefault(1).AsString();
             if (username == null)

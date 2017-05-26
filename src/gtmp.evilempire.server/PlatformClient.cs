@@ -1,4 +1,5 @@
-﻿using GrandTheftMultiplayer.Server.Elements;
+﻿using GrandTheftMultiplayer.Server.Constant;
+using GrandTheftMultiplayer.Server.Elements;
 using gtmp.evilempire.entities;
 using System;
 
@@ -8,6 +9,7 @@ namespace gtmp.evilempire.server
     {
         Client _client;
         bool _isFrozen;
+        int _modelHash;
 
         public object PlatformObject
         {
@@ -128,6 +130,21 @@ namespace gtmp.evilempire.server
         public string Login { get; set; }
         public int CharacterId { get; set; }
         public AuthUserGroup UserGroup { get; set; }
+        public int CharacterModel
+        {
+            get
+            {
+                return _modelHash;
+            }
+            set
+            {
+                if (_modelHash != value)
+                {
+                    _client.setSkin((PedHash)value);
+                    _modelHash = value;
+                }
+            }
+        }
         #endregion
 
         #region IEquatable

@@ -76,6 +76,8 @@ function define(module)  {
             app.client.cursor = true;
             app.browser.removeView('view-status');
             app.browser.addView('view-character-customization', data);
+
+            app.client.setCameraToViewPlayer();
         }
     }
 

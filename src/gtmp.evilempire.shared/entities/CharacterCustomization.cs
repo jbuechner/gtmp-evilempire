@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace gtmp.evilempire.entities
 {
-    class CharacterCustomization
+    public class CharacterCustomization
     {
-        public int Id { get; set; }
+        public int CharacterId { get; set; }
+
+        public int ModelHash { get; set; }
 
         public CharacterFaceCustomization Face { get; set; }
     }

@@ -1,4 +1,5 @@
-﻿using gtmp.evilempire.entities;
+﻿using GrandTheftMultiplayer.Server.Constant;
+using gtmp.evilempire.entities;
 using gtmp.evilempire.server.character.customization;
 
 namespace gtmp.evilempire.server
@@ -16,6 +17,15 @@ namespace gtmp.evilempire.server
             }
 
             return data;
+        }
+
+        public CharacterCustomization GetDefaultCharacterCustomization(int characterId)
+        {
+            return new CharacterCustomization
+            {
+                CharacterId = characterId,
+                ModelHash = (int)PedHash.FreemodeMale01
+            };
         }
     }
 }

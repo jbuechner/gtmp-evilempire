@@ -56,6 +56,14 @@ function define(module) {
             this._instance.call('addView', args);
         }
 
+        updateView(viewName, options) {
+            if (typeof options === 'string') {
+                options = JSON.parse(options);
+            }
+            let args = JSON.stringify({ selector: viewName, options });
+            this._instance.call('updateView', args);
+        }
+
         removeView(viewName) {
             this._instance.call('removeView', JSON.stringify({ selector: viewName }));
         }

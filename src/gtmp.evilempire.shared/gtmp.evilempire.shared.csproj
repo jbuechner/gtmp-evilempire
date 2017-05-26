@@ -70,6 +70,7 @@
     <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />
+    <Compile Include="services\CustomizeCharacterResponse.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
     <Compile Include="services\ICharacterService.cs" />
     <Compile Include="services\IClientLifecycleService.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="services\IJsonSerializer.cs" />
     <Compile Include="services\ILoginService.cs" />
     <Compile Include="services\IServiceResult.cs" />
+    <Compile Include="services\LoginResponse.cs" />
     <Compile Include="services\ServiceResultState.cs" />
     <Compile Include="TinyIoC.cs" />
     <Compile Include="AssemblyInfo.cs" />
