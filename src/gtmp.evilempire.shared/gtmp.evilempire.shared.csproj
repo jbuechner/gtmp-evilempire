@@ -39,6 +39,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\libs\gtmp\v0.1.508.640\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,6 +64,9 @@
     <Compile Include="entities\Character.cs" />
     <Compile Include="entities\CharacterCustomization.cs" />
     <Compile Include="entities\CharacterFaceCustomization.cs" />
+    <Compile Include="entities\customization\FreeroamCustomizationData.cs" />
+    <Compile Include="entities\customization\FreeroamFace.cs" />
+    <Compile Include="entities\customization\FreeroamModel.cs" />
     <Compile Include="entities\Gender.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
@@ -71,6 +77,7 @@
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="services\CustomizeCharacterResponse.cs" />
+    <Compile Include="services\IAuthenticationService.cs" />
     <Compile Include="services\IAuthorizationService.cs" />
     <Compile Include="services\ICharacterService.cs" />
     <Compile Include="services\IClientLifecycleService.cs" />
@@ -79,9 +86,16 @@
     <Compile Include="services\IDbService.cs" />
     <Compile Include="services\IJsonSerializer.cs" />
     <Compile Include="services\ILoginService.cs" />
+    <Compile Include="services\IPlatformService.cs" />
+    <Compile Include="services\ISerializationService.cs" />
     <Compile Include="services\IServiceResult.cs" />
+    <Compile Include="services\ISessionService.cs" />
+    <Compile Include="services\ISessionStateTransitionService.cs" />
     <Compile Include="services\LoginResponse.cs" />
+    <Compile Include="services\SerializationService.cs" />
     <Compile Include="services\ServiceResultState.cs" />
+    <Compile Include="sessions\ISession.cs" />
+    <Compile Include="sessions\SessionState.cs" />
     <Compile Include="TinyIoC.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="TinyIoCSupressions.cs" />

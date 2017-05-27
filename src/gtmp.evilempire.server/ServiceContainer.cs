@@ -35,15 +35,19 @@ namespace gtmp.evilempire.server
         public static ServiceContainer Create()
         {
             var services = new ServiceContainer();
-            services.Register<IJsonSerializer>(new JsonSerializer());
+            services.Register<ISerializationService, SerializationService>();
             services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
-            services.Register<ICommandService, CommandService>();
+            services.Register<ISessionStateTransitionService, SessionStateTransitionService>();
+            services.Register<ISessionService, SessionService>();
             services.Register<IClientService, ClientService>();
+            services.Register<IAuthenticationService, AuthenticationService>();
             services.Register<ICharacterService, CharacterService>();
-            services.Register<IClientLifecycleService, ClientLifecycleService>();
-            services.Register<IAuthorizationService, AuthorizationService>();
-            services.Register<ILoginService, LoginService>();
-            services.Register<MapObjectService, MapObjectService>();
+
+            //services.Register<ICommandService, CommandService>();
+            //services.Register<IClientLifecycleService, ClientLifecycleService>();
+            //services.Register<IAuthorizationService, AuthorizationService>();
+            //services.Register<ILoginService, LoginService>();
+            //services.Register<MapObjectService, MapObjectService>();
             return services;
         }
 

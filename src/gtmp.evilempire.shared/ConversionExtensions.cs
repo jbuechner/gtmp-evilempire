@@ -28,13 +28,11 @@ namespace gtmp.evilempire
             {
                 return (int)value;
             }
-            if (value is string)
+            string raw = (value as string) ?? value.ToString();
+            int v;
+            if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
             {
-                int v;
-                if (int.TryParse((string)value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
-                {
-                    return v;
-                }
+                return v;
             }
             return null;
         }
@@ -49,13 +47,11 @@ namespace gtmp.evilempire
             {
                 return (byte)value;
             }
-            if (value is string)
+            string raw = (value as string) ?? value.ToString();
+            byte v;
+            if (byte.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
             {
-                byte v;
-                if (byte.TryParse((string)value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
-                {
-                    return v;
-                }
+                return v;
             }
             return null;
         }
@@ -87,13 +83,11 @@ namespace gtmp.evilempire
             {
                 return (float)value;
             }
-            if (value is string)
+            string raw = (value as string) ?? value.ToString();
+            float v;
+            if (float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
             {
-                float v;
-                if (float.TryParse((string)value, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
-                {
-                    return v;
-                }
+                return v;
             }
             return null;
         }

@@ -5,11 +5,12 @@ Slim.tag('core-login', class extends Slim {
     onBeforeCreated() {
         this.app = window.app;
         let self = this;
-        document.addEventListener('relay', (ev) => {
-            if (ev.detail.event === 'res:login') {
-                if (ev.detail.status !== ClientLifecycleState.Success) {
-                    self.message = ev.detail.data;
-                }
+        document.addEventListener('res:login', (ev) => {
+            if (ev.detail.success) {
+                self.message = "Login successful";
+            }
+            else {
+                self.message = "Login failed";
             }
         });
     }
@@ -45,7 +46,15 @@ Slim.tag('core-login', class extends Slim {
     login(e) {
         e.preventDefault();
         if (this.username.value && this.password.value) {
-            this.app.login({ username: this.username.value, password: this.password.value });
+            let password = this.password.value;
+            if (password) {
+                let a = '__' + password + '::0';
+                for (let i = 0; i < 10; i++) {
+                    a = sha512(a);
+                }
+                password = '::' + a;
+            }
+            this.app.login(this.username.value, password);
             this.message = 'Logging in ...';
             this.username.focus();
         }
@@ -54,6 +63,6 @@ Slim.tag('core-login', class extends Slim {
 
     disconnect(e) {
         e.preventDefault();
-        this.app.disconnect();
+        this.app.disconnect('Disconnected from Login');
     }
 });

@@ -5,7 +5,8 @@
 	<link rel="stylesheet" href="bulma.css">
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="colors.css">
-	<script src="libs/slim.js"></script>
+    <script src="libs/slim.js"></script>
+	<script src="libs/sha512.js"></script>
 	<script src="components/core-watermark.js"></script>
 	<script src="components/core-login.js"></script>
 	<script src="components/view-status.js"></script>
@@ -14,6 +15,80 @@
 </head>
 <body>
 	<core-watermark></core-watermark>
-	<script src="app.js"></script>
+	<script>
+        'use strict';
+        function deserializeFromDesignatedJson(value) {
+            if (typeof value === 'string' && value.startsWith('$json')) {
+                return JSON.parse(value.substring(5));
+            }
+            return value;
+        }
+
+        function serializeToDesignatedJson(value) {
+            return '$json' + JSON.stringify(value);
+        }
+
+        function addView(args) {
+            args = deserializeFromDesignatedJson(args);
+            console.log('addView', args);
+            let el = document.createElement(args.selector);
+            document.body.appendChild(el);
+
+            if (args.options) {
+                Object.getOwnPropertyNames(args.options).forEach(propName => {
+                    el[propName] = args.options[propName];
+                });
+            }
+        }
+
+        function removeView(args) {
+            args = deserializeFromDesignatedJson(args);
+            console.log('removeView', args);
+            let elements = document.querySelectorAll(args.selector);
+            for (let i = 0; i < elements.length; i++) {
+                let el = elements[i];
+                if (el && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            }
+        }
+
+        function raiseEvent(args) {
+            args = deserializeFromDesignatedJson(args);
+            document.dispatchEvent(new CustomEvent(args.eventName, { detail: args.data }));
+        }
+
+        class App {
+            login(username, password) {
+                this.callBackend('login', argumentsToArray(arguments));
+            }
+
+            disconnect(reason) {
+                this.callBackend('disconnect', argumentsToArray(arguments));
+            }
+
+            customizeCharacter(what, newValue) {
+                this.callBackend('customizeCharacter', argumentsToArray(arguments));
+            }
+
+            callBackend(eventName, args) {
+                resourceCall('browser_backend', serializeToDesignatedJson({ eventName: eventName, args }));
+            }
+
+            confirmCharacterCustomization() {
+                this.callBackend('confirmCharacterCustomization');
+            }
+
+            cancelCharacterCustomization() {
+                this.callBackend('cancelCharacterCustomization');
+            }
+        }
+        window.app = new App();
+        function argumentsToArray(args) {
+            return Array.prototype.slice.call(args, 0);
+        }
+
+        resourceCall('browser_ready');
+    </script>
 </body>
 </html>

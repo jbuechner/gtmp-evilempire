@@ -1,4 +1,4 @@
-﻿namespace gtmp.evilempire.server.character.customization
+﻿namespace gtmp.evilempire.entities.customization
 {
     public class FreeroamFace
     {

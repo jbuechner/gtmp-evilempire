@@ -127,9 +127,6 @@ namespace gtmp.evilempire.server
         }
 
         #region Non GTMP
-        public string Login { get; set; }
-        public int CharacterId { get; set; }
-        public AuthUserGroup UserGroup { get; set; }
         public int CharacterModel
         {
             get

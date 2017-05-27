@@ -5,14 +5,15 @@ using System.Linq;
 using System.Collections.Generic;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
-using Newtonsoft.Json;
 using System.Threading;
 using gtmp.evilempire.server.commands;
 
 namespace gtmp.evilempire.server
 {
-    public class Main : Script
+    public class Main //: Script
     {
+        API API { get; }
+
         static readonly bool SavePositionsDuringHeartbeat = true;
 
         readonly object _syncRoot = new object();
@@ -190,12 +191,13 @@ namespace gtmp.evilempire.server
         void OnClientEventTrigger(Client sender, string eventName, params object[] arguments)
         {
             var clientService = Services.Get<IClientService>();
+            var serializationService = Services.Get<ISerializationService>();
             var managedClient = clientService.FindByPlatformObject(sender);
 
             ClientEventCallback eventCallback = null;
             if (ClientEventCallbacks.TryGetValue(eventName, out eventCallback) && eventCallback != null)
             {
-                SanitizeClientArguments(arguments);
+                SanitizeClientArguments(serializationService, arguments);
                 eventCallback(Services, managedClient, arguments);
             }
             else
@@ -207,7 +209,7 @@ namespace gtmp.evilempire.server
             }
         }
 
-        static void SanitizeClientArguments(params object[] arguments)
+        static void SanitizeClientArguments(ISerializationService serializationService, params object[] arguments)
         {
             if (arguments != null)
             {
@@ -217,10 +219,7 @@ namespace gtmp.evilempire.server
                     if (arg != null && arg is string)
                     {
                         var argAsString = (string)arg;
-                        if (argAsString.StartsWith(Constants.DataSerialization.ClientServerJsonPrefix, StringComparison.Ordinal))
-                        {
-                            arguments[i] = JsonConvert.DeserializeObject(argAsString);
-                        }
+                        arguments[i] = serializationService.DeserializeFromDesignatedJson(argAsString);
                     }
                 }
             }
@@ -251,6 +250,7 @@ namespace gtmp.evilempire.server
             //todo: check if client can customize character at the moment.
 
             var characterService = services.Get<ICharacterService>();
+            var serializationService = services.Get<ISerializationService>();
             var characterCustomization = characterService.GetCharacterCustomizationById(client.CharacterId);
 
             switch (what.ToUpperInvariant())
@@ -264,7 +264,7 @@ namespace gtmp.evilempire.server
                     break;
             }
 
-            var characterCutsomizationAsJson = JsonConvert.SerializeObject(characterCustomization);
+            var characterCutsomizationAsJson = serializationService.SerializeAsDesignatedJson(characterCustomization);
             var response = new CustomizeCharacterResponse
             {
                 CharacterCustomizationData = characterCutsomizationAsJson

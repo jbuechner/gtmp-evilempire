@@ -5,22 +5,20 @@ Slim.tag('view-status', class extends Slim {
     onBeforeCreated() {
         this.app = window.app;
         let self = this;
-        document.addEventListener('relay', (ev) => {
-            if (ev.detail.event === 'update') {
-                switch(ev.detail.what) {
-                    case 'cash':
-                        this.cash = ev.detail.value;
-                        break;
-                    case 'coordinates':
-                        let v = ev.detail.value;
-                        this.coordinateX = v.coord.x;
-                        this.coordinateY = v.coord.y;
-                        this.coordinateZ = v.coord.z;
-                        this.rotationX = v.rot.x;
-                        this.rotationY = v.rot.y;
-                        this.rotationZ = v.rot.z;
-                        break;
-                }
+        document.addEventListener('updateview', (ev) => {
+            switch(ev.detail.what) {
+                case 'cash':
+                    this.cash = ev.detail.value;
+                    break;
+                case 'coordinates':
+                    let v = ev.detail.value;
+                    this.coordinateX = v.coord.x;
+                    this.coordinateY = v.coord.y;
+                    this.coordinateZ = v.coord.z;
+                    this.rotationX = v.rot.x;
+                    this.rotationY = v.rot.y;
+                    this.rotationZ = v.rot.z;
+                    break;
             }
         });
     }
@@ -68,13 +66,13 @@ Slim.tag('view-status', class extends Slim {
 <div class="ui-big with-shadow" style="position: absolute; left: 12px; bottom: 0;">
 <span bind>[[asCurrency(cash)]]</span>
 </div>
-<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 0;">
+<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 0;" slim-if="displayCoordinates">
  <span>C</span>
  <span>X</span><span bind>[[formatCoordinate(coordinateX)]]</span>
  <span>Y</span><span bind>[[formatCoordinate(coordinateY)]]</span>
  <span>Z</span><span bind>[[formatCoordinate(coordinateZ)]]</span>
 </div>
-<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 22px;">
+<div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 22px;" slim-if="displayCoordinates">
  <span>R</span>
  <span>X</span><span bind>[[formatCoordinate(rotationX)]]</span>
  <span>Y</span><span bind>[[formatCoordinate(rotationZ)]]</span>

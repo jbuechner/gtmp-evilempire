@@ -1,11 +1,19 @@
-﻿using GrandTheftMultiplayer.Server.Constant;
+﻿using GrandTheftMultiplayer.Server.API;
+using GrandTheftMultiplayer.Server.Constant;
 using gtmp.evilempire.entities;
-using gtmp.evilempire.server.character.customization;
+using gtmp.evilempire.entities.customization;
+using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 
-namespace gtmp.evilempire.server
+namespace gtmp.evilempire.server.services
 {
-    class PlatformService
+    class GtmpPlatformService : IPlatformService
     {
+        public GtmpPlatformService(API api)
+        {
+
+        }
+
         public FreeroamCustomizationData GetFreeroamCharacterCustomizationData()
         {
             var data = new FreeroamCustomizationData();
@@ -19,13 +27,17 @@ namespace gtmp.evilempire.server
             return data;
         }
 
-        public CharacterCustomization GetDefaultCharacterCustomization(int characterId)
+        public CharacterCustomization GetDefaultCharacterCustomization()
         {
             return new CharacterCustomization
             {
-                CharacterId = characterId,
                 ModelHash = (int)PedHash.FreemodeMale01
             };
+        }
+
+        public void UpdateCharacterCustomizationOnClients(ISession session)
+        {
+            session.Client.CharacterModel = session.CharacterCustomization.ModelHash;
         }
     }
 }

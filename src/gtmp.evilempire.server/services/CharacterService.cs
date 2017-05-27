@@ -1,5 +1,6 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 using System;
 using System.Linq;
 
@@ -7,31 +8,28 @@ namespace gtmp.evilempire.server.services
 {
     class CharacterService : ICharacterService
     {
-        IDbService DbService { get; }
+        IDbService db;
+        IPlatformService platform;
 
-        public CharacterService(IDbService dbService)
+        public CharacterService(IDbService db, IPlatformService platform)
         {
-            DbService = dbService;
+            this.db = db;
+            this.platform = platform;
         }
 
-        public Character GetActiveCharacter(IClient client)
+        public Character GetActiveCharacter(ISession session)
         {
-            if (client == null)
+            if (session == null)
             {
-                throw new ArgumentNullException(nameof(client));
-            }
-            if (client.Login == null)
-            {
-                throw new InvalidOperationException("Can not select active character for a client without an associated login.");
+                throw new ArgumentNullException(nameof(session));
             }
 
-            var character = DbService.SelectMany<Character, string>(client.Login)?.FirstOrDefault();
-
+            var character = db.SelectMany<Character, string>(session.User.Login)?.FirstOrDefault();
             if (character == null)
             {
-                var characterId = DbService.NextValueFor(Constants.Database.Sequences.CharacterIdSequence);
-                character = new Character { AssociatedLogin = client.Login, Id = characterId };
-                DbService.Insert(character);
+                var characterId = db.NextValueFor(Constants.Database.Sequences.CharacterIdSequence);
+                character = new Character { AssociatedLogin = session.User.Login, Id = characterId };
+                db.Insert(character);
             }
 
             return character;
@@ -39,13 +37,21 @@ namespace gtmp.evilempire.server.services
 
         public Character GetCharacterById(int characterId)
         {
-            var character = DbService.Select<Character, int>(ks => ks.Id, characterId);
+            var character = db.Select<Character, int>(ks => ks.Id, characterId);
             return character;
         }
 
         public CharacterCustomization GetCharacterCustomizationById(int characterId)
         {
-            var characterCustomization = DbService.Select<CharacterCustomization, int>(characterId);
+            var characterCustomization = db.Select<CharacterCustomization, int>(characterId);
+            return characterCustomization;
+        }
+
+        public CharacterCustomization CreateDefaultCharacterCustomization(int characterId)
+        {
+            var characterCustomization = platform.GetDefaultCharacterCustomization();
+            characterCustomization.CharacterId = characterId;
+            db.Insert<CharacterCustomization>(characterCustomization);
             return characterCustomization;
         }
 
@@ -60,7 +66,7 @@ namespace gtmp.evilempire.server.services
             {
                 character.Rotation = rotation;
             }
-            DbService.Update<Character>(character);
+            db.Update<Character>(character);
         }
     }
 }

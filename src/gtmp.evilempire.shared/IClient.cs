@@ -30,10 +30,7 @@ namespace gtmp.evilempire
 
         void SendChatMessage(string message);
 
-        // Additional non GTMP properties /methods
-        string Login { get; set; }
-        int CharacterId { get; set; }
-        AuthUserGroup UserGroup { get; set; }
+        //
         int CharacterModel { get; set; }
     }
 }

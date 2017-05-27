@@ -44,9 +44,6 @@
       <HintPath>..\..\libs\gtmp\v0.1.508.640\GrandTheftMultiplayer.Shared.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\libs\gtmp\v0.1.508.640\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
@@ -60,16 +57,9 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="character\customization\FreeroamCustomizationData.cs" />
-    <Compile Include="character\customization\FreeroamFace.cs" />
-    <Compile Include="character\customization\FreeroamModel.cs" />
     <Compile Include="ClientEventCallbackExtensions.cs" />
-    <Compile Include="commands\Command.cs" />
-    <Compile Include="commands\GetUserGroupCommand.cs" />
-    <Compile Include="commands\HelpCommand.cs" />
-    <Compile Include="commands\TeleportCommand.cs" />
-    <Compile Include="JsonSerializer.cs" />
-    <Compile Include="Main.cs" />
+    <Compile Include="ClientEvents.cs" />
+    <Compile Include="GtmpMainScript.cs" />
     <Compile Include="mapping\Map.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
@@ -86,16 +76,29 @@
     <Compile Include="mapping\MapVehicle.cs" />
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
+    <Compile Include="messages\MessageHandlerBase.cs" />
+    <Compile Include="messages\RequestCharacterCustomization.cs" />
+    <Compile Include="messages\RequestCharacterCustomizationCancel.cs" />
+    <Compile Include="messages\RequestCharacterCustomizationOkay.cs" />
+    <Compile Include="messages\RequestCharacterCustomizationResponse.cs" />
+    <Compile Include="messages\RequestLoginHandler.cs" />
+    <Compile Include="messages\RequestLoginResponse.cs" />
+    <Compile Include="messages\transfer\ClientCharacter.cs" />
+    <Compile Include="messages\transfer\ClientCharacterCustomization.cs" />
+    <Compile Include="messages\transfer\ClientUser.cs" />
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />
-    <Compile Include="PlatformService.cs" />
+    <Compile Include="ServerRealm.cs" />
     <Compile Include="ServiceContainer.cs" />
+    <Compile Include="services\AuthenticationService.cs" />
     <Compile Include="services\AuthorizationService.cs" />
     <Compile Include="services\CharacterService.cs" />
-    <Compile Include="services\ClientLifecycleService.cs" />
     <Compile Include="services\ClientService.cs" />
     <Compile Include="services\CommandService.cs" />
-    <Compile Include="services\LoginService.cs" />
+    <Compile Include="services\GtmpPlatformService.cs" />
+    <Compile Include="services\SessionService.cs" />
+    <Compile Include="services\SessionStateTransitionService.cs" />
+    <Compile Include="sessions\Session.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">

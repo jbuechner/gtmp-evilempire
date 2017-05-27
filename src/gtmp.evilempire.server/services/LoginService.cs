@@ -1,12 +1,9 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.services;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.services
 {
@@ -15,18 +12,20 @@ namespace gtmp.evilempire.server.services
         IDbService DbService { get; }
         ICharacterService CharacterService { get; }
         PlatformService PlatformService { get; }
+        ISerializationService SerializationService { get; }
 
         ConcurrentDictionary<string, IClient> LoggedInClients { get; } = new ConcurrentDictionary<string, IClient>();
 
         public DateTime LastLoggedInClientsChangeTime { get; private set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public LoginService(IDbService dbService, ICharacterService characterService, PlatformService platformService)
+        public LoginService(IDbService dbService, ICharacterService characterService, PlatformService platformService, ISerializationService serializationService)
         {
             DbService = dbService;
             CharacterService = characterService;
             LastLoggedInClientsChangeTime = DateTime.MinValue;
             PlatformService = platformService;
+            SerializationService = serializationService;
         }
 
         public bool IsLoggedIn(IClient client)
@@ -122,8 +121,8 @@ namespace gtmp.evilempire.server.services
             DbService.Update(user);
 
             var characterCustomization = CharacterService.GetCharacterCustomizationById(activeCharacter.Id) ?? PlatformService.GetDefaultCharacterCustomization(activeCharacter.Id);
-            var freeroamCustomizationDataAsJson = JsonConvert.SerializeObject(PlatformService.GetFreeroamCharacterCustomizationData());
-            var characterCustomizationAsJson = JsonConvert.SerializeObject(characterCustomization);
+            var freeroamCustomizationDataAsJson = SerializationService.SerializeAsDesignatedJson(PlatformService.GetFreeroamCharacterCustomizationData());
+            var characterCustomizationAsJson = SerializationService.SerializeAsDesignatedJson(characterCustomization);
 
             client.CharacterModel = characterCustomization.ModelHash;
 
