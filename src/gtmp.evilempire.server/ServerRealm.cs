@@ -1,6 +1,7 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Elements;
 using gtmp.evilempire.server.commands;
+using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
 using gtmp.evilempire.services;
@@ -23,6 +24,7 @@ namespace gtmp.evilempire.server
         ServiceContainer services;
         IClientService clients;
         ISessionService sessions;
+        ICharacterService characters;
         ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransition;
         ICommandService commands;
@@ -38,14 +40,19 @@ namespace gtmp.evilempire.server
 
             this.api = api;
 
+            var map = MapLoader.LoadFrom("maps");
+            ServerMapLoader.Load(map, api);
+
             services = ServiceContainer.Create();
             services.Register<IPlatformService>(new GtmpPlatformService(api));
+            services.Register(map);
 
             clients = services.Get<IClientService>();
             sessions = services.Get<ISessionService>();
             serialization = services.Get<ISerializationService>();
             sessionStateTransition = services.Get<ISessionStateTransitionService>();
             commands = services.Get<ICommandService>();
+            characters = services.Get<ICharacterService>();
 
             clientMessageHandlers = GetClientMessageHandlers(services);
             AddPlatformHooks(api);
@@ -106,6 +113,10 @@ namespace gtmp.evilempire.server
         {
             var managedClient = clients.FindByPlatformObject(client);
             var session = sessions.GetSession(managedClient);
+            if (session.Character != null)
+            {
+                characters.UpdatePosition(session.Character.Id, session.Client.Position, session.Client.Rotation);
+            }
             sessions.RemoveSession(session);
         }
 

@@ -15,8 +15,6 @@ namespace gtmp.evilempire.server.mapping
 
         public IList<MapPed> Peds { get; } = new List<MapPed>();
 
-        public IList<MapRoute> Routes { get; } = new List<MapRoute>();
-
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
         Dictionary<string, MapPoint> NamedMapPointMap { get; } = new Dictionary<string, MapPoint>();
 
@@ -78,11 +76,6 @@ namespace gtmp.evilempire.server.mapping
                 }
                 map[mapPoint.Id] = mapPoint;
             }
-        }
-
-        public void AddRoute(MapRoute mapRoute)
-        {
-            Routes.Add(mapRoute);
         }
 
         public void AddMarker(MapMarker mapMarker)

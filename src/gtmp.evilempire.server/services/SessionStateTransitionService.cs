@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using gtmp.evilempire.sessions;
+using gtmp.evilempire.server.mapping;
+using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.server.services
 {
@@ -12,13 +14,15 @@ namespace gtmp.evilempire.server.services
 
     class SessionStateTransitionService : ISessionStateTransitionService
     {
+        Map map;
         IPlatformService platform;
         ISerializationService serialization;
 
         readonly Dictionary<SessionState, SessionStateTransit> transitions;
 
-        public SessionStateTransitionService(IPlatformService platform, ISerializationService serialization)
+        public SessionStateTransitionService(IPlatformService platform, ISerializationService serialization, Map map)
         {
+            this.map = map;
             this.platform = platform;
             this.serialization = serialization;
 
@@ -44,7 +48,15 @@ namespace gtmp.evilempire.server.services
 
         bool OnClientConnected(ISession session)
         {
-            session?.Client?.TriggerClientEvent(ClientEvents.DisplayLoginScreen);
+            var loadingPoint = map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0)?.Position ?? Vector3f.One;
+            var client = session.Client;
+            client.IsNametagVisible = false;
+            client.Dimension = session.PrivateDimension;
+            client.CanMove = false;
+            client.Position = loadingPoint;
+            client.StopAnimation();
+
+            client.TriggerClientEvent(ClientEvents.DisplayLoginScreen);
             session.State = SessionState.Connected;
             return true;
         }
@@ -73,8 +85,45 @@ namespace gtmp.evilempire.server.services
 
         bool OnClientFreeroam(ISession session)
         {
+            var client = session.Client;
+            if (client != null)
+            {
+                client.Dimension = 0;
+                if (session.Character != null)
+                {
+                    UpdateClientPositionWithLastKnownPosition(session);
+                }
+                client.CanMove = true;
+            }
+
             session?.Client?.TriggerClientEvent(ClientEvents.EnterFreeroam);
             return true;
+        }
+
+        void UpdateClientPositionWithLastKnownPosition(ISession session)
+        {
+            var client = session.Client;
+            var character = session.Character;
+
+            if (character.Position.HasValue)
+            {
+                var vector = character.Position.Value;
+                vector.Z += 0.2f;
+                client.Position = vector;
+            }
+            else
+            {
+                var startingPoint = map.GetPoint(MapPointType.NewPlayerSpawnPoint, 0);
+                if (startingPoint != null)
+                {
+                    client.Position = startingPoint.Position;
+                }
+            }
+
+            if (character.Rotation.HasValue)
+            {
+                client.Rotation = character.Rotation.Value;
+            }
         }
     }
 }

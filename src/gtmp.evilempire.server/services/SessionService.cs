@@ -9,6 +9,9 @@ namespace gtmp.evilempire.server.services
 {
     class SessionService : ISessionService
     {
+        const int PrivateDimensionsOffset = 1500000;
+        const int NumberOfMaximumPrivateDimensions = 10000;
+
         bool updateSessionsCopy = true;
         IList<ISession> sessionsCopy = null;
 
@@ -18,6 +21,8 @@ namespace gtmp.evilempire.server.services
 
         ISessionStateTransitionService sessionStateTransitionService;
         ICharacterService characters;
+
+        ConcurrentDictionary<int, byte> usedPrivateDimensions = new ConcurrentDictionary<int, byte>();
 
         public SessionService(ISessionStateTransitionService sessionStateTransitionService, ICharacterService characters)
         {
@@ -36,7 +41,7 @@ namespace gtmp.evilempire.server.services
 
         public ISession CreateSession(IClient client)
         {
-            var session = new Session(client);
+            var session = new Session(client) { PrivateDimension = GetUniquePrivateDimension() };
             sessions.TryAdd(session, 1);
             clientToSessionMap.TryAdd(client, session);
             UpdateSessionsCopy();
@@ -107,6 +112,7 @@ namespace gtmp.evilempire.server.services
             clientToSessionMap.TryRemove(session.Client, out v2);
             loginToSessionMap.TryRemove(session.User.Login, out v2);
             sessions.TryRemove(sessionObject, out v);
+            FreeDimension(session.PrivateDimension);
 
             if (session.Client.IsConnected)
             {
@@ -119,7 +125,7 @@ namespace gtmp.evilempire.server.services
         {
             foreach(var session in sessionsCopy)
             {
-                if (session.Character == null)
+                if (session.Character == null || session.State != SessionState.Freeroam)
                 {
                     continue;
                 }
@@ -137,6 +143,28 @@ namespace gtmp.evilempire.server.services
             {
                 sessionsCopy = new List<ISession>(sessions.Keys);
             }
+        }
+
+        void FreeDimension(int dimension)
+        {
+            byte v;
+            usedPrivateDimensions.TryRemove(dimension, out v);
+        }
+
+        int GetUniquePrivateDimension()
+        {
+            byte v;
+            for (var i = PrivateDimensionsOffset; i < PrivateDimensionsOffset + NumberOfMaximumPrivateDimensions; i++)
+            {
+                if (!usedPrivateDimensions.TryGetValue(i, out v))
+                {
+                    if (usedPrivateDimensions.TryAdd(i, 1))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return 0;
         }
     }
 }

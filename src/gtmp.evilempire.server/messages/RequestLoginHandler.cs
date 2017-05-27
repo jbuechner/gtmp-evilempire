@@ -62,9 +62,6 @@ namespace gtmp.evilempire.server.messages
 
                 platform.UpdateCharacterCustomizationOnClients(session);
 
-                client.Position = character.Position ?? new entities.Vector3f(0, 0, 0);
-                client.Rotation = character.Rotation ?? new entities.Vector3f(0, 0, 0);
-
                 var response = new RequestLoginResponse
                 {
                     User = new ClientUser(user),

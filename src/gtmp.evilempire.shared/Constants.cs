@@ -13,10 +13,5 @@
                 public static readonly string CharacterIdSequence = "characterId";
             }
         }
-
-        public static class DataSerialization
-        {
-            public static readonly string ClientServerJsonPrefix = "$obj";
-        }
     }
 }
