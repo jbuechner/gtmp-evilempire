@@ -27,6 +27,7 @@ namespace gtmp.evilempire.server
         {
             lock(_syncRoot)
             {
+                API.setCommandErrorMessage(string.Empty);
                 serverRealm = new ServerRealm(API);
             }
         }

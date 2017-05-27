@@ -7,11 +7,17 @@ using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace gtmp.evilempire.server
 {
     class ServerRealm : IDisposable
     {
+        readonly object _syncRoot = new object();
+
+        CancellationTokenSource heartbeatCancellationTokenSource;
+        Thread heartbeatThread;
+
         API api;
         ServiceContainer services;
         IClientService clients;
@@ -40,6 +46,7 @@ namespace gtmp.evilempire.server
 
             clientMessageHandlers = GetClientMessageHandlers(services);
             AddPlatformHooks(api);
+            BeginHeartbeat();
         }
 
         public void Dispose()
@@ -51,6 +58,14 @@ namespace gtmp.evilempire.server
             }
             api = null;
 
+            heartbeatCancellationTokenSource?.Cancel();
+            heartbeatThread?.Join();
+
+            heartbeatCancellationTokenSource?.Dispose();
+            heartbeatCancellationTokenSource = null;
+
+            heartbeatThread = null;
+
             services?.Dispose();
             services = null;
         }
@@ -59,6 +74,7 @@ namespace gtmp.evilempire.server
         {
             api.onPlayerFinishedDownload += OnPlayerFinishedDownload;
             api.onClientEventTrigger += OnClientEventTrigger;
+            api.onPlayerDisconnected += OnPlayerDisconnected;
         }
 
         void OnPlayerFinishedDownload(Client client)
@@ -68,6 +84,13 @@ namespace gtmp.evilempire.server
 
             var session = sessions.CreateSession(managedClient);
             sessionStateTransition.Transit(session, SessionState.Connected);
+        }
+
+        void OnPlayerDisconnected(Client client, string reason)
+        {
+            var managedClient = clients.FindByPlatformObject(client);
+            var session = sessions.GetSession(managedClient);
+            sessions.RemoveSession(session);
         }
 
         void OnClientEventTrigger(Client client, string eventName, params object[] args)
@@ -97,6 +120,47 @@ namespace gtmp.evilempire.server
             if (clientMessageHandlers.TryGetValue(eventName, out handler))
             {
                 handler?.ProcessClientMessage(session, args);
+            }
+        }
+
+        void BeginHeartbeat()
+        {
+            lock (_syncRoot)
+            {
+                if (heartbeatThread != null)
+                {
+                    throw new InvalidOperationException("Can not start heartbeat twice.");
+                }
+                heartbeatCancellationTokenSource = new CancellationTokenSource();
+                var thread = new Thread(() => this.Heartbeat(heartbeatCancellationTokenSource.Token));
+                thread.Start();
+            }
+        }
+
+        void Heartbeat(CancellationToken cancellationToken)
+        {
+            const int maxDirtyCounts = 200;
+            int dirtyCounts = 0;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (dirtyCounts++ > maxDirtyCounts)
+                {
+                    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                    sw.Start();
+
+                    sessions.RemoveStaleSessions();
+
+                    sessions.StoreSessionState();
+
+                    dirtyCounts = 0;
+                    sw.Stop();
+                    using (ConsoleColor.Cyan.Foreground())
+                    {
+                        Console.WriteLine($"Heartbeat completed within {sw.ElapsedMilliseconds}ms.");
+                    }
+                }
+                Thread.Sleep(100);
             }
         }
 

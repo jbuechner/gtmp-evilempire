@@ -30,6 +30,8 @@ namespace gtmp.evilempire
 
         void SendChatMessage(string message);
 
+        void Kick(string reason);
+
         //
         int CharacterModel { get; set; }
     }

@@ -13,5 +13,8 @@ namespace gtmp.evilempire.services
         ISession GetSession(IClient client);
         ISession GetSessionByLogin(string login);
         void AssociateSessionWithLogin(ISession session, string login);
+        void RemoveSession(ISession session);
+        void RemoveStaleSessions();
+        void StoreSessionState();
     }
 }

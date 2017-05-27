@@ -33,6 +33,11 @@ namespace gtmp.evilempire.server.messages
 
         public override bool ProcessClientMessage(ISession session, params object[] args)
         {
+            if (session.State != SessionState.CharacterCustomization)
+            {
+                return false;
+            }
+
             db.Update<CharacterCustomization>(session.CharacterCustomization);
             platform.UpdateCharacterCustomizationOnClients(session);
             sessionStateTransition.Transit(session, SessionState.Freeroam);

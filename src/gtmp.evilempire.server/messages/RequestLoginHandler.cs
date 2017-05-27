@@ -41,11 +41,12 @@ namespace gtmp.evilempire.server.messages
             var password = args.At(1).AsString();
 
             var user = authentication.Authenticate(session, login, password);
+            var client = session.Client;
             session.User = user;
 
             if (user == null)
             {
-                session.Client.TriggerClientEvent(ClientEvents.RequestLoginResponse, user != null);
+                client.TriggerClientEvent(ClientEvents.RequestLoginResponse, user != null);
             }
             else
             {
@@ -61,6 +62,9 @@ namespace gtmp.evilempire.server.messages
 
                 platform.UpdateCharacterCustomizationOnClients(session);
 
+                client.Position = character.Position ?? new entities.Vector3f(0, 0, 0);
+                client.Rotation = character.Rotation ?? new entities.Vector3f(0, 0, 0);
+
                 var response = new RequestLoginResponse
                 {
                     User = new ClientUser(user),
@@ -68,7 +72,7 @@ namespace gtmp.evilempire.server.messages
                     CharacterCustomization = new ClientCharacterCustomization(characterCustomization)
                 };
                 var data = serialization.SerializeAsDesignatedJson(response);
-                session.Client.TriggerClientEvent(ClientEvents.RequestLoginResponse, user != null, data);
+                client.TriggerClientEvent(ClientEvents.RequestLoginResponse, user != null, data);
 
                 sessionStateTransition.Transit(session, SessionState.LoggedIn);
             }

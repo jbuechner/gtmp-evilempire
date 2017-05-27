@@ -126,6 +126,11 @@ namespace gtmp.evilempire.server
             _client.sendChatMessage(message);
         }
 
+        public void Kick(string reason)
+        {
+            _client.kick(reason);
+        }
+
         #region Non GTMP
         public int CharacterModel
         {
