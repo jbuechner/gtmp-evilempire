@@ -1,5 +1,6 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,35 +11,36 @@ namespace gtmp.evilempire.server.commands
 {
     class GetUserGroupCommand : Command
     {
+        IAuthenticationService authentication;
+
         public override CommandInfo Info { get; }
-        public ILoginService LoginService { get; }
 
         public GetUserGroupCommand(ServiceContainer services)
         {
-            LoginService = services.Get<ILoginService>();
-
-            Info = new CommandInfo { Name = "get-usergroup", Description = "Returns the user group for a player. If no name is specified the user group of your login is returned.", Usage = "/get-usergroup [ <player> ]", IsAuthorized = p => p.UserGroup.IsAuthGroupOrHigher(AuthUserGroup.GameMaster), Execute = Execute };
+            authentication = services.Get<IAuthenticationService>();
+            Info = new CommandInfo { Name = "get-usergroup", Description = "Returns the user group for a player. If no name is specified the user group of your login is returned.", Usage = "/get-usergroup [ <player> ]", IsAuthorized = p => p.User.UserGroup.IsAuthGroupOrHigher(AuthUserGroup.GameMaster), Execute = Execute };
         }
 
-        public bool Execute(IClient client, ParsedCommand parsedCommand)
+        public bool Execute(ISession session, ParsedCommand parsedCommand)
         {
             var target = parsedCommand.Args.At(0);
-
+            var client = session.Client;
             if (!string.IsNullOrEmpty(target))
             {
-                var user = LoginService.FindUserByLogin(target);
-                if (user == null)
+                var targetUser = authentication.FindUserByLogin(target);
+                if (targetUser == null)
                 {
                     client.SendChatMessage($"No user for login \"{target}\" found.");
                 }
                 else
                 {
-                    client.SendChatMessage($"User group for login \"{target}\" is {user.UserGroup}.");
+                    client.SendChatMessage($"User group for login \"{target}\" is {targetUser.UserGroup}.");
                 }
                 return true;
             }
 
-            client.SendChatMessage($"Your user group is {client.UserGroup}.");
+            var user = session.User;
+            client.SendChatMessage($"Your user group is {user.UserGroup}.");
             return true;
         }
     }

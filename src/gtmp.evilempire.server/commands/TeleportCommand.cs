@@ -1,5 +1,6 @@
 ﻿using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +11,27 @@ namespace gtmp.evilempire.server.commands
 {
     class TeleportCommand : Command
     {
+        IAuthenticationService authentication;
+        ISessionService sessions;
+
         public override CommandInfo Info { get; }
 
-        public ILoginService LoginService { get; set; }
         public Map Map { get; set; }
 
         public TeleportCommand(ServiceContainer services)
         {
-            LoginService = services.Get<ILoginService>();
+            authentication = services.Get<IAuthenticationService>();
+            sessions = services.Get<ISessionService>();
             Map = services.Get<Map>();
-            Info = new CommandInfo { Name = "tp", Description = "Teleports yourself to a given map point / player or teleport another player to you.", Usage = "/tp [2me] [ p<Login> | c<Coordinate> | n<Named Point> ] e. g. /tp c28,238,24.5    /tp 2me pUser", IsAuthorized = c => c.UserGroup.IsAuthGroupOrHigher(entities.AuthUserGroup.GameMaster), Execute = Execute };
+            Info = new CommandInfo { Name = "tp", Description = "Teleports yourself to a given map point / player or teleport another player to you.", Usage = "/tp [2me] [ p<Login> | c<Coordinate> | n<Named Point> ] e. g. /tp c28,238,24.5    /tp 2me pUser", IsAuthorized = c => c.User.UserGroup.IsAuthGroupOrHigher(entities.AuthUserGroup.GameMaster), Execute = Execute };
         }
 
-        public bool Execute(IClient client, ParsedCommand command)
+        public bool Execute(ISession session, ParsedCommand command)
         {
             var teleportToMe = string.Compare("2me", command.Args.At(0), StringComparison.OrdinalIgnoreCase) == 0;
             string target = teleportToMe ? command.Args.At(1) : command.Args.At(0);
+
+            var client = session.Client;
 
             if (target == null || target.Length < 1)
             {
@@ -66,10 +72,10 @@ namespace gtmp.evilempire.server.commands
 
         bool TeleportPlayerByLogin(IClient client, string target, bool teleportToMe)
         {
-            var targetClient = LoginService.FindLoggedInClientByLogin(target);
-            if (targetClient == null)
+            var targetSession = sessions.GetSessionByLogin(target);
+            if (targetSession == null)
             {
-                var user = LoginService.FindUserByLogin(target);
+                var user = authentication.FindUserByLogin(target);
                 if (user == null)
                 {
                     client.SendChatMessage($"There is no player with the login \"{target}\".");
@@ -83,11 +89,11 @@ namespace gtmp.evilempire.server.commands
 
             if (teleportToMe)
             {
-                targetClient.Position = client.Position;
+                targetSession.Client.Position = client.Position;
             }
             else
             {
-                client.Position = targetClient.Position;
+                client.Position = targetSession.Client.Position;
             }
             return true;
         }

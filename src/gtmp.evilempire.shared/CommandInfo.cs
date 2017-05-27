@@ -1,7 +1,9 @@
-﻿namespace gtmp.evilempire
+﻿using gtmp.evilempire.sessions;
+
+namespace gtmp.evilempire
 {
-    public delegate bool CommandExecute(IClient client, ParsedCommand args);
-    public delegate bool CommandIsAuthorized(IClient client);
+    public delegate bool CommandExecute(ISession session, ParsedCommand args);
+    public delegate bool CommandIsAuthorized(ISession session);
 
     public class CommandInfo
     {

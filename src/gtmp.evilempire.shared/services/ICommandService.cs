@@ -1,4 +1,5 @@
-﻿using System;
+﻿using gtmp.evilempire.sessions;
+using System;
 using System.Collections.Generic;
 
 namespace gtmp.evilempire.services
@@ -7,8 +8,8 @@ namespace gtmp.evilempire.services
     {
         void RegisterCommand(CommandInfo command);
 
-        IServiceResult ExecuteCommand(IClient client, string command);
+        CommandExecutionResult ExecuteCommand(ISession session, string command);
 
-        IList<CommandInfo> GetRegisteredCommands(IClient client);
+        IList<CommandInfo> GetRegisteredCommands(ISession session);
     }
 }

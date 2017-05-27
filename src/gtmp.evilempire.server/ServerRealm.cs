@@ -1,5 +1,6 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Elements;
+using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
 using gtmp.evilempire.services;
@@ -24,6 +25,7 @@ namespace gtmp.evilempire.server
         ISessionService sessions;
         ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransition;
+        ICommandService commands;
 
         readonly IDictionary<string, MessageHandlerBase> clientMessageHandlers;
 
@@ -43,9 +45,11 @@ namespace gtmp.evilempire.server
             sessions = services.Get<ISessionService>();
             serialization = services.Get<ISerializationService>();
             sessionStateTransition = services.Get<ISessionStateTransitionService>();
+            commands = services.Get<ICommandService>();
 
             clientMessageHandlers = GetClientMessageHandlers(services);
             AddPlatformHooks(api);
+            AddChatCommands();
             BeginHeartbeat();
         }
 
@@ -75,6 +79,18 @@ namespace gtmp.evilempire.server
             api.onPlayerFinishedDownload += OnPlayerFinishedDownload;
             api.onClientEventTrigger += OnClientEventTrigger;
             api.onPlayerDisconnected += OnPlayerDisconnected;
+            api.onChatCommand += OnChatCommand;
+        }
+
+        void AddChatCommands()
+        {
+            var commandTypes = typeof(ServerRealm).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(Command)));
+            foreach (var commandType in commandTypes)
+            {
+                var command = Activator.CreateInstance(commandType, new[] { services }) as Command;
+                var commandInfo = command?.Info;
+                commands.RegisterCommand(commandInfo);
+            }
         }
 
         void OnPlayerFinishedDownload(Client client)
@@ -121,6 +137,17 @@ namespace gtmp.evilempire.server
             {
                 handler?.ProcessClientMessage(session, args);
             }
+        }
+
+        void OnChatCommand(Client client, string command, CancelEventArgs e)
+        {
+            var managedClient = clients.FindByPlatformObject(client);
+            var session = sessions.GetSession(managedClient);
+
+            var result = commands.ExecuteCommand(session, command);
+
+            e.Cancel = !result.Success;
+            e.Reason = result.ResponseMessage;
         }
 
         void BeginHeartbeat()

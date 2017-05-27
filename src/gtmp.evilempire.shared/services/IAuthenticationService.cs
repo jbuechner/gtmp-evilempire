@@ -11,5 +11,6 @@ namespace gtmp.evilempire.services
     public interface IAuthenticationService
     {
         User Authenticate(ISession session, string login, string password);
+        User FindUserByLogin(string login);
     }
 }

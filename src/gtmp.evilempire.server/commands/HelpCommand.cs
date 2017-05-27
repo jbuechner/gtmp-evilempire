@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 using System;
 using System.Linq;
 
@@ -18,10 +19,11 @@ namespace gtmp.evilempire.server.commands
             Info = new CommandInfo { Name = "help", Description = "Displays help and information for all available commands or a specific command.", IsAuthorized = client => true, Usage = "/help [<command>]", Execute = Execute };
         }
 
-        bool Execute(IClient client, ParsedCommand parsedCommand)
+        bool Execute(ISession session, ParsedCommand parsedCommand)
         {
             var targetCommand = parsedCommand.Args.At(0);
-            var commands = CommandService.GetRegisteredCommands(client);
+            var client = session.Client;
+            var commands = CommandService.GetRegisteredCommands(session);
             var allCount = commands.Count;
             commands = commands.Where(p => string.IsNullOrEmpty(targetCommand) || string.Compare(p.Name, targetCommand, StringComparison.OrdinalIgnoreCase) == 0).ToList();
             var filteredCount = commands.Count;

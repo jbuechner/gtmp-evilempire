@@ -71,7 +71,7 @@ namespace gtmp.evilempire.server.services
             return user;
         }
 
-        User FindUserByLogin(string login)
+        public User FindUserByLogin(string login)
         {
             var user = db.Select<User, string>(login);
             return user;

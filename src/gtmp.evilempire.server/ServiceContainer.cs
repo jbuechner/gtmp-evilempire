@@ -42,8 +42,8 @@ namespace gtmp.evilempire.server
             services.Register<IClientService, ClientService>();
             services.Register<IAuthenticationService, AuthenticationService>();
             services.Register<ICharacterService, CharacterService>();
+            services.Register<ICommandService, CommandService>();
 
-            //services.Register<ICommandService, CommandService>();
             //services.Register<IClientLifecycleService, ClientLifecycleService>();
             //services.Register<IAuthorizationService, AuthorizationService>();
             //services.Register<ILoginService, LoginService>();

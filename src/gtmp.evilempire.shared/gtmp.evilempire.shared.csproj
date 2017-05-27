@@ -55,6 +55,7 @@
     </Compile>
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="AuthExtensions.cs" />
+    <Compile Include="CommandExecutionResult.cs" />
     <Compile Include="CommandInfo.cs" />
     <Compile Include="ConsoleExtensions.cs" />
     <Compile Include="Constants.cs" />
@@ -75,25 +76,19 @@
     <Compile Include="IClient.cs" />
     <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />
-    <Compile Include="ServiceResult.cs" />
-    <Compile Include="services\CustomizeCharacterResponse.cs" />
     <Compile Include="services\IAuthenticationService.cs" />
-    <Compile Include="services\IAuthorizationService.cs" />
     <Compile Include="services\ICharacterService.cs" />
     <Compile Include="services\IClientLifecycleService.cs" />
     <Compile Include="services\IClientService.cs" />
     <Compile Include="services\ICommandService.cs" />
     <Compile Include="services\IDbService.cs" />
     <Compile Include="services\IJsonSerializer.cs" />
-    <Compile Include="services\ILoginService.cs" />
     <Compile Include="services\IPlatformService.cs" />
     <Compile Include="services\ISerializationService.cs" />
-    <Compile Include="services\IServiceResult.cs" />
     <Compile Include="services\ISessionService.cs" />
     <Compile Include="services\ISessionStateTransitionService.cs" />
     <Compile Include="services\LoginResponse.cs" />
     <Compile Include="services\SerializationService.cs" />
-    <Compile Include="services\ServiceResultState.cs" />
     <Compile Include="sessions\ISession.cs" />
     <Compile Include="sessions\SessionState.cs" />
     <Compile Include="TinyIoC.cs" />

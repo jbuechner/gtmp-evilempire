@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.services;
+using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
 
@@ -18,8 +19,13 @@ namespace gtmp.evilempire.server.services
             _registered.Add(command.Name, command);
         }
 
-        public IServiceResult ExecuteCommand(IClient client, string command)
+        public CommandExecutionResult ExecuteCommand(ISession session, string command)
         {
+            if (session == null || session.User == null || session.Client == null)
+            {
+                return new CommandExecutionResult(false);
+            }
+
             var l = command.IndexOf(' ');
             if (l < 1)
             {
@@ -29,32 +35,32 @@ namespace gtmp.evilempire.server.services
             CommandInfo info;
             if (_registered.TryGetValue(commandName, out info) && info != null)
             {
-                if (!info.IsAuthorized(client))
+                if (!info.IsAuthorized(session))
                 {
-                    return ServiceResult.AsSuccess();
+                    return new CommandExecutionResult(true);
                 }
 
                 var args = ParseCommand(command, l);
                 var parsedCommand = new ParsedCommand { Command = info, Args = args };
 
-                if (!info.Execute(client, parsedCommand))
+                if (!info.Execute(session, parsedCommand))
                 {
-                    return ServiceResult.AsError("Command failed.");
+                    return new CommandExecutionResult(false, "Command failed");
                 }
             }
             else
             {
-                return ServiceResult.AsError("Unknown command.");
+                return new CommandExecutionResult(false, "Unknown Command.");
             }
-            return ServiceResult.AsSuccess();
+            return new CommandExecutionResult(true);
         }
 
-        public IList<CommandInfo> GetRegisteredCommands(IClient client)
+        public IList<CommandInfo> GetRegisteredCommands(ISession session)
         {
             var result = new List<CommandInfo>(_registered.Count);
             foreach(var command in _registered.Values)
             {
-                if (command.IsAuthorized(client))
+                if (command.IsAuthorized(session))
                 {
                     result.Add(command);
                 }
