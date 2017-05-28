@@ -1,5 +1,6 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Elements;
+using GrandTheftMultiplayer.Shared;
 using gtmp.evilempire.db;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;

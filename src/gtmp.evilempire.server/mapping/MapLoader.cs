@@ -98,13 +98,67 @@ namespace gtmp.evilempire.server.mapping
                 var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
                 var vehicle = new MapVehicle(templateName, hash, position, rotation, color1, color2);
+
+                // optional
+                vehicle.IsInvincible = mapObject.Element("IsInvincible")?.Value?.AsBool() ?? false;
+                vehicle.IsLocked = mapObject.Element("IsLocked")?.Value?.AsBool() ?? false;
+                vehicle.IsCollisionless = mapObject.Element("IsCollisionless")?.Value?.AsBool() ?? false;
+                vehicle.IsEngineRunning = mapObject.Element("IsEngineRunning")?.Value?.AsBool() ?? false;
+                vehicle.HasBulletproofTyres = mapObject.Element("HasBulletproofTyres")?.Value?.AsBool() ?? false;
+                vehicle.IsPositionFrozen = mapObject.Element("IsPositionFrozen")?.Value?.AsBool() ?? false;
+                vehicle.NumberPlate = mapObject.Element("NumberPlate")?.Value;
+                vehicle.NumberPlateStyle = mapObject.Element("NumberPlateStyle")?.Value.AsInt();
+                vehicle.IsSpecialLightEnabled = mapObject.Element("IsSpecialLightEnabled")?.Value?.AsBool() ?? false;
+                vehicle.TrimColor = mapObject.Element("TrimColor")?.Value.AsInt();
+
+                vehicle.BrokenWindows = mapObject.Element("BrokenWindows")?.Attribute("Value")?.Value?.Split(',').Select(s => s.AsInt()).Where(p => p.HasValue).Select(s => s.Value).ToList();
+                vehicle.OpenedDoors = mapObject.Element("OpenedDoors")?.Attribute("Value")?.Value?.Split(',').Select(s => s.AsInt()).Where(p => p.HasValue).Select(s => s.Value).ToList();
+                vehicle.BrokenDoors = mapObject.Element("BrokenDoors")?.Attribute("Value")?.Value?.Split(',').Select(s => s.AsInt()).Where(p => p.HasValue).Select(s => s.Value).ToList();
+                vehicle.PoppedTyres = mapObject.Element("PoppedTyres")?.Attribute("Value")?.Value?.Split(',').Select(s => s.AsInt()).Where(p => p.HasValue).Select(s => s.Value).ToList();
+
+                var neonElements = mapObject.Elements("Neon");
+                if(neonElements != null)
+                {
+                    List<MapVehicle.Neon> neons = new List<MapVehicle.Neon>();
+                    foreach(var neonElement in neonElements)
+                    {
+                        var neonIndex = neonElement.Attribute("Slot")?.Value?.AsInt() ?? 0;
+                        var isTurnedOn = neonElement.Attribute("On")?.Value?.AsBool() ?? false;
+                        var neon = new MapVehicle.Neon { Index = neonIndex, IsTurnedOn = isTurnedOn };
+                        neons.Add(neon);
+                    }
+                    vehicle.Neons = neons;
+                }
+
+                vehicle.EnginePowerMultiplier = mapObject.Element("EnginePowerMultiplier")?.Value.AsFloat();
+                vehicle.EngineTorqueMultiplier = mapObject.Element("EngineTorqueMultiplier")?.Value.AsFloat();
+                vehicle.CustomPrimaryColor = mapObject.Element("CustomPrimaryColor")?.ToColor();
+                vehicle.CustomSecondaryColor = mapObject.Element("CustomSecondaryColor")?.ToColor();
+                vehicle.ModColor1 = mapObject.Element("ModColor1")?.ToColor();
+                vehicle.ModColor2 = mapObject.Element("ModColor2")?.ToColor();
+                vehicle.NeonColor = mapObject.Element("NeonColor")?.ToColor();
+                vehicle.TyreSmokeColor = mapObject.Element("TyreSmokeColor")?.ToColor();
+
+                vehicle.WheelColor = mapObject.Element("WheelColor")?.Value.AsInt();
+                vehicle.WheelType = mapObject.Element("WheelType")?.Value.AsInt();
+                vehicle.WindowTint = mapObject.Element("WindowTint")?.Value.AsInt();
+                vehicle.DashboardColor = mapObject.Element("DashboardColor")?.Value.AsInt();
+                vehicle.Health = mapObject.Element("Health")?.Value.AsFloat();
+                vehicle.Livery = mapObject.Element("Livery")?.Value.AsInt();
+                vehicle.PearlescentColor = mapObject.Element("PearlescentColor")?.Value.AsInt();
+
                 map.AddVehicle(vehicle);
             }
         }
 
         void LoadBlips(Map map, XDocument xdoc)
         {
-            foreach (var element in xdoc?.Root.Element("Metadata")?.Elements("Blip"))
+            var blips = xdoc?.Root.Element("Metadata")?.Elements("Blip");
+            if (blips == null)
+            {
+                return;
+            }
+            foreach (var element in blips)
             {
                 var position = element.ToVector3f() ?? Vector3f.One;
                 var sprite = element.Element("Sprite")?.Value?.AsInt() ?? 0;
@@ -217,7 +271,7 @@ namespace gtmp.evilempire.server.mapping
             {
                 return null;
             }
-            switch(element.Name.LocalName.ToUpperInvariant())
+            switch (element.Name.LocalName.ToUpperInvariant())
             {
                 case "LOADINGPOINT":
                     return MapPointType.Loading;
@@ -245,6 +299,19 @@ namespace gtmp.evilempire.server.mapping
             var y = element?.Element("Y")?.Value?.AsFloat() ?? 0;
             var z = element?.Element("Z")?.Value?.AsFloat() ?? 0;
             return new Vector3f(x, y, z);
+        }
+
+        internal static Color? ToColor(this XElement element)
+        {
+            if (element == null)
+            {
+                return null;
+            }
+            var a = element?.Element("Alpha")?.Value?.AsByte() ?? 0;
+            var r = element?.Element("Red")?.Value?.AsByte() ?? 0;
+            var g = element?.Element("Green")?.Value?.AsByte() ?? 0;
+            var b = element?.Element("Blue")?.Value?.AsByte() ?? 0;
+            return new Color(r, g, b, a);
         }
 
         internal static string GetSubElementValue(this XElement element, XName subElementName)
