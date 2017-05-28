@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.entities;
+using System;
 using System.Globalization;
 
 namespace gtmp.evilempire
@@ -68,7 +69,14 @@ namespace gtmp.evilempire
             }
             if (value is string)
             {
-                return bool.Parse((string)value);
+                try
+                {
+                    return bool.Parse((string)value);
+                }
+                catch(FormatException)
+                {
+                    return null;
+                }
             }
             return null;
         }

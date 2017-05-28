@@ -59,6 +59,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ClientEvents.cs" />
     <Compile Include="commands\Command.cs" />
+    <Compile Include="commands\EnableCharacterCustomizationCommand.cs" />
     <Compile Include="commands\GetUserGroupCommand.cs" />
     <Compile Include="commands\HelpCommand.cs" />
     <Compile Include="commands\TeleportCommand.cs" />
