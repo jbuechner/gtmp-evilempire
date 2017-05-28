@@ -34,7 +34,7 @@ namespace gtmp.evilempire.server.sessions
             }
             else
             {
-                session.State = SessionState.LoggedIn;
+                sessionStateTransition.Transit(session, SessionState.Freeroam);
             }
             return true;
         }

@@ -38,6 +38,9 @@ namespace gtmp.evilempire.server.messages
                 return false;
             }
 
+            session.Character.HasBeenThroughInitialCustomization = true;
+            db.Update<Character>(session.Character);
+
             db.Update<CharacterCustomization>(session.CharacterCustomization);
             platform.UpdateCharacterCustomizationOnClients(session);
             sessionStateTransition.Transit(session, SessionState.Freeroam);
