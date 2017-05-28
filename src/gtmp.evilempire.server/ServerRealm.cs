@@ -1,9 +1,11 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Elements;
+using gtmp.evilempire.db;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
+using gtmp.evilempire.server.sessions;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
 using System;
@@ -43,20 +45,21 @@ namespace gtmp.evilempire.server
             var map = MapLoader.LoadFrom("maps");
             ServerMapLoader.Load(map, api);
 
-            services = ServiceContainer.Create();
+            services = CreateServiceContainer();
             services.Register<IPlatformService>(new GtmpPlatformService(api));
             services.Register(map);
 
             clients = services.Get<IClientService>();
             sessions = services.Get<ISessionService>();
             serialization = services.Get<ISerializationService>();
-            sessionStateTransition = services.Get<ISessionStateTransitionService>();
             commands = services.Get<ICommandService>();
             characters = services.Get<ICharacterService>();
+            sessionStateTransition = services.Get<ISessionStateTransitionService>();
 
             clientMessageHandlers = GetClientMessageHandlers(services);
             AddPlatformHooks(api);
             AddChatCommands();
+            AddSessionStateTransitions();
             BeginHeartbeat();
         }
 
@@ -81,6 +84,22 @@ namespace gtmp.evilempire.server
             services = null;
         }
 
+        static ServiceContainer CreateServiceContainer()
+        {
+            var services = new ServiceContainer();
+            services.Register<ServiceContainer>(services);
+            services.Register<ISerializationService, SerializationService>();
+            services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
+            services.Register<ISessionService, SessionService>();
+            services.Register<IClientService, ClientService>();
+            services.Register<IAuthenticationService, AuthenticationService>();
+            services.Register<ICharacterService, CharacterService>();
+            services.Register<ICommandService, CommandService>();
+            services.Register<ISessionStateTransitionService, SessionStateTransitionService>();
+
+            return services;
+        }
+
         void AddPlatformHooks(API api)
         {
             api.onPlayerFinishedDownload += OnPlayerFinishedDownload;
@@ -97,6 +116,19 @@ namespace gtmp.evilempire.server
                 var command = Activator.CreateInstance(commandType, new[] { services }) as Command;
                 var commandInfo = command?.Info;
                 commands.RegisterCommand(commandInfo);
+            }
+        }
+
+        void AddSessionStateTransitions()
+        {
+            var sessionStateHandlerTypes = typeof(ServerRealm).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(SessionStateHandlerBase)));
+            if (sessionStateHandlerTypes != null)
+            {
+                foreach (var sessionStateHandlerType in sessionStateHandlerTypes)
+                {
+                    var sessionStateHandler = (SessionStateHandlerBase)Activator.CreateInstance(sessionStateHandlerType, new[] { services });
+                    sessionStateTransition.RegisterTransition(sessionStateHandler);
+                }
             }
         }
 

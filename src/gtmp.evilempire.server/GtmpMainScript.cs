@@ -1,4 +1,6 @@
 ﻿using GrandTheftMultiplayer.Server.API;
+using System;
+using System.Linq;
 
 namespace gtmp.evilempire.server
 {
@@ -10,6 +12,13 @@ namespace gtmp.evilempire.server
 
         public GtmpMainScript()
         {
+#if DEBUG
+            if (Environment.GetCommandLineArgs().Any(p => string.CompareOrdinal(p, "--dbgbreak") == 0))
+            {
+                System.Diagnostics.Debugger.Launch();
+            }
+#endif
+
             API.onResourceStart += OnResourceStart;
             API.onResourceStop += OnResourceStop;
         }

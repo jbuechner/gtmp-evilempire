@@ -10,5 +10,6 @@ namespace gtmp.evilempire.services
     public interface ISessionStateTransitionService
     {
         bool Transit(ISession session, SessionState newState);
+        void RegisterTransition(SessionStateHandlerBase sessionStateHandler);
     }
 }

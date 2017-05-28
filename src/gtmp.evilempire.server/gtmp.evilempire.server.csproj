@@ -87,7 +87,6 @@
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />
     <Compile Include="ServerRealm.cs" />
-    <Compile Include="ServiceContainer.cs" />
     <Compile Include="services\AuthenticationService.cs" />
     <Compile Include="services\CharacterService.cs" />
     <Compile Include="services\ClientService.cs" />
@@ -96,6 +95,10 @@
     <Compile Include="services\SessionService.cs" />
     <Compile Include="services\SessionStateTransitionService.cs" />
     <Compile Include="sessions\Session.cs" />
+    <Compile Include="sessions\SessionCharacterCustomizationStateHandler.cs" />
+    <Compile Include="sessions\SessionConnectedStateHandler.cs" />
+    <Compile Include="sessions\SessionFreeroamStateHandler.cs" />
+    <Compile Include="sessions\SessionLoggedInStateHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">
