@@ -16,7 +16,7 @@ namespace gtmp.evilempire.server.mapping
 
         public MapLoader()
         {
-            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadProps, LoadPeds, LoadVehicles };
+            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadProps, LoadPeds, LoadVehicles, LoadBlips };
         }
 
         public static Map LoadFrom(string directory)
@@ -99,6 +99,19 @@ namespace gtmp.evilempire.server.mapping
 
                 var vehicle = new MapVehicle(templateName, hash, position, rotation, color1, color2);
                 map.AddVehicle(vehicle);
+            }
+        }
+
+        void LoadBlips(Map map, XDocument xdoc)
+        {
+            foreach (var element in xdoc?.Root.Element("Metadata")?.Elements("Blip"))
+            {
+                var position = element.ToVector3f() ?? Vector3f.One;
+                var sprite = element.Element("Sprite")?.Value?.AsInt() ?? 0;
+                var color = element.Element("Color")?.Value?.AsInt() ?? 0;
+                var blip = new MapBlip(position, sprite, color);
+
+                map.AddBlip(blip);
             }
         }
 

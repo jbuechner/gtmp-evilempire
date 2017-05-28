@@ -52,6 +52,13 @@ namespace gtmp.evilempire.server.mapping
             {
                 Load(vehicle, api);
             }
+
+            foreach (var blip in map.Blips)
+            {
+                var entity = api.createBlip(blip.Position.ToVector3());
+                entity.color = blip.Color;
+                entity.sprite = blip.Sprite;
+            }
         }
     }
 }

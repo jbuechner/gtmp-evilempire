@@ -65,6 +65,7 @@
     <Compile Include="commands\TeleportCommand.cs" />
     <Compile Include="GtmpMainScript.cs" />
     <Compile Include="mapping\Map.cs" />
+    <Compile Include="mapping\MapBlip.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
     <Compile Include="mapping\MapProp.cs" />

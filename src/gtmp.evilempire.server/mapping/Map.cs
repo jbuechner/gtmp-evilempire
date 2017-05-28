@@ -15,6 +15,8 @@ namespace gtmp.evilempire.server.mapping
 
         public IList<MapPed> Peds { get; } = new List<MapPed>();
 
+        public IList<MapBlip> Blips { get; } = new List<MapBlip>();
+
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
         Dictionary<string, MapPoint> NamedMapPointMap { get; } = new Dictionary<string, MapPoint>();
 
@@ -109,6 +111,11 @@ namespace gtmp.evilempire.server.mapping
             {
                 Vehicles.Add(mapVehicle);
             }
+        }
+
+        public void AddBlip(MapBlip mapBlip)
+        {
+            Blips.Add(mapBlip);
         }
     }
 }
