@@ -36,7 +36,12 @@ namespace gtmp.evilempire.server.messages
             handlers = new Dictionary<string, UpdateCharacterCustomization>
             {
                 { "MODEL", UpdateModel },
-                { "FACE::SHAPEFIRST", UpdateFaceFirstShape }
+                { "FACE::SHAPEFIRST", UpdateFaceFirstShape },
+                { "FACE::SHAPESECOND", UpdateFaceSecondShape },
+                { "FACE::SKINFIRST", UpdateFaceFirstSkin },
+                { "FACE::SKINSECOND", UpdateFaceSecondSkin },
+                { "FACE::SKINMIX", UpdateFaceSkinMix },
+                { "FACE::SHAPEMIX", UpdateFaceShapeMix }
             };
         }
 
@@ -63,11 +68,8 @@ namespace gtmp.evilempire.server.messages
                     changed = handler?.Invoke(availableOptions, characterCustomization, value.Value) ?? false;
                 }
 
-                if (changed)
-                {
-                    platform.UpdateCharacterCustomization(session);
-                    return SendCharacterCustomizationResponse(session, true, characterCustomization);
-                }
+                platform.UpdateCharacterCustomization(session);
+                return SendCharacterCustomizationResponse(session, changed, characterCustomization);
             }
 
             return SendCharacterCustomizationResponse(session, false, null);
@@ -103,12 +105,74 @@ namespace gtmp.evilempire.server.messages
 
         static bool UpdateFaceFirstShape(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
         {
-            if (availableOptions.Faces.Any(p => p.Id == newValue))
+            if (IsFaceAvailable(availableOptions, newValue))
             {
                 characterCustomization.Face.ShapeFirst = newValue;
                 return true;
             }
             return false;
+        }
+
+        static bool UpdateFaceSecondShape(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (IsFaceAvailable(availableOptions, newValue))
+            {
+                characterCustomization.Face.ShapeSecond = newValue;
+                return true;
+            }
+            return false;
+        }
+
+        static bool UpdateFaceFirstSkin(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (IsFaceAvailable(availableOptions, newValue))
+            {
+                characterCustomization.Face.SkinFirst = newValue;
+                return true;
+            }
+            return false;
+        }
+
+        static bool UpdateFaceSecondSkin(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (IsFaceAvailable(availableOptions, newValue))
+            {
+                characterCustomization.Face.SkinSecond = newValue;
+                return true;
+            }
+            return false;
+        }
+
+        static bool UpdateFaceSkinMix(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (IsValidMixValue(newValue))
+            {
+                characterCustomization.Face.SkinMix = newValue / 100f;
+                return true;
+            }
+
+            return false;
+        }
+
+        static bool UpdateFaceShapeMix(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (IsValidMixValue(newValue))
+            {
+                characterCustomization.Face.ShapeMix = newValue / 100f;
+                return true;
+            }
+
+            return false;
+        }
+
+        static bool IsFaceAvailable(FreeroamCustomizationData availableOptions, int newValue)
+        {
+            return availableOptions.Faces.Any(p => p.Id == newValue);
+        }
+
+        static bool IsValidMixValue(int value)
+        {
+            return value >= 0 && value <= 100;
         }
     }
 }

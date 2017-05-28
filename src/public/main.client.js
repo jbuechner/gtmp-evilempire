@@ -109,7 +109,7 @@ const ClientEvents = {
     },
     'res:customizeChar': function __customizeChar_response(success, data) {
         data = deserializeFromDesignatedJson(data);
-        if (!success) {
+        if (!success && typeof data !== 'object') {
             data = {};
         }
         data.success = success;

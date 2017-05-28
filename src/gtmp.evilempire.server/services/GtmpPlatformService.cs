@@ -32,10 +32,13 @@ namespace gtmp.evilempire.server.services
 
         public CharacterCustomization GetDefaultCharacterCustomization()
         {
-            return new CharacterCustomization
+            var defaultValue = new CharacterCustomization
             {
                 ModelHash = (int)PedHash.FreemodeMale01
             };
+            defaultValue.Face.ShapeMix = defaultValue.Face.SkinMix = 0.5f;
+
+            return defaultValue;
         }
 
         public void UpdateCharacterCustomizationOnClients(ISession session)
