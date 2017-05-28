@@ -12,6 +12,6 @@ namespace gtmp.evilempire.entities
 
         public int ModelHash { get; set; }
 
-        public CharacterFaceCustomization Face { get; set; }
+        public CharacterFaceCustomization Face { get; set; } = new CharacterFaceCustomization();
     }
 }

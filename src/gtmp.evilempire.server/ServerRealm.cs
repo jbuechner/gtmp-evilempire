@@ -145,6 +145,16 @@ namespace gtmp.evilempire.server
         {
             var managedClient = clients.FindByPlatformObject(client);
             var session = sessions.GetSession(managedClient);
+
+            if (session == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"Client disconnected but found not session for {client.name} / {client.address}");
+                }
+                return;
+            }
+
             if (session.Character != null)
             {
                 characters.UpdatePosition(session.Character.Id, session.Client.Position, session.Client.Rotation);
@@ -175,6 +185,16 @@ namespace gtmp.evilempire.server
             
             var managedClient = clients.FindByPlatformObject(client);
             var session = sessions.GetSession(managedClient);
+
+            if (session == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"Got a client message but found not session for {client.name} / {client.address}");
+                }
+                return;
+            }
+
             MessageHandlerBase handler;
             if (clientMessageHandlers.TryGetValue(eventName, out handler))
             {

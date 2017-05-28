@@ -83,6 +83,7 @@
     <Compile Include="messages\RequestLoginResponse.cs" />
     <Compile Include="messages\transfer\ClientCharacter.cs" />
     <Compile Include="messages\transfer\ClientCharacterCustomization.cs" />
+    <Compile Include="messages\transfer\ClientCharacterFaceCustomization.cs" />
     <Compile Include="messages\transfer\ClientUser.cs" />
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />

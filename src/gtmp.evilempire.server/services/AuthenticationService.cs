@@ -33,7 +33,7 @@ namespace gtmp.evilempire.server.services
         public User Authenticate(ISession session, string login, string password)
         {
             var user = FindUserByLogin(login);
-            if (user == null)
+            if (user == null || session == null)
             {
                 return null;
             }

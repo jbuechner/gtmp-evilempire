@@ -11,21 +11,8 @@ namespace gtmp.evilempire.server.messages.transfer
     {
         Character character;
 
-        public bool HasBeenThroughInitialCustomization
-        {
-            get
-            {
-                return character.HasBeenThroughInitialCustomization;
-            }
-        }
-
-        public Gender Gender
-        {
-            get
-            {
-                return character.Gender;
-            }
-        }
+        public bool HasBeenThroughInitialCustomization => character.HasBeenThroughInitialCustomization;
+        public Gender Gender => character.Gender;
 
         public ClientCharacter(Character character)
         {

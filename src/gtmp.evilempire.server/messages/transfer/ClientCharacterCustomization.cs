@@ -11,16 +11,13 @@ namespace gtmp.evilempire.server.messages.transfer
     {
         CharacterCustomization characterCustomization;
 
-        public int ModelHash
-        {
-            get
-            {
-                return characterCustomization.ModelHash;
-            }
-        }
+        public int ModelHash => characterCustomization.ModelHash;
+
+        public ClientCharacterFaceCustomization Face { get; }
 
         public ClientCharacterCustomization(CharacterCustomization characterCustomization)
         {
+            Face = new ClientCharacterFaceCustomization(characterCustomization.Face);
             this.characterCustomization = characterCustomization;
         }
     }

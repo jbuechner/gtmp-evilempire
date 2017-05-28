@@ -15,5 +15,6 @@ namespace gtmp.evilempire.services
         CharacterCustomization GetDefaultCharacterCustomization();
 
         void UpdateCharacterCustomizationOnClients(ISession session);
+        void UpdateCharacterCustomization(ISession session);
     }
 }

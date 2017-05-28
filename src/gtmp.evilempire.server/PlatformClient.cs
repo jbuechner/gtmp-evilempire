@@ -9,7 +9,6 @@ namespace gtmp.evilempire.server
     {
         Client _client;
         bool _isFrozen;
-        int _modelHash;
 
         public object PlatformObject
         {
@@ -130,24 +129,6 @@ namespace gtmp.evilempire.server
         {
             _client.kick(reason);
         }
-
-        #region Non GTMP
-        public int CharacterModel
-        {
-            get
-            {
-                return _modelHash;
-            }
-            set
-            {
-                if (_modelHash != value)
-                {
-                    _client.setSkin((PedHash)value);
-                    _modelHash = value;
-                }
-            }
-        }
-        #endregion
 
         #region IEquatable
         public bool Equals(IClient other)

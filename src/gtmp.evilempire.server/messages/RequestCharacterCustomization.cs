@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 using gtmp.evilempire.sessions;
 using gtmp.evilempire.services;
 using gtmp.evilempire.entities;
+using gtmp.evilempire.entities.customization;
 
 namespace gtmp.evilempire.server.messages
 {
     class RequestCharacterCustomization : MessageHandlerBase
     {
+        delegate bool UpdateCharacterCustomization(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue);
+
+        readonly IDictionary<string, UpdateCharacterCustomization> handlers;
+
         IPlatformService platform;
         ISerializationService serialization;
 
@@ -27,6 +32,12 @@ namespace gtmp.evilempire.server.messages
         {
             platform = services.Get<IPlatformService>();
             serialization = services.Get<ISerializationService>();
+
+            handlers = new Dictionary<string, UpdateCharacterCustomization>
+            {
+                { "MODEL", UpdateModel },
+                { "FACE::SHAPEFIRST", UpdateFaceFirstShape }
+            };
         }
 
         public override bool ProcessClientMessage(ISession session, params object[] args)
@@ -41,17 +52,21 @@ namespace gtmp.evilempire.server.messages
                     return SendCharacterCustomizationResponse(session, false, null);
                 }
 
+                var changed = false;
+                var characterCustomization = session.CharacterCustomization;
+
                 var availableOptions = platform.GetFreeroamCharacterCustomizationData();
-                switch(what.ToUpperInvariant())
+
+                UpdateCharacterCustomization handler;
+                if (handlers.TryGetValue(what.ToUpperInvariant(), out handler))
                 {
-                    case "MODEL":
-                        if (availableOptions.Models.Any(p => p.Hash == value))
-                        {
-                            session.Client.CharacterModel = session.CharacterCustomization.ModelHash = value.Value;
-                            return SendCharacterCustomizationResponse(session, true, session.CharacterCustomization);
-                            // store into db after customization is finished
-                        }
-                        break;
+                    changed = handler?.Invoke(availableOptions, characterCustomization, value.Value) ?? false;
+                }
+
+                if (changed)
+                {
+                    platform.UpdateCharacterCustomization(session);
+                    return SendCharacterCustomizationResponse(session, true, characterCustomization);
                 }
             }
 
@@ -74,6 +89,26 @@ namespace gtmp.evilempire.server.messages
                 session.Client.TriggerClientEvent(ClientEvents.RequestCustomizeCharacterResponse, success);
             }
             return success;
+        }
+
+        static bool UpdateModel(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (availableOptions.Models.Any(p => p.Hash == newValue))
+            {
+                characterCustomization.ModelHash = newValue;
+                return true;
+            }
+            return false;
+        }
+
+        static bool UpdateFaceFirstShape(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            if (availableOptions.Faces.Any(p => p.Id == newValue))
+            {
+                characterCustomization.Face.ShapeFirst = newValue;
+                return true;
+            }
+            return false;
         }
     }
 }
