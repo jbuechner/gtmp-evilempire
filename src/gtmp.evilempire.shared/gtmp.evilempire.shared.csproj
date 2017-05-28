@@ -67,6 +67,8 @@
     <Compile Include="entities\CharacterFaceCustomization.cs" />
     <Compile Include="entities\customization\FreeroamCustomizationData.cs" />
     <Compile Include="entities\customization\FreeroamFace.cs" />
+    <Compile Include="entities\customization\FreeroamHairColor.cs" />
+    <Compile Include="entities\customization\FreeroamHairStyle.cs" />
     <Compile Include="entities\customization\FreeroamModel.cs" />
     <Compile Include="entities\Gender.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />

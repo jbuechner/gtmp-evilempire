@@ -260,12 +260,14 @@ class Client {
         let player = API.getLocalPlayer();
         let pos = API.getEntityPosition(player);
         let rot = API.getGameplayCamDir();
+
+        pos.Z += 0.5;
+        pos.X -= (rot.X * 2);
+        pos.Y += (rot.Y * 1.2);
+
         let camera = API.createCamera(pos, rot);
 
-        pos.X += (rot.X * 3);
-        pos.Y += (rot.Y * 3);
-        pos.Z -= 0.1;
-        let offset = new Vector3(0, 0, 0);
+        let offset = new Vector3(0, 0, 0.5);
         API.pointCameraAtEntity(camera, player, offset);
         API.setActiveCamera(camera);
     }

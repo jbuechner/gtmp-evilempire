@@ -13,6 +13,12 @@ namespace gtmp.evilempire.server.messages.transfer
 
         public int ModelHash => characterCustomization.ModelHash;
 
+        public int HairStyleId => characterCustomization.HairStyleId;
+
+        public int HairColorId => characterCustomization.HairColorId;
+
+        public Gender Gender => characterCustomization.Gender;
+
         public ClientCharacterFaceCustomization Face { get; }
 
         public ClientCharacterCustomization(CharacterCustomization characterCustomization)

@@ -41,7 +41,9 @@ namespace gtmp.evilempire.server.messages
                 { "FACE::SKINFIRST", UpdateFaceFirstSkin },
                 { "FACE::SKINSECOND", UpdateFaceSecondSkin },
                 { "FACE::SKINMIX", UpdateFaceSkinMix },
-                { "FACE::SHAPEMIX", UpdateFaceShapeMix }
+                { "FACE::SHAPEMIX", UpdateFaceShapeMix },
+                { "HAIR::STYLE", UpdateHairStyle },
+                { "HAIR::COLOR", UpdateHairColor }
             };
         }
 
@@ -95,8 +97,10 @@ namespace gtmp.evilempire.server.messages
 
         static bool UpdateModel(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
         {
-            if (availableOptions.Models.Any(p => p.Hash == newValue))
+            var model = availableOptions.Models.FirstOrDefault(p => p.Hash == newValue);
+            if (model != null)
             {
+                characterCustomization.Gender = model.Gender;
                 characterCustomization.ModelHash = newValue;
                 return true;
             }
@@ -162,6 +166,28 @@ namespace gtmp.evilempire.server.messages
                 return true;
             }
 
+            return false;
+        }
+
+        static bool UpdateHairStyle(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            var hairStyle = availableOptions.HairStyles.FirstOrDefault(p => p.Gender == characterCustomization.Gender && p.Id == newValue && p.AvailableDuringCharacterCustomization);
+            if (hairStyle != null)
+            {
+                characterCustomization.HairStyleId = newValue;
+                return true;
+            }
+            return false;
+        }
+
+        static bool UpdateHairColor(FreeroamCustomizationData availableOptions, CharacterCustomization characterCustomization, int newValue)
+        {
+            var hairColor = availableOptions.HairColors.FirstOrDefault(p => p.Id == newValue);
+            if (hairColor != null)
+            {
+                characterCustomization.HairColorId = newValue;
+                return true;
+            }
             return false;
         }
 

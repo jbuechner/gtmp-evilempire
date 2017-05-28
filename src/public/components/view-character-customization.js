@@ -87,6 +87,24 @@ Slim.tag('view-character-customization', class extends Slim {
             },
             item => this.app.customizeCharacter('face::skinSecond', item.Id)
         );
+        this.addIndexBasedSelection('hairstyle', 'selectedHairStyle',
+            () => this.customization.HairStyles.filter(p => p.Gender === this.current.Gender && p.AvailableDuringCharacterCustomization),
+            () => this.current.HairStyleId,
+            p => p.Gender === this.current.Gender && p.Id === this.current.HairStyleId,
+            (item, index) => {
+                return item ? 'Hair ' + item.Id : '(n/a ' + index + ')'
+            },
+            item => this.app.customizeCharacter('hair::style', item.Id)
+        );
+        this.addIndexBasedSelection('haircolor', 'selectedHairColor',
+            () => this.customization.HairColors,
+            () => this.current.HairColorId,
+            p => p.Id === this.current.HairColorId,
+            (item, index) => {
+                return item ? 'Color ' + item.Id : '(n/a' + index + ')'
+            },
+            item => this.app.customizeCharacter('hair::color', item.Id)
+        );
 
 
         document.addEventListener('res:customizeChar', (ev) => {
@@ -270,6 +288,40 @@ Skin
 </div>
 <div style="font-size: 12px;padding-bottom:9px;">
     You can mix the values between mother and father using a number between 0 and 100 (0 all traits of the mother, 100 all trais of the father).
+</div>
+
+<div>
+Hair
+</div>
+<div class="field has-addons">
+  <p class="control">
+    <a class="button" click="previoushairstyle">
+      &lt;
+    </a>
+  </p>
+  <p class="control">
+    <input class="input" type="text" placeholder="Gender" disabled="disabled" value="[[gethairstyle(customization.HairStyles, current, selectedHairStyle)]]">
+  </p>
+  <p class="control">
+    <a class="button" click="nexthairstyle">
+      >
+    </a>
+  </p>
+</div>
+<div class="field has-addons">
+  <p class="control">
+    <a class="button" click="previoushaircolor">
+      &lt;
+    </a>
+  </p>
+  <p class="control">
+    <input class="input" type="text" placeholder="Gender" disabled="disabled" value="[[gethaircolor(customization.HairColors, current, selectedHairColor)]]">
+  </p>
+  <p class="control">
+    <a class="button" click="nexthaircolor">
+      >
+    </a>
+  </p>
 </div>
 
 <p bind>[[message]]</p>
