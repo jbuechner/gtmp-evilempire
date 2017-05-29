@@ -43,6 +43,10 @@ namespace gtmp.evilempire.server.sessions
             if (mapPoint != null)
             {
                 session.Client.Position = mapPoint.Position;
+                if (mapPoint.Rotation.HasValue)
+                {
+                    session.Client.Rotation = mapPoint.Rotation.Value;
+                }
             }
 
             return true;
