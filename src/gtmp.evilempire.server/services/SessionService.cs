@@ -84,14 +84,17 @@ namespace gtmp.evilempire.server.services
             {
                 updateSessionsCopy = false;
 
-                foreach (var session in sessionsCopy)
+                if (sessionsCopy != null)
                 {
-                    if (!session.Client.IsConnected)
+                    foreach (var session in sessionsCopy)
                     {
-                        using (ConsoleColor.Yellow.Foreground())
+                        if (!session.Client.IsConnected)
                         {
-                            Console.WriteLine($"Removed stale session for client {session.Client.Name}");
-                            RemoveSession(session);
+                            using (ConsoleColor.Yellow.Foreground())
+                            {
+                                Console.WriteLine($"Removed stale session for client {session.Client.Name}");
+                                RemoveSession(session);
+                            }
                         }
                     }
                 }

@@ -14,7 +14,6 @@ namespace gtmp.evilempire.services
         FreeroamCustomizationData GetFreeroamCharacterCustomizationData();
         CharacterCustomization GetDefaultCharacterCustomization();
 
-        void UpdateCharacterCustomizationOnClients(ISession session);
         void UpdateCharacterCustomization(ISession session);
     }
 }

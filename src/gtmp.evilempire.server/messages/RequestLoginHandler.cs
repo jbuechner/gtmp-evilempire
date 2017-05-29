@@ -15,6 +15,7 @@ namespace gtmp.evilempire.server.messages
         ISerializationService serialization;
         ICharacterService characters;
         ISessionStateTransitionService sessionStateTransition;
+        ISessionService sessions;
         IPlatformService platform;
 
         public override string EventName
@@ -33,6 +34,7 @@ namespace gtmp.evilempire.server.messages
             characters = services.Get<ICharacterService>();
             sessionStateTransition = services.Get<ISessionStateTransitionService>();
             platform = services.Get<IPlatformService>();
+            sessions = services.Get<ISessionService>();
         }
 
         public override bool ProcessClientMessage(ISession session, params object[] args)
@@ -59,8 +61,8 @@ namespace gtmp.evilempire.server.messages
                     characterCustomization = characters.CreateDefaultCharacterCustomization(character.Id);
                 }
                 session.CharacterCustomization = characterCustomization;
-
-                platform.UpdateCharacterCustomizationOnClients(session);
+                //platform.UpdateCharacterCustomizationOnClients(session);
+                platform.UpdateCharacterCustomization(session);
 
                 var response = new RequestLoginResponse
                 {

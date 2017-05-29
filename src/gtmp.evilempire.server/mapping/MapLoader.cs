@@ -63,8 +63,8 @@ namespace gtmp.evilempire.server.mapping
             {
                 var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
-                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.Zero;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.Zero;
 
                 var obj = new MapProp(templateName, hash, position, rotation);
                 map.AddProp(obj);
@@ -77,9 +77,9 @@ namespace gtmp.evilempire.server.mapping
             {
                 var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
-                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
-                var isInvincible = mapObject.Element("Invicible")?.Value?.AsBool() ?? false;
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.Zero;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.Zero;
+                var isInvincible = mapObject.Element("IsInvicible")?.Value?.AsBool() ?? false;
 
                 var ped = new MapPed(templateName, hash, position, rotation.Z, isInvincible);
                 map.AddPed(ped);
@@ -92,8 +92,8 @@ namespace gtmp.evilempire.server.mapping
             {
                 var templateName = mapObject.Element("TemplateName")?.Value;
                 var hash = mapObject.Element("Hash")?.Value?.AsInt() ?? 0;
-                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.One;
-                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
+                var position = mapObject.Element("Position")?.ToVector3f() ?? Vector3f.Zero;
+                var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.Zero;
                 var color1 = mapObject.Element("PrimaryColor")?.Value?.AsInt() ?? 0;
                 var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
@@ -160,7 +160,7 @@ namespace gtmp.evilempire.server.mapping
             }
             foreach (var element in blips)
             {
-                var position = element.ToVector3f() ?? Vector3f.One;
+                var position = element.ToVector3f() ?? Vector3f.Zero;
                 var sprite = element.Element("Sprite")?.Value?.AsInt() ?? 0;
                 var color = element.Element("Color")?.Value?.AsInt() ?? 0;
                 var blip = new MapBlip(position, sprite, color);
@@ -204,7 +204,7 @@ namespace gtmp.evilempire.server.mapping
             {
                 var mapPointType = metapoint.ToMapPointType() ?? MapPointType.None;
                 var id = metapoint.Element("id")?.Value?.AsInt() ?? 0;
-                var position = metapoint.ToVector3f() ?? Vector3f.One;
+                var position = metapoint.ToVector3f() ?? Vector3f.Zero;
                 var rotation = metapoint.Element("Rotation")?.ToVector3f();
                 var name = metapoint.Element("Name")?.Value?.AsString();
 
@@ -223,16 +223,16 @@ namespace gtmp.evilempire.server.mapping
             foreach (var marker in markers)
             {
                 var markerType = marker.Element("Type")?.ToMarkerType() ?? MarkerType.UpsideDownCone;
-                var position = marker.Element("Position")?.ToVector3f() ?? Vector3f.One;
-                var direction = marker.Element("Direction")?.ToVector3f() ?? Vector3f.One;
-                var rotation = marker.Element("Rotation")?.ToVector3f() ?? Vector3f.One;
-                var scale = marker.Element("Scale")?.ToVector3f() ?? Vector3f.One;
+                var position = marker.Element("Position")?.ToVector3f() ?? Vector3f.Zero;
+                var direction = marker.Element("Direction")?.ToVector3f() ?? Vector3f.Zero;
+                var rotation = marker.Element("Rotation")?.ToVector3f() ?? Vector3f.Zero;
+                var scale = marker.Element("Scale")?.ToVector3f() ?? Vector3f.Zero;
                 var alpha = marker.Element("Alpha")?.Value?.AsByte() ?? 0;
                 var r = marker.Element("Red")?.Value?.AsByte() ?? 0;
                 var g = marker.Element("Green")?.Value?.AsByte() ?? 0;
                 var b = marker.Element("Blue")?.Value?.AsByte() ?? 0;
 
-                var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, b, g);
+                var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, g, b);
                 map.AddMarker(mapMarker);
             }
         }

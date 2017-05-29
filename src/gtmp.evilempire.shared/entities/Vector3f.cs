@@ -2,6 +2,7 @@
 {
     public struct Vector3f
     {
+        public static readonly Vector3f Zero = new Vector3f(0f, 0f, 0f);
         public static readonly Vector3f One = new Vector3f(1f, 1f, 1f);
 
         float _x;

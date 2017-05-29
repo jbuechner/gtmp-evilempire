@@ -40,10 +40,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrandTheftMultiplayer.Server">
-      <HintPath>..\..\libs\gtmp\v0.1.508.640\GrandTheftMultiplayer.Server.exe</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />

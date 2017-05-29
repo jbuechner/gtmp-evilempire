@@ -95,15 +95,15 @@ namespace gtmp.evilempire.server.mapping
             }
             if (vehicle.ModColor2.HasValue)
             {
-                entity.modColor2 = vehicle.ModColor2.Value.ToColor(); ;
+                entity.modColor2 = vehicle.ModColor2.Value.ToColor();
             }
             if (vehicle.NeonColor.HasValue)
             {
-                entity.neonColor = vehicle.NeonColor.Value.ToColor(); ;
+                entity.neonColor = vehicle.NeonColor.Value.ToColor();
             }
             if (vehicle.TyreSmokeColor.HasValue)
             {
-                entity.tyreSmokeColor = vehicle.TyreSmokeColor.Value.ToColor(); ;
+                entity.tyreSmokeColor = vehicle.TyreSmokeColor.Value.ToColor();
             }
             if (vehicle.WheelColor.HasValue)
             {

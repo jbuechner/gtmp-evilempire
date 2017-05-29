@@ -39,8 +39,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\libs\gtmp\v0.1.508.640\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,6 +76,7 @@
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />
     <Compile Include="entities\Vector3f.cs" />
+    <Compile Include="entities\Vehicle.cs" />
     <Compile Include="IClient.cs" />
     <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />
@@ -101,6 +102,9 @@
     <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">
       <Link>CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

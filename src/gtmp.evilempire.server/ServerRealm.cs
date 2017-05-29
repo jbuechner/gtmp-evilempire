@@ -140,6 +140,10 @@ namespace gtmp.evilempire.server
 
             var session = sessions.CreateSession(managedClient);
             sessionStateTransition.Transit(session, SessionState.Connected);
+
+            System.Threading.Tasks.Task.Delay(10000).ContinueWith(t =>
+                 api.createPed(GrandTheftMultiplayer.Server.Constant.PedHash.Ashley, client.position, 20)
+            );
         }
 
         void OnPlayerDisconnected(Client client, string reason)

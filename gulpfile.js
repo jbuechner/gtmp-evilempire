@@ -31,7 +31,7 @@ const project = {
         },
         libs: {
             gtmp: {
-                serverzip: './libs/gtmp/v0.1.508.640/GT-MP-Server.zip'
+                serverzip: './libs/gtmp/v0.1.513.481/GT-MP-Server.zip'
             }
         }
     },

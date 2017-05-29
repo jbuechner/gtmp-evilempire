@@ -5,6 +5,7 @@ using gtmp.evilempire.entities;
 using gtmp.evilempire.entities.customization;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace gtmp.evilempire.server.services
@@ -38,32 +39,23 @@ namespace gtmp.evilempire.server.services
             return defaultValue;
         }
 
-        public void UpdateCharacterCustomizationOnClients(ISession session)
-        {
-            var client = session.Client;
-            var characterCustomization = session.CharacterCustomization;
-            var face = characterCustomization.Face;
-
-            var nativeClient = (Client)client.PlatformObject;
-
-            api.setPlayerSkin(nativeClient, (PedHash)characterCustomization.ModelHash);
-            api.sendNativeToAllPlayers(0x9414E18B9434C2FE, nativeClient, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
-            api.sendNativeToAllPlayers(0x262B14F48D29DE80, nativeClient, 2, characterCustomization.HairStyleId, 0, 0);
-            api.sendNativeToAllPlayers(0x4CFFC65454C93A49, nativeClient, characterCustomization.HairColorId, 0);
-        }
-
         public void UpdateCharacterCustomization(ISession session)
         {
             var client = session.Client;
             var characterCustomization = session.CharacterCustomization;
-            var face = characterCustomization.Face;
-
             var nativeClient = (Client)client.PlatformObject;
 
-            api.setPlayerSkin(nativeClient, (PedHash)characterCustomization.ModelHash);
-            api.sendNativeToPlayer(nativeClient, 0x9414E18B9434C2FE, nativeClient, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
-            api.sendNativeToPlayer(nativeClient, 0x262B14F48D29DE80, nativeClient, 2, characterCustomization.HairStyleId, 0, 0);
-            api.sendNativeToPlayer(nativeClient, 0x4CFFC65454C93A49, nativeClient, characterCustomization.HairColorId, 0);
+            SendCharacterCustomizationToClient(nativeClient, nativeClient, characterCustomization);
+        }
+
+        void SendCharacterCustomizationToClient(Client recipient, Client characterClient, CharacterCustomization characterCustomization)
+        {
+            var face = characterCustomization.Face;
+
+            api.setPlayerSkin(characterClient, (PedHash)characterCustomization.ModelHash);
+            api.sendNativeToPlayer(recipient, 0x9414E18B9434C2FE, characterClient.handle, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
+            api.sendNativeToPlayer(recipient, 0x262B14F48D29DE80, characterClient.handle, 2, characterCustomization.HairStyleId, 0, 0);
+            api.sendNativeToPlayer(recipient, 0x4CFFC65454C93A49, characterClient.handle, characterCustomization.HairColorId, 0);
         }
 
         static FreeroamCustomizationData CreateFreeroamCustomizationData()
