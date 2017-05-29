@@ -163,7 +163,8 @@ namespace gtmp.evilempire.server.mapping
                 var position = element.ToVector3f() ?? Vector3f.Zero;
                 var sprite = element.Element("Sprite")?.Value?.AsInt() ?? 0;
                 var color = element.Element("Color")?.Value?.AsInt() ?? 0;
-                var blip = new MapBlip(position, sprite, color);
+                var name = element.Element("Name")?.Value;
+                var blip = new MapBlip(position, sprite, color, name);
 
                 map.AddBlip(blip);
             }

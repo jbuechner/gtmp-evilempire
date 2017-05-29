@@ -179,6 +179,7 @@ namespace gtmp.evilempire.server.mapping
                 var entity = api.createBlip(blip.Position.ToVector3());
                 entity.color = blip.Color;
                 entity.sprite = blip.Sprite;
+                api.setBlipName(entity, blip.Name);
             }
         }
     }

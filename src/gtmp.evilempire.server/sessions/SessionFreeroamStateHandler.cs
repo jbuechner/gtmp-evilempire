@@ -62,6 +62,7 @@ namespace gtmp.evilempire.server.sessions
                     client.Position = startingPoint.Position;
                 }
             }
+            session.UpdateDatabasePosition = true;
 
             if (character.Rotation.HasValue)
             {

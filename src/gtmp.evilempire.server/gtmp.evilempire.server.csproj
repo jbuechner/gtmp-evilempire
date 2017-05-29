@@ -105,6 +105,7 @@
     <Compile Include="sessions\SessionConnectedStateHandler.cs" />
     <Compile Include="sessions\SessionFreeroamStateHandler.cs" />
     <Compile Include="sessions\SessionLoggedInStateHandler.cs" />
+    <Compile Include="WellKnownNamedPoints.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\shared\CustomDictionary.xml">

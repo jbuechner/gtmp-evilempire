@@ -6,6 +6,7 @@
           <Y>100</Y>
           <Sprite>446</Sprite>
           <Color>36</Color>
+          <Name>Test</Name>
       </Blip>
   </Metadata>
 </Map>

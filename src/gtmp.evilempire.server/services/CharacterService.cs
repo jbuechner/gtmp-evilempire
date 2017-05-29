@@ -51,6 +51,7 @@ namespace gtmp.evilempire.server.services
         {
             var characterCustomization = platform.GetDefaultCharacterCustomization();
             characterCustomization.CharacterId = characterId;
+            characterCustomization.Gender = Gender.Male;
             db.Insert<CharacterCustomization>(characterCustomization);
             return characterCustomization;
         }

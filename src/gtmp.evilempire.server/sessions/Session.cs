@@ -27,6 +27,8 @@ namespace gtmp.evilempire.server.sessions
         public CharacterCustomization CharacterCustomization { get; set; }
         public int PrivateDimension { get; set; }
 
+        public bool UpdateDatabasePosition { get; set; }
+
         public Session(IClient client)
         {
             if (client == null)

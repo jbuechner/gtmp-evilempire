@@ -140,10 +140,6 @@ namespace gtmp.evilempire.server
 
             var session = sessions.CreateSession(managedClient);
             sessionStateTransition.Transit(session, SessionState.Connected);
-
-            System.Threading.Tasks.Task.Delay(10000).ContinueWith(t =>
-                 api.createPed(GrandTheftMultiplayer.Server.Constant.PedHash.Ashley, client.position, 20)
-            );
         }
 
         void OnPlayerDisconnected(Client client, string reason)
@@ -160,7 +156,7 @@ namespace gtmp.evilempire.server
                 return;
             }
 
-            if (session.Character != null)
+            if (session.Character != null && session.UpdateDatabasePosition)
             {
                 characters.UpdatePosition(session.Character.Id, session.Client.Position, session.Client.Rotation);
             }

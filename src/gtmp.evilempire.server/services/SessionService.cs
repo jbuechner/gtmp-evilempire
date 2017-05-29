@@ -41,7 +41,7 @@ namespace gtmp.evilempire.server.services
 
         public ISession CreateSession(IClient client)
         {
-            var session = new Session(client) { PrivateDimension = GetUniquePrivateDimension() };
+            var session = new Session(client) { PrivateDimension = GetUniquePrivateDimension(), UpdateDatabasePosition = false };
             sessions.TryAdd(session, 1);
             clientToSessionMap.TryAdd(client, session);
             UpdateSessionsCopy();
@@ -113,7 +113,10 @@ namespace gtmp.evilempire.server.services
             byte v;
             Session v2;
             clientToSessionMap.TryRemove(session.Client, out v2);
-            loginToSessionMap.TryRemove(session.User.Login, out v2);
+            if (session.User != null)
+            {
+                loginToSessionMap.TryRemove(session.User.Login, out v2);
+            }
             sessions.TryRemove(sessionObject, out v);
             FreeDimension(session.PrivateDimension);
 
@@ -133,10 +136,13 @@ namespace gtmp.evilempire.server.services
                     continue;
                 }
 
-                var client = session.Client;
-                var position = client.Position;
-                var rotation = client.Rotation;
-                characters.UpdatePosition(session.Character.Id, position, rotation);
+                if (session.UpdateDatabasePosition)
+                {
+                    var client = session.Client;
+                    var position = client.Position;
+                    var rotation = client.Rotation;
+                    characters.UpdatePosition(session.Character.Id, position, rotation);
+                }
             }
         }
 

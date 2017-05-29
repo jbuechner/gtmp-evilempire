@@ -1,6 +1,7 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Constant;
 using GrandTheftMultiplayer.Server.Elements;
+using GrandTheftMultiplayer.Shared;
 using gtmp.evilempire.entities;
 using gtmp.evilempire.entities.customization;
 using gtmp.evilempire.services;
@@ -44,18 +45,23 @@ namespace gtmp.evilempire.server.services
             var client = session.Client;
             var characterCustomization = session.CharacterCustomization;
             var nativeClient = (Client)client.PlatformObject;
-
-            SendCharacterCustomizationToClient(nativeClient, nativeClient, characterCustomization);
-        }
-
-        void SendCharacterCustomizationToClient(Client recipient, Client characterClient, CharacterCustomization characterCustomization)
-        {
             var face = characterCustomization.Face;
 
-            api.setPlayerSkin(characterClient, (PedHash)characterCustomization.ModelHash);
-            api.sendNativeToPlayer(recipient, 0x9414E18B9434C2FE, characterClient.handle, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
-            api.sendNativeToPlayer(recipient, 0x262B14F48D29DE80, characterClient.handle, 2, characterCustomization.HairStyleId, 0, 0);
-            api.sendNativeToPlayer(recipient, 0x4CFFC65454C93A49, characterClient.handle, characterCustomization.HairColorId, 0);
+            nativeClient.setSyncedData("ENTITY_TYPE", (int)EntityType.Player);
+            nativeClient.setSyncedData("FACE::SHAPEFIRST", face.ShapeFirst);
+            nativeClient.setSyncedData("FACE::SHAPESECOND", face.ShapeSecond);
+            nativeClient.setSyncedData("FACE::SKINFIRST", face.SkinFirst);
+            nativeClient.setSyncedData("FACE::SKINSECOND", face.SkinSecond);
+            nativeClient.setSyncedData("FACE::SKINMIX", face.SkinMix);
+            nativeClient.setSyncedData("FACE::SHAPEMIX", face.ShapeMix);
+            nativeClient.setSyncedData("HAIR::STYLE", characterCustomization.HairStyleId);
+            nativeClient.setSyncedData("HAIR::COLOR", characterCustomization.HairColorId);
+
+            api.setPlayerDefaultClothes(nativeClient);
+            api.setPlayerSkin(nativeClient, (PedHash)characterCustomization.ModelHash);
+            api.sendNativeToPlayer(nativeClient, 0x9414E18B9434C2FE, nativeClient.handle, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
+            api.sendNativeToPlayer(nativeClient, 0x262B14F48D29DE80, nativeClient.handle, 2, characterCustomization.HairStyleId, 0, 0);
+            api.sendNativeToPlayer(nativeClient, 0x4CFFC65454C93A49, nativeClient.handle, characterCustomization.HairColorId, 0);
         }
 
         static FreeroamCustomizationData CreateFreeroamCustomizationData()

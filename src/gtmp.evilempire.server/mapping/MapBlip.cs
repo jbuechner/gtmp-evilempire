@@ -12,12 +12,14 @@ namespace gtmp.evilempire.server.mapping
         public Vector3f Position { get; set; }
         public int Sprite { get; set; }
         public int Color { get; set; }
+        public string Name { get; set; }
 
-        public MapBlip(Vector3f position, int sprite, int color)
+        public MapBlip(Vector3f position, int sprite, int color, string name)
         {
             Position = position;
             Sprite = sprite;
             Color = color;
+            Name = name;
         }
     }
 }

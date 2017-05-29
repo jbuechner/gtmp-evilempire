@@ -393,6 +393,45 @@ function onServerEventTrigger(eventName, argsArray) {
     processServerEventTriggers();
 }
 
+function onEntityStreamIn(entity, entityType) {
+    updateCharacterCustomization(entity);
+}
+
+function onEntityDataChange(entity, key, oldValue) {
+    updateCharacterCustomization(entity);
+}
+
+function updateCharacterCustomization(entity) {
+    try {
+            let entityType = API.getEntitySyncedData(entity, 'ENTITY_TYPE');
+            if (typeof entityType !== 'undefined') {
+                if (entityType === 6 || entityType === 8) {
+                    let shapeFirst = API.getEntitySyncedData(entity, 'FACE::SHAPEFIRST');
+                    let shapeSecond = API.getEntitySyncedData(entity, 'FACE::SHAPESECOND');
+                    let skinFirst = API.getEntitySyncedData(entity, 'FACE::SKINFIRST');
+                    let skinSecond = API.getEntitySyncedData(entity, 'FACE::SKINSECOND');
+                    let shapeMix = API.getEntitySyncedData(entity, 'FACE::SHAPEMIX');
+                    let skinMix = API.getEntitySyncedData(entity, 'FACE::SKINMIX');
+
+                    let hairStyle = API.getEntitySyncedData(entity, 'HAIR::STYLE');
+                    let hairColor = API.getEntitySyncedData(entity, 'HAIR::COLOR');
+
+                    if (typeof shapeFirst !== 'undefined' && typeof shapeSecond !== 'undefined' && typeof skinFirst !== 'undefined' && skinSecond !== 'undefined' && typeof shapeMix !== 'undefined' && skinMix !== 'undefined') {
+                        API.callNative('0x9414E18B9434C2FE', entity, shapeFirst, shapeSecond, 0, skinFirst, skinSecond, 0, shapeMix, skinMix, 0, false);
+                    }
+                    if (typeof hairStyle !== 'undefined') {
+                        API.callNative('0x262B14F48D29DE80', entity, 2, hairStyle, 0, 0);
+                    }
+                    if (typeof hairColor !== 'undefined') {
+                        API.callNative('0x4CFFC65454C93A49', entity, hairColor, 0);
+                    }
+                }
+            }
+    } catch(ex) {
+        debugOut(ex);
+    }
+}
+
 function processServerEventTriggers() {
     while (serverEventTriggerQueue.length > 0) {
         let args = serverEventTriggerQueue.shift();
@@ -446,6 +485,8 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     onResourceStartSubscription = null;
 
     onServerEventTriggerSubscription = API.onServerEventTrigger.connect(onServerEventTrigger);
+    API.onEntityStreamIn.connect(onEntityStreamIn);
+    API.onEntityDataChange.connect(onEntityDataChange);
 
     client = new Client();
     inputs = new InputController();
