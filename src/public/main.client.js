@@ -80,6 +80,7 @@ const ClientEvents = {
         browser.removeView('view-login');
         browser.removeView('view-character-customization');
         browser.addView('view-status', { displayCoordinates: Client.hasRequiredUserGroup(UserGroups.GameMaster) });
+        browser.addView('view-entityinteractionmenu');
     },
     '::display:login': function __display_login() {
         client.cursor = true;
@@ -287,9 +288,15 @@ class Client {
     }
 
     get rotation() {
-        let player = API.getLocalPlayer()
+        let player = API.getLocalPlayer();
         let r = API.returnNative('0xAFBD61CC738D9EB9', 5, player, 0);
         return r;
+    }
+
+    get aimCoordinates() {
+        let player = API.getLocalPlayer();
+        let c = API.getPlayerAimCoords(player);
+        return c;
     }
 
     resetCamera() {
@@ -393,6 +400,40 @@ function onServerEventTrigger(eventName, argsArray) {
     processServerEventTriggers();
 }
 
+let updateCount = 0;
+let testRange = 3;
+let targetedEntity = null;
+let targetedEntityPos = null;
+let targetedEntityPosAbove = null;
+let targetedEntityPoint = null;
+function onUpdate() {
+    if (updateCount++ > 20) {
+        updateCount = 0;
+
+        let player = API.getLocalPlayer();
+        let playerPos = API.getEntityPosition(player);
+        let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
+        let raycast = API.createRaycast(playerPos, tar,  10 | 12, player);
+        if (raycast && raycast.didHitEntity) {
+            targetedEntity = raycast.hitEntity;
+            targetedEntityPos = API.getEntityPosition(raycast.hitEntity);
+            targetedEntityPosAbove = targetedEntityPos.Add(new Vector3(0, 0, 1));
+        } else {
+            if (targetedEntityPos && Vector3.Distance(playerPos, targetedEntityPos) > testRange) {
+                targetedEntityPos = null;
+                targetedEntityPosAbove = null;
+                targetedEntityPoint = null;
+                browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: null });
+            }
+        }
+    }
+
+    if (targetedEntityPos && updateCount % 10 === 0) {
+        targetedEntityPoint = API.worldToScreenMaintainRatio(targetedEntityPosAbove);
+        browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { x: targetedEntityPoint.X, y: targetedEntityPoint.Y} });
+    }
+}
+
 function onEntityStreamIn(entity, entityType) {
     updateCharacterCustomization(entity);
 }
@@ -487,6 +528,7 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     onServerEventTriggerSubscription = API.onServerEventTrigger.connect(onServerEventTrigger);
     API.onEntityStreamIn.connect(onEntityStreamIn);
     API.onEntityDataChange.connect(onEntityDataChange);
+    API.onUpdate.connect(onUpdate);
 
     client = new Client();
     inputs = new InputController();

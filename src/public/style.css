@@ -18,6 +18,24 @@ h1, h2, h3 {
     margin: 0;
 }
 
+.hover-box {
+    background-color: #202020;
+    color: #fafafa;
+    font-size: 12px;
+    border-color: #323232;
+    border-radius: 3px;
+}
+
+.hover-box-title {
+    background-color: #101010;
+    padding: 4px;
+    font-weight: 100;
+}
+
+.hover-box-content {
+    padding: 4px;
+}
+
 .monospace {
     font-family: 'Cutive Mono', monospace;;
 }
