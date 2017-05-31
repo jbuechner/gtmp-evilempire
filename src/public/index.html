@@ -37,14 +37,17 @@
             document.body.appendChild(el);
 
             if (args.options) {
-                Object.getOwnPropertyNames(args.options).forEach(propName => {
-                    el[propName] = args.options[propName];
+                setTimeout(() => {
+					Object.getOwnPropertyNames(args.options).forEach(propName => {
+						el[propName] = args.options[propName];
+					});
                 });
             }
         }
 
         function removeView(args) {
             args = deserializeFromDesignatedJson(args);
+            setTimeout(() => {
             console.log('removeView', args);
             let elements = document.querySelectorAll(args.selector);
             for (let i = 0; i < elements.length; i++) {
@@ -52,7 +55,7 @@
                 if (el && el.parentNode) {
                     el.parentNode.removeChild(el);
                 }
-            }
+            }}, 0);
         }
 
         function raiseEvent(args) {

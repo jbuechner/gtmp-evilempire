@@ -80,7 +80,6 @@ const ClientEvents = {
         browser.removeView('view-login');
         browser.removeView('view-character-customization');
         browser.addView('view-status', { displayCoordinates: Client.hasRequiredUserGroup(UserGroups.GameMaster) });
-        browser.addView('view-entityinteractionmenu');
     },
     '::display:login': function __display_login() {
         client.cursor = true;
@@ -259,17 +258,9 @@ class Client {
 
     setCameraToViewPlayer() {
         let player = API.getLocalPlayer();
-        let pos = API.getEntityPosition(player);
-        let rot = API.getGameplayCamDir();
-
-        pos.Z += 0.5;
-        pos.X -= (rot.X * 2);
-        pos.Y += (rot.Y * 1.2);
-
-        let camera = API.createCamera(pos, rot);
-
-        let offset = new Vector3(0, 0, 0.5);
-        API.pointCameraAtEntity(camera, player, offset);
+        let camPos = API.getOffsetInWorldCoords(player, new Vector3(0.35, 1, 0.5));
+        let camera = API.createCamera(camPos, new Vector3(0, 0, 0));
+        API.pointCameraAtEntity(camera, player, new Vector3(0, 0, 0.5));
         API.setActiveCamera(camera);
     }
 
@@ -402,12 +393,63 @@ function onServerEventTrigger(eventName, argsArray) {
 
 let updateCount = 0;
 let testRange = 3;
-let targetedEntity = null;
-let targetedEntityPos = null;
-let targetedEntityPosAbove = null;
-let targetedEntityPoint = null;
+let uiTrackedEntities = new Map();
+function addUiTrackedEntity(entity) {
+    let entityId = entity.Value;
+    if (uiTrackedEntities.has(entityId)) {
+        return;
+    }
+
+    let position = API.getEntityPosition(entity);
+    let positionAbove = position.Add(new Vector3(0, 0, 1));
+    let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
+    uiTrackedEntities.set(entityId, { id: entityId, position, positionAbove });
+
+    let options = getUiTrackingOptions(entity);
+    options.entityId = '' + entityId;
+    options.pos = { x: viewPoint.X, y: viewPoint.Y };
+
+    browser.addView('view-entityinteractionmenu', options);
+}
+function updateUiTrackedEntities() {
+    uiTrackedEntities.forEach(value => {
+        let viewPoint = API.worldToScreenMaintainRatio(value.positionAbove);
+        browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { entityId: '' + value.id, x: viewPoint.X, y: viewPoint.Y} });
+    });
+}
+function removeUiTrackedEntitiesThatAreOutOfRange() {
+    let player = API.getLocalPlayer();
+    let playerPosition = API.getEntityPosition(player);
+    let removable = [];
+    uiTrackedEntities.forEach((value, key) => {
+        let distance = Vector3.Distance(playerPosition, value.position);
+        if (distance > testRange) {
+            removable.push(key);
+            browser.removeView('view-entityinteractionmenu[data-entityId="' + value.id + '"]')
+        }
+    });
+    removable.forEach(key => {
+        uiTrackedEntities.delete(key);
+    });
+}
+function getUiTrackingOptions(entity) {
+    if (API.isVehicle(entity)) {
+        let model = API.returnNative('0x9F47B058362C84B5', 0, entity);
+        let name = API.getVehicleDisplayName(model);
+        let plate = API.getVehicleNumberPlate(entity);
+        return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock'] };
+    }
+    if (API.isPed(entity)) {
+        return { title: 'PED', actions: ['speak'] }
+    }
+
+    return {
+        title: '' + entity.Value
+    }
+}
+
 function onUpdate() {
-    if (updateCount++ > 20) {
+    if (updateCount++ > 30) {
         updateCount = 0;
 
         let player = API.getLocalPlayer();
@@ -415,22 +457,12 @@ function onUpdate() {
         let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
         let raycast = API.createRaycast(playerPos, tar,  10 | 12, player);
         if (raycast && raycast.didHitEntity) {
-            targetedEntity = raycast.hitEntity;
-            targetedEntityPos = API.getEntityPosition(raycast.hitEntity);
-            targetedEntityPosAbove = targetedEntityPos.Add(new Vector3(0, 0, 1));
-        } else {
-            if (targetedEntityPos && Vector3.Distance(playerPos, targetedEntityPos) > testRange) {
-                targetedEntityPos = null;
-                targetedEntityPosAbove = null;
-                targetedEntityPoint = null;
-                browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: null });
-            }
+            addUiTrackedEntity(raycast.hitEntity);
         }
+        removeUiTrackedEntitiesThatAreOutOfRange();
     }
-
-    if (targetedEntityPos && updateCount % 10 === 0) {
-        targetedEntityPoint = API.worldToScreenMaintainRatio(targetedEntityPosAbove);
-        browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { x: targetedEntityPoint.X, y: targetedEntityPoint.Y} });
+    if (updateCount % 10 === 0) {
+        updateUiTrackedEntities();
     }
 }
 

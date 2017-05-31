@@ -1,0 +1,39 @@
+<?doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="../public/bulma.css">
+	<link rel="stylesheet" href="../public/style.css">
+	<link rel="stylesheet" href="../public/colors.css">
+	<link rel="stylesheet" href="../public/css/font-awesome.min.css">
+    <script src="../public/libs/slim.js"></script>
+	<script src="../public/libs/sha512.js"></script>
+	<script src="../public/components/core-watermark.js"></script>
+	<script src="../public/components/core-login.js"></script>
+	<script src="../public/components/view-status.js"></script>
+	<script src="../public/components/view-login.js"></script>
+	<script src="../public/components/view-entityinteractionmenu.js"></script>
+	<script src="../public/components/view-character-customization.js"></script>
+    <style>
+        body { background-color: magenta !important; }
+    </style>
+</head>
+<body>
+	<core-watermark></core-watermark>
+    <script>
+        'use strict';
+        document.onreadystatechange = function() {
+            if (document.readyState === 'complete') {
+                let el = document.createElement('view-entityinteractionmenu');
+                document.body.appendChild(el);
+                setTimeout(() =>                 el.title = 'AC');
+
+                setTimeout(() => {
+                    document.dispatchEvent(new CustomEvent('updateview', { detail: { what: 'entitytargetpos', value: { x: 200, y: 300 } } }));
+                    document.dispatchEvent(new CustomEvent('updateview', { detail: { what: 'entityactions', value: [ 'speak' ]  } }))
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
