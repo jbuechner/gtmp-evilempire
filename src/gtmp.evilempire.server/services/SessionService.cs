@@ -42,6 +42,8 @@ namespace gtmp.evilempire.server.services
         public ISession CreateSession(IClient client)
         {
             var session = new Session(client) { PrivateDimension = GetUniquePrivateDimension(), UpdateDatabasePosition = false };
+            using (ConsoleColor.Cyan.Foreground())
+                Console.WriteLine($"[{client.Name}] Private Dimensions = {session.PrivateDimension} ");
             sessions.TryAdd(session, 1);
             clientToSessionMap.TryAdd(client, session);
             UpdateSessionsCopy();

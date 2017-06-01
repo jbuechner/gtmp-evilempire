@@ -14,6 +14,8 @@ namespace gtmp.evilempire.server.mapping
         public Vector3f Position { get; }
         public float Rotation { get; }
         public bool IsInvincible { get; }
+        public bool IsPositionFrozen { get; set; }
+        public bool IsCollisionless { get; set; }
 
         public bool IsTemplate
         {

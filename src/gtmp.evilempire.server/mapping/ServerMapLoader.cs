@@ -3,12 +3,15 @@ using GrandTheftMultiplayer.Server.Constant;
 using GrandTheftMultiplayer.Server.Elements;
 using GrandTheftMultiplayer.Shared;
 using System;
+using System.Threading;
 using static System.FormattableString;
 
 namespace gtmp.evilempire.server.mapping
 {
     static class ServerMapLoader
     {
+        static readonly int TimeBetweenObjectCreationInMs = 10;
+
         public static Vehicle Load(MapVehicle vehicle, ServerAPI api)
         {
             if (!Enum.IsDefined(typeof(VehicleHash), vehicle.Hash))
@@ -144,42 +147,59 @@ namespace gtmp.evilempire.server.mapping
             return entity;
         }
 
+        public static Ped Load(MapPed ped, ServerAPI api)
+        {
+            if (!Enum.IsDefined(typeof(PedHash), ped.Hash))
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine(Invariant($"Invalid ped hash {ped.Hash}. Skipped."));
+                }
+            }
+            var entity = api.createPed((PedHash)ped.Hash, ped.Position.ToVector3(), ped.Rotation);
+            entity.invincible = ped.IsInvincible;
+            entity.freezePosition = ped.IsPositionFrozen;
+            entity.collisionless = ped.IsCollisionless;
+            return entity;
+        }
+
+        public static GrandTheftMultiplayer.Server.Elements.Object Load(MapProp prop, ServerAPI api)
+        {
+            var entity = api.createObject(prop.Hash, prop.Position.ToVector3(), prop.Rotation.ToVector3());
+            entity.collisionless = prop.IsCollisionless;
+            entity.freezePosition = prop.IsPositionFrozen;
+            return entity;
+        }
+
         public static void Load(Map map, API api)
         {
             foreach(var marker in map.Markers)
             {
                 api.createMarker((int)marker.MarkerType, marker.Position.ToVector3(), marker.Direction.ToVector3(), marker.Rotation.ToVector3(), marker.Scale.ToVector3(), marker.Alpha, marker.Red, marker.Green, marker.Blue);
+                Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
             foreach(var obj in map.Props)
             {
-                api.createObject(obj.Hash, obj.Position.ToVector3(), obj.Rotation.ToVector3());
+                Load(obj, api);
+                Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
             foreach(var ped in map.Peds)
             {
-                if (!Enum.IsDefined(typeof(PedHash), ped.Hash))
-                {
-                    using (ConsoleColor.Yellow.Foreground())
-                    {
-                        Console.WriteLine(Invariant($"Invalid ped hash {ped.Hash}. Skipped."));
-                    }
-                    continue;
-                }
-
-                var hash = (PedHash)ped.Hash;
-                var r = api.createPed(hash, ped.Position.ToVector3(), ped.Rotation);
-                r.invincible = ped.IsInvincible;
+                Load(ped, api);
+                Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
             foreach(var vehicle in map.Vehicles)
             {
                 Load(vehicle, api);
+                Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
-
             foreach (var blip in map.Blips)
             {
                 var entity = api.createBlip(blip.Position.ToVector3());
                 entity.color = blip.Color;
                 entity.sprite = blip.Sprite;
                 api.setBlipName(entity, blip.Name);
+                Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
         }
     }

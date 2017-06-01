@@ -26,7 +26,12 @@
             if (document.readyState === 'complete') {
                 let el = document.createElement('view-entityinteractionmenu');
                 document.body.appendChild(el);
-                setTimeout(() =>                 el.title = 'AC');
+                setTimeout(() => {
+                    el.title = 'Test';
+                    el.pos = { x: 100, y: 200 };
+					el.entityId = 102;
+					el.actions = [ 'speak', 'lock' ]
+                }, 0);
 
                 setTimeout(() => {
                     document.dispatchEvent(new CustomEvent('updateview', { detail: { what: 'entitytargetpos', value: { x: 200, y: 300 } } }));

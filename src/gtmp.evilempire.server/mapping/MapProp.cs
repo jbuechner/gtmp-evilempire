@@ -8,6 +8,8 @@ namespace gtmp.evilempire.server.mapping
         public int Hash { get; }
         public Vector3f Position { get; }
         public Vector3f Rotation { get; }
+        public bool IsPositionFrozen { get; set; }
+        public bool IsCollisionless { get; set; }
 
         public bool IsTemplate
         {

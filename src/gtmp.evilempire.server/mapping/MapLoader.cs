@@ -67,6 +67,8 @@ namespace gtmp.evilempire.server.mapping
                 var rotation = mapObject.Element("Rotation")?.ToVector3f() ?? Vector3f.Zero;
 
                 var obj = new MapProp(templateName, hash, position, rotation);
+                obj.IsPositionFrozen = mapObject.Element("IsPositionFrozen")?.Value?.AsBool() ?? false;
+                obj.IsCollisionless = mapObject.Element("IsCollisionless")?.Value?.AsBool() ?? false;
                 map.AddProp(obj);
             }
         }
@@ -82,6 +84,8 @@ namespace gtmp.evilempire.server.mapping
                 var isInvincible = mapObject.Element("IsInvicible")?.Value?.AsBool() ?? false;
 
                 var ped = new MapPed(templateName, hash, position, rotation.Z, isInvincible);
+                ped.IsPositionFrozen = mapObject.Element("IsPositionFrozen")?.Value?.AsBool() ?? false;
+                ped.IsCollisionless = mapObject.Element("IsCollisionless")?.Value?.AsBool() ?? false;
                 map.AddPed(ped);
             }
         }

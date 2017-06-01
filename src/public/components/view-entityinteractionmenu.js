@@ -87,9 +87,9 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         return `
 <div slim-id="container" style="position:absolute;visibility: hidden;" class="hover-box">
     <div class="hover-box-title" slim-id="titleElement"></div>
-    <div class="hover-box-content">
+    <div class="hover-box-icons">
         <i slim-if="available.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak"></i>
-        <i slim-if="available.lock" class="fa fa-key" aria-hidden="true" click="raiseAction" data-action="lock"></i>
+        <i slim-if="available.lock" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock"></i>
     </div>
 </div>
 `;
