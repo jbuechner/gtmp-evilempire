@@ -15,7 +15,13 @@
                 let branchingDialogue = {
                     __start: 'hello',
                     hello: {
-                        markdown: 'Hello, hello. You can either buy(#buy) or leave(#leave).'
+                        __markdown: 'Hello, hello. You can either [buy](#buy) or [leave](#leave).'
+                    },
+                    buy: {
+                        __markdown: 'First class stuff, yo.'
+                    },
+                    leave: {
+                        __action: 'closeActiveEntityInteraction'
                     }
                 };
 

@@ -11,7 +11,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         this.pos = { x: ev.detail.value.x, y: ev.detail.value.y };
                         break;
                     case 'content':
-                        this.markdown = ev.detail.value.markdown || '';
+                        this.dialogue = new BranchingDialogue(ev.detail.value.dialogue);
                         this.isLoading = false;
                         break;
                 }
@@ -23,14 +23,71 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         this._entityId = null;
         this._pos = null;
         this._actions = [];
+        this._dialogue = null;
         this.isLoading = true;
         this.isContentVisible = false;
+    }
+
+    onContentDomLinkClick(e) {
+        e.preventDefault();
+        let action = e.target.getAttribute('data-dialogue-action');
+        let target = e.target.getAttribute('data-dialogue-target');
+        switch (('' + action).toUpperCase()) {
+            case 'JUMPTOPAGE':
+                let page = this.dialogue.findPage(target, true);
+                if (page && page.markdown) {
+                    this.markdown = page.markdown;
+                    break;
+                }
+                if (page.action) {
+                    switch (('' + page.action).toUpperCase()) {
+                        case 'CLOSEACTIVEENTITYINTERACTION':
+                            this.dialogue = null;
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+
+    postProcessContentDom(root) {
+        let links = root.querySelectorAll('a');
+        for (let i = 0; i < links.length; i++) {
+            let link = links.item(i);
+            link.onclick = (e) => this.onContentDomLinkClick(e);
+
+            let href = link.getAttribute('href');
+            if (typeof href === 'string' && href.startsWith('#')) {
+                link.setAttribute('data-dialogue-action', 'jumpToPage');
+                link.setAttribute('data-dialogue-target', href.substring(1));
+            }
+        }
+    }
+
+    get dialogue() {
+        return this._dialogue;
+    }
+
+    set dialogue(v) {
+        if (v !== this.dialogue) {
+            this._dialogue = v;
+            if (v) {
+                this.markdown = v.markdown;
+            } else {
+                this.markdown = null;
+                this.isContentVisible = false;
+                this.resetActiveActions();
+            }
+        }
     }
 
     set markdown(v) {
         let converter = new showdown.Converter();
         let html = converter.makeHtml(v);
+
         this.content.innerHTML = html;
+
+        this.postProcessContentDom(this.content);
     }
 
     get entityId() {
@@ -97,16 +154,20 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
             this.markdown = null;
         }
 
-        let nodes = this.querySelectorAll('.hover-box-icons .fa');
-        for (let i = 0; i < nodes.length; i++) {
-            nodes.item(i).classList.remove('active');
-        }
+        this.resetActiveActions();
         e.target.classList.add('active');
 
         if (this.app) {
             this.app.entityinteraction(this.entityId, action);
         } else {
             console.warn('unable to dispatch entity interaction.');
+        }
+    }
+
+    resetActiveActions() {
+        let nodes = this.querySelectorAll('.hover-box-icons .fa');
+        for (let i = 0; i < nodes.length; i++) {
+            nodes.item(i).classList.remove('active');
         }
     }
 
