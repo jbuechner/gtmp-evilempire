@@ -10,6 +10,10 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                     case 'entitytargetpos':
                         this.pos = { x: ev.detail.value.x, y: ev.detail.value.y };
                         break;
+                    case 'content':
+                        this.markdown = ev.detail.value.markdown || '';
+                        this.isLoading = false;
+                        break;
                 }
             }
         });
@@ -19,6 +23,14 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         this._entityId = null;
         this._pos = null;
         this._actions = [];
+        this.isLoading = true;
+        this.isContentVisible = false;
+    }
+
+    set markdown(v) {
+        let converter = new showdown.Converter();
+        let html = converter.makeHtml(v);
+        this.content.innerHTML = html;
     }
 
     get entityId() {
@@ -78,18 +90,44 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
     raiseAction(e) {
         e.preventDefault();
         let action = e.target.getAttribute('data-action');
+        let requiresContent = e.target.getAttribute('data-action-requiresContent');
+        this.isContentVisible = requiresContent && requiresContent === 'true';
+        this.isLoading = this.isContentVisible;
+        if (this.isContentVisible) {
+            this.markdown = null;
+        }
+
+        let nodes = this.querySelectorAll('.hover-box-icons .fa');
+        for (let i = 0; i < nodes.length; i++) {
+            nodes.item(i).classList.remove('active');
+        }
+        e.target.classList.add('active');
+
         if (this.app) {
             this.app.entityinteraction(this.entityId, action);
+        } else {
+            console.warn('unable to dispatch entity interaction.');
         }
     }
 
     get template() {
-        return `
-<div slim-id="container" style="position:absolute;visibility: hidden;" class="hover-box">
-    <div class="hover-box-title" slim-id="titleElement"></div>
-    <div class="hover-box-icons">
-        <i slim-if="available.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak"></i>
-        <i slim-if="available.lock" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock"></i>
+        return `<div slim-id="container" style="position:absolute;visibility: hidden;">
+         <div class="hover-box">
+            <div class="hover-box-title" slim-id="titleElement"></div>
+            <div class="hover-box-icons">
+                <i slim-if="available.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak" data-action-requiresContent="true"></i>
+                <i slim-if="available.lock" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock" data-action-requiresContent="false"></i>
+            </div>
+        </div>
+        <div slim-if="isContentVisible" class="hover-box-content">
+            <p slim-if="isLoading" >
+                <span>
+                    <i class="fa fa-spinner fa-pulse fa-fw" style="margin-top:3px"></i>
+                    Loading ...
+                </span>
+            </p>
+            <div slim-id="content"></div>
+        </div>
     </div>
 </div>
 `;

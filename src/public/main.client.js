@@ -403,7 +403,7 @@ function addUiTrackedEntity(entity) {
     let position = API.getEntityPosition(entity);
     let positionAbove = position.Add(new Vector3(0, 0, 1));
     let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
-    uiTrackedEntities.set(entityId, { id: entityId, position, positionAbove });
+    uiTrackedEntities.set(entityId, { id: entityId, entity, position, positionAbove });
 
     let options = getUiTrackingOptions(entity);
     options.entityId = '' + entityId;
@@ -413,6 +413,9 @@ function addUiTrackedEntity(entity) {
 }
 function updateUiTrackedEntities() {
     uiTrackedEntities.forEach(value => {
+        value.position = API.getEntityPosition(value.entity);
+        value.positionAbove = value.position.Add(new Vector3(0, 0, 1));
+
         let viewPoint = API.worldToScreenMaintainRatio(value.positionAbove);
         browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { entityId: '' + value.id, x: viewPoint.X, y: viewPoint.Y} });
     });
@@ -457,7 +460,9 @@ function onUpdate() {
         let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
         let raycast = API.createRaycast(playerPos, tar,  10 | 12, player);
         if (raycast && raycast.didHitEntity) {
-            addUiTrackedEntity(raycast.hitEntity);
+            if (!API.isPed(raycast.hitEntity) || !raycast.hitEntity.IsHuman) {
+                addUiTrackedEntity(raycast.hitEntity);
+            }
         }
         removeUiTrackedEntitiesThatAreOutOfRange();
     }

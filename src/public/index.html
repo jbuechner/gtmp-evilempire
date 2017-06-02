@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="css/font-awesome.min.css">
     <script src="libs/slim.js"></script>
 	<script src="libs/sha512.js"></script>
+	<script src="libs/showdown.min.js"></script>
 	<script src="components/core-watermark.js"></script>
 	<script src="components/core-login.js"></script>
 	<script src="components/view-status.js"></script>
@@ -87,6 +88,10 @@
             cancelCharacterCustomization() {
                 this.callBackend('cancelCharacterCustomization');
             }
+
+            entityinteraction(entityId, action) {
+                this.callBackend('interactWithEntity', argumentsToArray(arguments));
+			}
         }
         window.app = new App();
         function argumentsToArray(args) {

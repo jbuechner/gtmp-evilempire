@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
-    "cshash": "node ./cshash.js"
+    "cshash": "node ./cshash.js",
+    "http:dev": "http-server ./src/public"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "gulp-flatten": "^0.3.1",
     "gulp-msbuild": "^0.4.7",
     "gulp-zip": "^4.0.0",
+    "http-server": "^0.10.0",
     "js-sha512": "^0.3.0",
     "run-sequence": "^1.2.2"
   },

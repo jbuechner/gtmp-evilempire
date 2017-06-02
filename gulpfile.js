@@ -21,7 +21,7 @@ const project = {
         src: {
             configs: './src/configs/**/*',
             resources: './src/resources/**/*',
-            public: './src/public/**/*',
+            public: './src/public/**/!(*.tests.*)',
             csharp: {
                 sln: './src/gtmp.evilempire.sln',
                 binaries: './src/gtmp.evilempire*/bin/debug/*'

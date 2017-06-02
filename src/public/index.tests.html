@@ -1,0 +1,76 @@
+<?doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <style>
+        body { background-color: magenta !important; }
+    </style>
+</head>
+<body>
+    <script>
+        'use strict';
+        function testViewEntityInteractionMenu() {
+            mockBackendCallResponse('interactWithEntity', function(entityId, action) {
+
+                let branchingDialogue = {
+                    __start: 'hello',
+                    hello: {
+                        markdown: 'Hello, hello. You can either buy(#buy) or leave(#leave).'
+                    }
+                };
+
+
+                let json = JSON.stringify({
+                    eventName: 'updateview',
+                    data: { what: 'content', value: { entityId: entityId, dialogue: branchingDialogue } }
+                });
+                raiseEvent('$json' + json);
+            }, 340);
+            addView({
+                selector: 'view-entityinteractionmenu',
+                options: {entityId: 109, title: 'Test', pos: {x: 100, y: 200}, actions: [ 'speak' ]}
+            });
+        }
+
+        let mockedBackendCalls = new Map();
+        function mockBackendCallResponse(eventName, fn, latency) {
+            let nfn = function() {
+                let args = arguments;
+                setTimeout(function() { fn.apply(null, args) }, latency || 0);
+            };
+            mockedBackendCalls.set(eventName, nfn);
+        }
+
+        function prepareTest() {
+            window.resourceCall = function() {};
+        }
+
+        function runTest() {
+            console.log('patch app object');
+            window.app.callBackend = function(ev, args) {
+                let fn = mockedBackendCalls.get(ev);
+                if (typeof fn === 'function') {
+                    fn.apply(null, args);
+                }
+            };
+
+            console.log('run test');
+            testViewEntityInteractionMenu();
+        }
+
+        document.onreadystatechange = function() {
+            if (document.readyState === 'complete') {
+                console.log('patching API');
+                prepareTest();
+                console.log('import index.html');
+
+                let x = document.createElement('link');
+                x.setAttribute('rel', 'import');
+                x.setAttribute('href', 'index.html');
+                x.addEventListener('load', runTest);
+                document.head.appendChild(x);
+            }
+        }
+    </script>
+</body>
+</html>

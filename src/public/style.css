@@ -19,11 +19,10 @@ h1, h2, h3 {
 }
 
 .hover-box {
-    background-color: #202020;
+    display: inline-block;
     color: #fafafa;
     font-size: 12px;
     border-color: #323232;
-    border-radius: 3px;
 }
 
 .hover-box-title {
@@ -31,23 +30,53 @@ h1, h2, h3 {
     padding: 4px 4px 0 4px;
     font-size: 16px;
     font-weight: 100;
+    border-radius: 5px 5px 0 0;
 }
 
 .hover-box-icons {
+    background-color: #202020;
     padding: 4px;
     font-size: 24px;
     line-height: 1em;
 }
 
-.hover-box-
+.hover-box-content {
+    background-color: #f0f0f0;
+    color: #151515;
+    border-radius: 0 5px 5px 5px;
+}
 
 .hover-box-icon {
+}
+
+.hover-box-icon.active {
+    color: #009688;
+}
+
+.hover-box-icon.active:hover {
+    color: #00695c;
 }
 
 .hover-box-icon:hover {
     color: #b0b0b0;
     cursor: pointer;
 }
+
+.hover-box-content {
+    padding: 4px;
+    font-size: 14px;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    overflow-x: hidden;
+    border: 1px solid #202020;
+}
+
+.hover-box-content::-webkit-scrollbar{ width: 12px; height: 12px;}
+.hover-box-content::-webkit-scrollbar-button:start:decrement,.hover-box-content ::-webkit-scrollbar-button:end:increment{ display:block;height:0; background-color:transparent;}
+.hover-box-content::-webkit-scrollbar-track-piece{background-color:#202020;-webkit-border-radius:0;-webkit-border-bottom-right-radius:5px;-webkit-border-top-right-radius:5px;}
+.hover-box-content::-webkit-scrollbar-thumb:vertical{height:24px;background-color:#f0f0f0;-webkit-border-radius:0;-webkit-border-bottom-right-radius:5px;-webkit-border-top-right-radius:5px;}
+.hover-box-content::-webkit-scrollbar-thumb:horizontal{width:24px;background-color:#f0f0f0;-webkit-border-radius:0;-webkit-border-bottom-right-radius:5px;-webkit-border-top-right-radius:5px;}
 
 .monospace {
     font-family: 'Cutive Mono', monospace;;
