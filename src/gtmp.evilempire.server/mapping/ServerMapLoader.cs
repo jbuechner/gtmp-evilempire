@@ -160,6 +160,12 @@ namespace gtmp.evilempire.server.mapping
             entity.invincible = ped.IsInvincible;
             entity.freezePosition = ped.IsPositionFrozen;
             entity.collisionless = ped.IsCollisionless;
+
+            if (ped.Dialogue != null)
+            {
+                api.setEntitySyncedData(entity, "DIALOGUE::NAME", ped.Dialogue.Name);
+            }
+
             return entity;
         }
 

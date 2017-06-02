@@ -86,6 +86,18 @@ namespace gtmp.evilempire.server.mapping
                 var ped = new MapPed(templateName, hash, position, rotation.Z, isInvincible);
                 ped.IsPositionFrozen = mapObject.Element("IsPositionFrozen")?.Value?.AsBool() ?? false;
                 ped.IsCollisionless = mapObject.Element("IsCollisionless")?.Value?.AsBool() ?? false;
+
+                var dialogueElement = mapObject.Element("Dialogue");
+                if (dialogueElement != null)
+                {
+                    var dialogue = LoadMapDialogue(map, dialogueElement);
+                    if (dialogue != null)
+                    {
+                        ped.Dialogue = dialogue;
+                        map.AddDialogue(dialogue);
+                    }
+                }
+
                 map.AddPed(ped);
             }
         }
@@ -239,6 +251,70 @@ namespace gtmp.evilempire.server.mapping
 
                 var mapMarker = new MapMarker(markerType, position, direction, rotation, scale, alpha, r, g, b);
                 map.AddMarker(mapMarker);
+            }
+        }
+
+        MapDialogue LoadMapDialogue(Map map, XElement dialogueElement)
+        {
+            if (dialogueElement == null)
+            {
+                return null;
+            }
+            var startDialoguePageKey = dialogueElement.Element("StartPage")?.Value;
+            if (!string.IsNullOrEmpty(startDialoguePageKey))
+            {
+                var startDialoguePage = dialogueElement.Element("Pages")?.Elements("Page")?.Where(p => p != null && string.CompareOrdinal(p.Element("Name")?.Value, startDialoguePageKey) == 0).FirstOrDefault();
+                var mapDialogue = ReadDialoguePage<MapDialogue>(null, startDialoguePage);
+                ReadDialoguePages(mapDialogue, dialogueElement);
+                //next: name
+                return mapDialogue;
+            }
+            return null;
+        }
+
+        T ReadDialoguePage<T>(MapDialoguePage dialoguePage, XElement dialoguePageElement)
+            where T : MapDialoguePage
+        {
+            if (dialoguePageElement == null)
+            {
+                throw new ArgumentNullException(nameof(dialoguePageElement));
+            }
+            var name = dialoguePageElement?.Element("Name")?.Value;
+            var markdown = dialoguePageElement?.Element("Markdown")?.Value;
+            var action = dialoguePageElement?.Element("Action");
+            var actionName = action?.Value;
+            var isClientSideAction = action?.Attribute("IsClientSide")?.Value.AsBool() ?? false;
+
+            var newDialoguePage = (T)Activator.CreateInstance(typeof(T), name, markdown, actionName, isClientSideAction);
+            if (dialoguePage != null)
+            {
+                dialoguePage.Pages.Add(newDialoguePage);
+            }
+            ReadDialoguePages(newDialoguePage, dialoguePageElement);
+            return newDialoguePage;
+        }
+
+        void ReadDialoguePages(MapDialoguePage dialoguePage, XElement dialoguePageElement)
+        {
+            if (dialoguePage == null)
+            {
+                throw new ArgumentNullException(nameof(dialoguePage));
+            }
+            if (dialoguePageElement == null)
+            {
+                throw new ArgumentNullException(nameof(dialoguePageElement));
+            }
+            var pageElements = dialoguePageElement?.Element("Pages")?.Elements("Page");
+            if (pageElements != null)
+            {
+                foreach(var pageElement in pageElements)
+                {
+                    if (pageElement == null)
+                    {
+                        continue;
+                    }
+                    ReadDialoguePage<MapDialoguePage>(dialoguePage, pageElement);
+                }
             }
         }
     }

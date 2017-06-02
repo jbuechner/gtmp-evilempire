@@ -17,6 +17,8 @@ namespace gtmp.evilempire.server.mapping
         public bool IsPositionFrozen { get; set; }
         public bool IsCollisionless { get; set; }
 
+        public MapDialogue Dialogue { get; set; }
+
         public bool IsTemplate
         {
             get

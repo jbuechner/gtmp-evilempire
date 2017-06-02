@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Objects>
+        <MapObject>
+            <Type>Ped</Type>
+            <Position>
+                <X>-1036.73</X>
+                <Y>-2742.55</Y>
+                <Z>13.88</Z>
+            </Position>
+            <Rotation>
+                <X>-0.5928519</X>
+                <Y>-1.067217E-07</Y>
+                <Z>-35.62664</Z>
+            </Rotation>
+            <Hash>60192701</Hash>
+            <Dynamic>true</Dynamic>
+            <Quaternion>
+                <X>-0.004925555</X>
+                <Y>0.00158268574</Y>
+                <Z>-0.305912584</Z>
+                <W>0.95204556</W>
+            </Quaternion>
+            <Dialogue>
+                <StartPage>hello</StartPage>
+                <Pages>
+                    <Page>
+                        <Name>hello</Name>
+                        <Markdown>
+                            <![CDATA[Willkommen in Los Santos!
+    Ich bin ein NPC zu Testzwecken.
+    Ignoriere mich bitte einfach.
+    
+    [Ansonsten?](#aha)
+    [Okay](#close)
+]]>
+                        </Markdown>
+                    </Page>
+                    <Page>
+                        <Name>aha</Name>
+                        <Markdown>
+                            <![CDATA[Nichts ...
+]]>
+                        </Markdown>
+                    </Page>
+                    <Page>
+                        <Name>close</Name>
+                        <Action IsClientSide="true">closeActiveEntityInteraction</Action>
+                    </Page>
+                </Pages>
+            </Dialogue>
+        </MapObject>
+    </Objects>
+</Map>

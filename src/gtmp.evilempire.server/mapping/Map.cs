@@ -22,6 +22,8 @@ namespace gtmp.evilempire.server.mapping
 
         Dictionary<string, MapVehicle> TemplatedMapVehicles { get; } = new Dictionary<string, MapVehicle>();
 
+        Dictionary<string, MapDialogue> Dialogues { get; } = new Dictionary<string, MapDialogue>();
+
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
             Dictionary<int, MapPoint> map;
@@ -32,6 +34,16 @@ namespace gtmp.evilempire.server.mapping
                 {
                     return mapPoint;
                 }
+            }
+            return null;
+        }
+
+        public MapDialogue GetDialogue(string key)
+        {
+            MapDialogue dialogue;
+            if (Dialogues.TryGetValue(key, out dialogue))
+            {
+                return dialogue;
             }
             return null;
         }
@@ -116,6 +128,15 @@ namespace gtmp.evilempire.server.mapping
         public void AddBlip(MapBlip mapBlip)
         {
             Blips.Add(mapBlip);
+        }
+
+        public void AddDialogue(MapDialogue mapDialogue)
+        {
+            if (mapDialogue == null)
+            {
+                throw new ArgumentNullException(nameof(mapDialogue));
+            }
+            Dialogues[mapDialogue.Key] = mapDialogue;
         }
     }
 }
