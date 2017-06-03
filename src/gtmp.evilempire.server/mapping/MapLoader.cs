@@ -86,6 +86,7 @@ namespace gtmp.evilempire.server.mapping
                 var ped = new MapPed(templateName, hash, position, rotation.Z, isInvincible);
                 ped.IsPositionFrozen = mapObject.Element("IsPositionFrozen")?.Value?.AsBool() ?? false;
                 ped.IsCollisionless = mapObject.Element("IsCollisionless")?.Value?.AsBool() ?? false;
+                ped.Title = mapObject.Element("Title")?.Value;
 
                 var dialogueElement = mapObject.Element("Dialogue");
                 if (dialogueElement != null)

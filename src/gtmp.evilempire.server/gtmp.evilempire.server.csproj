@@ -44,6 +44,9 @@
       <HintPath>..\packages\grandtheftmultiplayer.api.0.1.513.481\lib\net452\GrandTheftMultiplayer.Shared.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.4.9\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -86,6 +89,8 @@
     <Compile Include="messages\RequestCharacterCustomizationCancel.cs" />
     <Compile Include="messages\RequestCharacterCustomizationOkay.cs" />
     <Compile Include="messages\RequestCharacterCustomizationResponse.cs" />
+    <Compile Include="messages\RequestInteractWithEntity.cs" />
+    <Compile Include="messages\RequestInteractWithEntityResponse.cs" />
     <Compile Include="messages\RequestLoginHandler.cs" />
     <Compile Include="messages\RequestLoginResponse.cs" />
     <Compile Include="messages\transfer\ClientCharacter.cs" />

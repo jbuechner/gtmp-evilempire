@@ -4,7 +4,8 @@ const ServerClientMessage = {
     RequestLogin: 'req:login',
     CustomizeCharacter: 'req:customizeChar',
     ConfirmCustomizeCharacter: 'req:customizeChar:ok',
-    CancelCustomizeCharacter: 'req:customizeChar:cancel'
+    CancelCustomizeCharacter: 'req:customizeChar:cancel',
+    InteractWithEntity: 'req:interactWithEntity'
 };
 
 const UserGroups = {
@@ -114,6 +115,27 @@ const ClientEvents = {
         }
         data.success = success;
         browser.raiseEventInBrowser('res:customizeChar', data);
+    },
+    'res:interactWithEntity': function __interactWithEntity_response(success, data) {
+        data = deserializeFromDesignatedJson(data);
+        if (!success) {
+            data = {};
+        } else {
+            if (data) {
+                if (data.EntityId) {
+                    for (let [key, value] of uiTrackedEntities) {
+                        if (value.netHandle && value.netHandle === data.EntityId) {
+                            data.EntityId = key;
+                            break;
+                        }
+                    }
+                }
+                if (data.Dialogue) {
+                    data.Dialogue = deserializeFromDesignatedJson(data.Dialogue);
+                }
+            }
+        }
+        browser.raiseEventInBrowser('updateview', { what: 'content', value: { entityId: '' + data.EntityId, dialogue: data.Dialogue }});
     }
 };
 
@@ -132,6 +154,16 @@ const BrowserEvents = {
     },
     'cancelCharacterCustomization': function __cancelCustomizeChar() {
         sendToServer(ServerClientMessage.CancelCustomizeCharacter);
+    },
+    'interactWithEntity': function __interactWithEntity(entityId, action) {
+        if (entityId) {
+            entityId = Number.parseInt(entityId);
+            let uiTrackedEntity = uiTrackedEntities.get(entityId);
+            if (uiTrackedEntity && uiTrackedEntity.netHandle) {
+                entityId = uiTrackedEntity.netHandle;
+            }
+        }
+        sendToServer(ServerClientMessage.InteractWithEntity, [entityId, action]);
     }
 };
 
@@ -403,7 +435,9 @@ function addUiTrackedEntity(entity) {
     let position = API.getEntityPosition(entity);
     let positionAbove = position.Add(new Vector3(0, 0, 1));
     let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
-    uiTrackedEntities.set(entityId, { id: entityId, entity, position, positionAbove });
+
+    let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
+    uiTrackedEntities.set(entityId, { id: entityId, netHandle, entity, position, positionAbove });
 
     let options = getUiTrackingOptions(entity);
     options.entityId = '' + entityId;
@@ -443,7 +477,12 @@ function getUiTrackingOptions(entity) {
         return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock'] };
     }
     if (API.isPed(entity)) {
-        return { title: 'PED', actions: ['speak'] }
+        let actions = [];
+        let title = API.getEntitySyncedData(entity, 'ENTITY:TITLE') || 'PED';
+        if (API.hasEntitySyncedData(entity, 'DIALOGUE:NAME')) {
+            actions.push('speak');
+        }
+        return { title: title, actions };
     }
 
     return {

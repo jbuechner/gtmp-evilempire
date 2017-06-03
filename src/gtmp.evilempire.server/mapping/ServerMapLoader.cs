@@ -163,8 +163,13 @@ namespace gtmp.evilempire.server.mapping
 
             if (ped.Dialogue != null)
             {
-                api.setEntitySyncedData(entity, "DIALOGUE::NAME", ped.Dialogue.Name);
+                api.setEntitySyncedData(entity, "DIALOGUE:NAME", ped.Dialogue.Name);
             }
+            if (ped.Title != null)
+            {
+                api.setEntitySyncedData(entity, "ENTITY:TITLE", ped.Title);
+            }
+            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
 
             return entity;
         }
@@ -179,7 +184,9 @@ namespace gtmp.evilempire.server.mapping
 
         public static void Load(Map map, API api)
         {
-            foreach(var marker in map.Markers)
+            Thread.Sleep(TimeBetweenObjectCreationInMs);
+
+            foreach (var marker in map.Markers)
             {
                 api.createMarker((int)marker.MarkerType, marker.Position.ToVector3(), marker.Direction.ToVector3(), marker.Rotation.ToVector3(), marker.Scale.ToVector3(), marker.Alpha, marker.Red, marker.Green, marker.Blue);
                 Thread.Sleep(TimeBetweenObjectCreationInMs);
@@ -191,7 +198,8 @@ namespace gtmp.evilempire.server.mapping
             }
             foreach(var ped in map.Peds)
             {
-                Load(ped, api);
+                var entity = Load(ped, api);
+                map.MakeAssociation(entity.handle.Value, ped);
                 Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
             foreach(var vehicle in map.Vehicles)

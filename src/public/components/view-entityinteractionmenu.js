@@ -148,13 +148,21 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         e.preventDefault();
         let action = e.target.getAttribute('data-action');
         let requiresContent = e.target.getAttribute('data-action-requiresContent');
+
+        let isActive = e.target.classList.contains('active');
+        this.resetActiveActions();
+        if (isActive) {
+            this.isLoading = false;
+            this.isContentVisible = false;
+            return;
+        }
+
         this.isContentVisible = requiresContent && requiresContent === 'true';
         this.isLoading = this.isContentVisible;
         if (this.isContentVisible) {
             this.markdown = null;
         }
 
-        this.resetActiveActions();
         e.target.classList.add('active');
 
         if (this.app) {

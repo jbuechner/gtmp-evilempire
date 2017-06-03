@@ -10,5 +10,7 @@ namespace gtmp.evilempire.services
     {
         string SerializeAsDesignatedJson(object o);
         object DeserializeFromDesignatedJson(string s);
+
+        string DecorateAsJson(string value);
     }
 }

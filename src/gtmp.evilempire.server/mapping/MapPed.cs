@@ -19,6 +19,8 @@ namespace gtmp.evilempire.server.mapping
 
         public MapDialogue Dialogue { get; set; }
 
+        public string Title { get; set; }
+
         public bool IsTemplate
         {
             get

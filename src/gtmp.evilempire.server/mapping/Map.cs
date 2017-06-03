@@ -24,6 +24,8 @@ namespace gtmp.evilempire.server.mapping
 
         Dictionary<string, MapDialogue> Dialogues { get; } = new Dictionary<string, MapDialogue>();
 
+        Dictionary<int, MapPed> RuntimeHandleToPedMap { get; } = new Dictionary<int, MapPed>();
+
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
             Dictionary<int, MapPoint> map;
@@ -137,6 +139,21 @@ namespace gtmp.evilempire.server.mapping
                 throw new ArgumentNullException(nameof(mapDialogue));
             }
             Dialogues[mapDialogue.Key] = mapDialogue;
+        }
+
+        public void MakeAssociation(int runtimeHandle, MapPed ped)
+        {
+            RuntimeHandleToPedMap[runtimeHandle] = ped;
+        }
+
+        public MapPed GetPedByRuntimeHandle(int runtimeHandle)
+        {
+            MapPed ped;
+            if (RuntimeHandleToPedMap.TryGetValue(runtimeHandle, out ped))
+            {
+                return ped;
+            }
+            return null;
         }
     }
 }

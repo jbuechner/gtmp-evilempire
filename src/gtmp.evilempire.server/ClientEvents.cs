@@ -20,5 +20,7 @@ namespace gtmp.evilempire.server
         public static readonly string RequestCustomizeCharacterOk = "req:customizeChar:ok";
         public static readonly string RequestCustomizeCharacterCancel = "req:customizeChar:cancel";
         public static readonly string RequestCustomizeCharacterResponse = "res:customizeChar";
+        public static readonly string RequestInteractWithEntity = "req:interactWithEntity";
+        public static readonly string RequestInteractWithEntityResponse = "res:interactWithEntity";
     }
 }

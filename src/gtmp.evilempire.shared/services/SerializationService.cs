@@ -24,7 +24,12 @@ namespace gtmp.evilempire.services
             {
                 return EmptyDesignatedJson;
             }
-            return string.Concat(JsonDesignation, JsonConvert.SerializeObject(o));
+            return DecorateAsJson(JsonConvert.SerializeObject(o));
+        }
+
+        public string DecorateAsJson(string value)
+        {
+            return string.Concat(JsonDesignation, value);
         }
     }
 }

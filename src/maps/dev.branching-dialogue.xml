@@ -21,6 +21,7 @@
                 <Z>-0.305912584</Z>
                 <W>0.95204556</W>
             </Quaternion>
+            <Title>Ein DEV NPC</Title>
             <Dialogue>
                 <StartPage>hello</StartPage>
                 <Pages>
@@ -28,19 +29,18 @@
                         <Name>hello</Name>
                         <Markdown>
                             <![CDATA[Willkommen in Los Santos!
-    Ich bin ein NPC zu Testzwecken.
-    Ignoriere mich bitte einfach.
-    
-    [Ansonsten?](#aha)
-    [Okay](#close)
+Ich bin ein NPC zu Testzwecken.
+Ignoriere mich bitte einfach.
+
+[Ansonsten?](#aha)
+[Okay](#close)
 ]]>
                         </Markdown>
                     </Page>
                     <Page>
                         <Name>aha</Name>
                         <Markdown>
-                            <![CDATA[Nichts ...
-]]>
+                            <![CDATA[Nichts ...]]>
                         </Markdown>
                     </Page>
                     <Page>
