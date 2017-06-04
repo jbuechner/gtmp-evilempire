@@ -108,6 +108,7 @@ Ignoriere mich bitte einfach.
                                 </Item>
                             </Sequence>
                         </Action>
+                        <Markdown><![CDATA[Da ist es. [Endlich!](#close)]]></Markdown>
                     </Page>
                 </Pages>
             </Dialogue>

@@ -16,7 +16,11 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         break;
                     case 'entityAction':
                         this.resetIsLoading();
-                        this.markdown = '';
+                        if (this.followUpContent && this.followUpContent.length > 0) {
+                            this.markdown = this.followUpContent;
+                            this.iContentVisible = true;
+                            this.followUpContent = '';
+                        }
                         break;
                 }
             }
@@ -39,10 +43,6 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         switch (('' + action).toUpperCase()) {
             case 'JUMPTOPAGE':
                 let page = this.dialogue.findPage(target, true);
-                if (page && page.markdown) {
-                    this.markdown = page.markdown;
-                    break;
-                }
                 if (page.action) {
                     let invariantAction = page.action.toUpperCase();
                     if (invariantAction === 'CLOSEACTIVEENTITYINTERACTION') {
@@ -50,10 +50,18 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         return;
                     }
                     if (invariantAction.startsWith('@')) {
+                        this.followUpContent = page.markdown;
+                        this.markdown = '';
                         this.triggerServerAction(page.action);
                         return;
                     }
                 }
+
+                if (page && page.markdown) {
+                    this.markdown = page.markdown;
+                    break;
+                }
+
                 break;
         }
     }
