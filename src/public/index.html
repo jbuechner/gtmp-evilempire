@@ -93,6 +93,10 @@
             entityinteraction(entityId, action) {
                 this.callBackend('interactWithEntity', argumentsToArray(arguments));
 			}
+
+            triggerEntityAction(entityId, action) {
+                this.callBackend('triggerEntityAction', argumentsToArray(arguments));
+			}
         }
         window.app = new App();
         function argumentsToArray(args) {

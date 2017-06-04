@@ -70,9 +70,14 @@
     <Compile Include="commands\HelpCommand.cs" />
     <Compile Include="commands\TeleportCommand.cs" />
     <Compile Include="GtmpMainScript.cs" />
+    <Compile Include="mapping\actions\ChangePropertyServerAction.cs" />
+    <Compile Include="mapping\actions\MapDialogueServerAction.cs" />
+    <Compile Include="mapping\actions\SpawnEntityServerAction.cs" />
     <Compile Include="mapping\Map.cs" />
     <Compile Include="mapping\MapBlip.cs" />
     <Compile Include="mapping\MapDialogue.cs" />
+    <Compile Include="mapping\MapDialogueAction.cs" />
+    <Compile Include="mapping\MapDialogueActionSequenceItem.cs" />
     <Compile Include="mapping\MapDialoguePage.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
@@ -81,7 +86,6 @@
     <Compile Include="mapping\MapPed.cs" />
     <Compile Include="mapping\MapPoint.cs" />
     <Compile Include="mapping\MapPointType.cs" />
-    <Compile Include="mapping\MapVehicle.cs" />
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
     <Compile Include="messages\MessageHandlerBase.cs" />
@@ -93,6 +97,8 @@
     <Compile Include="messages\RequestInteractWithEntityResponse.cs" />
     <Compile Include="messages\RequestLoginHandler.cs" />
     <Compile Include="messages\RequestLoginResponse.cs" />
+    <Compile Include="messages\RequestTriggerEntityAction.cs" />
+    <Compile Include="messages\RequestTriggerEntityActionResponse.cs" />
     <Compile Include="messages\transfer\ClientCharacter.cs" />
     <Compile Include="messages\transfer\ClientCharacterCustomization.cs" />
     <Compile Include="messages\transfer\ClientCharacterFaceCustomization.cs" />

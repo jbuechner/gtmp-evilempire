@@ -91,10 +91,10 @@ namespace gtmp.evilempire.server.messages
                 writer.WritePropertyName("__markdown");
                 writer.WriteValue(page.Markdown);
             }
-            if (!string.IsNullOrEmpty(page.Action))
+            if (page.Action != null)
             {
                 writer.WritePropertyName("__action");
-                writer.WriteValue(page.Action);
+                writer.WriteValue(page.Action.Name);
             }
 
             if (writeNestedPages && page.Pages != null)

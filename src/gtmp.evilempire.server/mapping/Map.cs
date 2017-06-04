@@ -1,4 +1,6 @@
-﻿using System;
+﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.server.mapping.actions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,7 @@ namespace gtmp.evilempire.server.mapping
         public IList<MapPoint> Points { get; } = new List<MapPoint>();
         public IList<MapMarker> Markers { get; } = new List<MapMarker>();
         public IList<MapProp> Props { get; } = new List<MapProp>();
-        public IList<MapVehicle> Vehicles { get; } = new List<MapVehicle>();
+        public IList<Vehicle> Vehicles { get; } = new List<Vehicle>();
 
         public IList<MapPed> Peds { get; } = new List<MapPed>();
 
@@ -20,11 +22,13 @@ namespace gtmp.evilempire.server.mapping
         Dictionary<MapPointType, Dictionary<int, MapPoint>> MapPointMap { get; } = new Dictionary<MapPointType, Dictionary<int, MapPoint>>();
         Dictionary<string, MapPoint> NamedMapPointMap { get; } = new Dictionary<string, MapPoint>();
 
-        Dictionary<string, MapVehicle> TemplatedMapVehicles { get; } = new Dictionary<string, MapVehicle>();
+        Dictionary<string, Vehicle> TemplatedMapVehicles { get; } = new Dictionary<string, Vehicle>();
 
         Dictionary<string, MapDialogue> Dialogues { get; } = new Dictionary<string, MapDialogue>();
 
         Dictionary<int, MapPed> RuntimeHandleToPedMap { get; } = new Dictionary<int, MapPed>();
+
+        Dictionary<string, MapDialogueServerAction> MapDialogueServerActions = new Dictionary<string, MapDialogueServerAction>();
 
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
@@ -50,9 +54,9 @@ namespace gtmp.evilempire.server.mapping
             return null;
         }
 
-        public MapVehicle FindVehicleByTemplateName(string templateName)
+        public Vehicle FindVehicleByTemplateName(string templateName)
         {
-            MapVehicle templateVehicle;
+            Vehicle templateVehicle;
             if (TemplatedMapVehicles.TryGetValue(templateName, out templateVehicle))
             {
                 return templateVehicle;
@@ -115,9 +119,9 @@ namespace gtmp.evilempire.server.mapping
             }
         }
 
-        public void AddVehicle(MapVehicle mapVehicle)
+        public void AddVehicle(Vehicle mapVehicle)
         {
-            if (mapVehicle.IsTemplate)
+            if (!string.IsNullOrEmpty(mapVehicle.TemplateName))
             {
                 TemplatedMapVehicles.Add(mapVehicle.TemplateName, mapVehicle);
             }
@@ -152,6 +156,21 @@ namespace gtmp.evilempire.server.mapping
             if (RuntimeHandleToPedMap.TryGetValue(runtimeHandle, out ped))
             {
                 return ped;
+            }
+            return null;
+        }
+
+        public void AddDialogueServerAction(MapDialogueServerAction serverAction)
+        {
+            MapDialogueServerActions[serverAction.Name] = serverAction;
+        }
+
+        public MapDialogueServerAction FindDialogueServerActionByName(string name)
+        {
+            MapDialogueServerAction serverAction;
+            if (MapDialogueServerActions.TryGetValue(name, out serverAction))
+            {
+                return serverAction;
             }
             return null;
         }

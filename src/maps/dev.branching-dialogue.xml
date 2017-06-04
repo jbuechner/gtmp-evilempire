@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Markers>
+        <Marker>
+          <Type>UpsideDownCone</Type>
+          <Position>
+            <X>-1040</X>
+            <Y>-2737</Y>
+            <Z>14</Z>
+          </Position>
+          <Rotation>
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Rotation>
+          <Scale>
+            <X>0.75</X>
+            <Y>0.75</Y>
+            <Z>0.75</Z>
+          </Scale>
+          <Red>255</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+          <Alpha>255</Alpha>
+        </Marker>
+    </Markers>
     <Objects>
+        <MapObject>
+            <Type>Vehicle</Type>
+            <TemplateName>DEV_VehicleSpawn</TemplateName>
+            <Position>
+                <X>-1040</X>
+                <Y>-2737</Y>
+                <Z>14</Z>
+            </Position>
+            <Rotation>
+                <Y>-32</Y>
+            </Rotation>
+            <Hash>237764926</Hash>
+            <Quaternion>
+                <X>-0.0183549933</X>
+                <Y>0.009907198</Y>
+                <Z>0.0341101177</Z>
+                <W>0.9992004</W>
+            </Quaternion>
+            <PrimaryColor>111</PrimaryColor>
+            <SecondaryColor>0</SecondaryColor>
+        </MapObject>
         <MapObject>
             <Type>Ped</Type>
             <Position>
@@ -34,6 +79,7 @@ Ignoriere mich bitte einfach.
 
 [Ansonsten?](#aha)
 [Okay](#close)
+[Gib mir ein Auto](#car)
 ]]>
                         </Markdown>
                     </Page>
@@ -46,6 +92,22 @@ Ignoriere mich bitte einfach.
                     <Page>
                         <Name>close</Name>
                         <Action IsClientSide="true">closeActiveEntityInteraction</Action>
+                    </Page>
+                    <Page>
+                        <Name>car</Name>
+                        <Action>
+                            <Name>@CreateCar</Name>
+                            <Sequence>
+                                <Item Type="SpawnEntity">
+                                    <Type>Vehicle</Type>
+                                    <Template>DEV_VehicleSpawn</Template>
+                                </Item>
+                                <Item Type="Change">
+                                    <Property>Cash</Property>
+                                    <Value>-2000</Value>
+                                </Item>
+                            </Sequence>
+                        </Action>
                     </Page>
                 </Pages>
             </Dialogue>

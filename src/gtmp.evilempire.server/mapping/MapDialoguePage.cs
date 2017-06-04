@@ -10,16 +10,14 @@ namespace gtmp.evilempire.server.mapping
     {
         public string Key { get; }
         public string Markdown { get; }
-        public string Action { get; }
-        public bool IsClientSideAction { get; }
+        public MapDialogueAction Action { get; }
         public IList<MapDialoguePage> Pages { get; } = new List<MapDialoguePage>();
 
-        public MapDialoguePage(string key, string markdown, string action, bool isClientSideAction)
+        public MapDialoguePage(string key, string markdown, MapDialogueAction action)
         {
             Key = key;
             Markdown = markdown;
             Action = action;
-            IsClientSideAction = isClientSideAction;
         }
 
     }

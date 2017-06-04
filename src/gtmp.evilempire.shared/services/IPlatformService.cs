@@ -15,5 +15,9 @@ namespace gtmp.evilempire.services
         CharacterCustomization GetDefaultCharacterCustomization();
 
         void UpdateCharacterCustomization(ISession session);
+
+        void SpawnVehicle(Vehicle vehicle);
+
+        bool IsClearRange(Vector3f point, float range, float height);
     }
 }

@@ -4,6 +4,7 @@ using GrandTheftMultiplayer.Shared;
 using gtmp.evilempire.db;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;
+using gtmp.evilempire.server.mapping.actions;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
 using gtmp.evilempire.server.sessions;
@@ -24,7 +25,9 @@ namespace gtmp.evilempire.server
         Thread heartbeatThread;
 
         API api;
+        Map map;
         ServiceContainer services;
+        IPlatformService platform;
         IClientService clients;
         ISessionService sessions;
         ICharacterService characters;
@@ -43,11 +46,12 @@ namespace gtmp.evilempire.server
 
             this.api = api;
 
-            var map = MapLoader.LoadFrom("maps");
-            ServerMapLoader.Load(map, api);
-
             services = CreateServiceContainer();
-            services.Register<IPlatformService>(new GtmpPlatformService(api));
+            services.Register<IPlatformService>(platform = new GtmpPlatformService(api));
+
+            map = MapLoader.LoadFrom("maps");
+            ServerMapLoader.Load(map, platform, api);
+
             services.Register(map);
 
             clients = services.Get<IClientService>();
@@ -61,6 +65,7 @@ namespace gtmp.evilempire.server
             AddPlatformHooks(api);
             AddChatCommands();
             AddSessionStateTransitions();
+            AddDialogueServerActions();
             BeginHeartbeat();
         }
 
@@ -129,6 +134,19 @@ namespace gtmp.evilempire.server
                 {
                     var sessionStateHandler = (SessionStateHandlerBase)Activator.CreateInstance(sessionStateHandlerType, new[] { services });
                     sessionStateTransition.RegisterTransition(sessionStateHandler);
+                }
+            }
+        }
+
+        void AddDialogueServerActions()
+        {
+            var dialogueActionTypes = typeof(ServerRealm).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(MapDialogueServerAction)));
+            if (dialogueActionTypes != null)
+            {
+                foreach(var dialogueActionType in dialogueActionTypes)
+                {
+                    var dialogueAction = (MapDialogueServerAction)Activator.CreateInstance(dialogueActionType, new[] { services });
+                    map.AddDialogueServerAction(dialogueAction);
                 }
             }
         }

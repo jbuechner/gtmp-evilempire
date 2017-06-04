@@ -12,7 +12,11 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         break;
                     case 'content':
                         this.dialogue = new BranchingDialogue(ev.detail.value.dialogue);
-                        this.isLoading = false;
+                        this.resetIsLoading();
+                        break;
+                    case 'entityAction':
+                        this.resetIsLoading();
+                        this.markdown = '';
                         break;
                 }
             }
@@ -24,7 +28,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         this._pos = null;
         this._actions = [];
         this._dialogue = null;
-        this.isLoading = true;
+        this.resetIsLoading();
         this.isContentVisible = false;
     }
 
@@ -40,10 +44,14 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                     break;
                 }
                 if (page.action) {
-                    switch (('' + page.action).toUpperCase()) {
-                        case 'CLOSEACTIVEENTITYINTERACTION':
-                            this.dialogue = null;
-                            break;
+                    let invariantAction = page.action.toUpperCase();
+                    if (invariantAction === 'CLOSEACTIVEENTITYINTERACTION') {
+                        this.dialogue = null;
+                        return;
+                    }
+                    if (invariantAction.startsWith('@')) {
+                        this.triggerServerAction(page.action);
+                        return;
                     }
                 }
                 break;
@@ -144,20 +152,46 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         }
     }
 
+    resetIsLoading() {
+        this.isLoading = false;
+        this.loadingText = 'Please wait ...';
+    }
+
+    triggerServerAction(serverAction) {
+        if (this.isLoading) {
+            this.loadingText = 'Patience ...';
+            return;
+        }
+
+        this.isLoading = true;
+        this.markdown = '';
+        if (this.app) {
+            this.app.triggerEntityAction(this.entityId, serverAction);
+        } else {
+            console.warn('unable to dispatch entity interaction.');
+        }
+    }
+
     raiseAction(e) {
         e.preventDefault();
+
+        if (this.isLoading) {
+            this.loadingText = 'Patience ...';
+            return;
+        }
+
         let action = e.target.getAttribute('data-action');
         let requiresContent = e.target.getAttribute('data-action-requiresContent');
 
         let isActive = e.target.classList.contains('active');
         this.resetActiveActions();
         if (isActive) {
-            this.isLoading = false;
+            this.resetIsLoading();
             this.isContentVisible = false;
             return;
         }
 
-        this.isContentVisible = requiresContent && requiresContent === 'true';
+        this.isContentVisible = requiresContent === 'true';
         this.isLoading = this.isContentVisible;
         if (this.isContentVisible) {
             this.markdown = null;
@@ -192,7 +226,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
             <p slim-if="isLoading" >
                 <span>
                     <i class="fa fa-spinner fa-pulse fa-fw" style="margin-top:3px"></i>
-                    Loading ...
+                    <span bind>[[loadingText]]</span>
                 </span>
             </p>
             <div slim-id="content"></div>

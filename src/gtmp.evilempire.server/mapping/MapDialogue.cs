@@ -10,8 +10,8 @@ namespace gtmp.evilempire.server.mapping
     {
         public string Name { get; }
 
-        public MapDialogue(string key, string markdown, string action, bool isClientSideAction)
-            : base(key, markdown, action, isClientSideAction)
+        public MapDialogue(string key, string markdown, MapDialogueAction action)
+            : base(key, markdown, action)
         {
             Name = key;
         }

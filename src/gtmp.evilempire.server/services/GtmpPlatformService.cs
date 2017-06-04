@@ -6,8 +6,10 @@ using gtmp.evilempire.entities;
 using gtmp.evilempire.entities.customization;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.FormattableString;
 
 namespace gtmp.evilempire.server.services
 {
@@ -62,6 +64,156 @@ namespace gtmp.evilempire.server.services
             api.sendNativeToPlayer(nativeClient, 0x9414E18B9434C2FE, nativeClient.handle, face.ShapeFirst, face.ShapeSecond, 0, face.SkinFirst, face.SkinSecond, 0, face.ShapeMix, face.SkinMix, 0f, false);
             api.sendNativeToPlayer(nativeClient, 0x262B14F48D29DE80, nativeClient.handle, 2, characterCustomization.HairStyleId, 0, 0);
             api.sendNativeToPlayer(nativeClient, 0x4CFFC65454C93A49, nativeClient.handle, characterCustomization.HairColorId, 0);
+        }
+
+        public void SpawnVehicle(entities.Vehicle vehicle)
+        {
+
+            if (!Enum.IsDefined(typeof(VehicleHash), vehicle.Hash))
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine(Invariant($"Invalid vehicle hash {vehicle.Hash}. Skipped."));
+                }
+            }
+            var hash = (VehicleHash)vehicle.Hash;
+            var entity = api.createVehicle(hash, vehicle.Position.ToVector3(), vehicle.Rotation.ToVector3(), vehicle.Color1, vehicle.Color2);
+
+            if (vehicle.NumberPlate != null)
+            {
+                entity.numberPlate = vehicle.NumberPlate;
+            }
+            if (vehicle.NumberPlateStyle.HasValue)
+            {
+                entity.numberPlateStyle = vehicle.NumberPlateStyle.Value;
+            }
+            entity.specialLight = vehicle.IsSpecialLightEnabled;
+            if (vehicle.TrimColor.HasValue)
+            {
+                entity.trimColor = vehicle.TrimColor.Value;
+            }
+
+            if (vehicle.BrokenWindows != null)
+            {
+                foreach (var windowIndex in vehicle.BrokenWindows)
+                {
+                    entity.breakWindow(windowIndex);
+                }
+            }
+            if (vehicle.OpenedDoors != null)
+            {
+                foreach (var doorIndex in vehicle.OpenedDoors)
+                {
+                    entity.openDoor(doorIndex);
+                }
+            }
+            if (vehicle.BrokenDoors != null)
+            {
+                foreach (var doorIndex in vehicle.BrokenDoors)
+                {
+                    entity.breakDoor(doorIndex);
+                }
+            }
+            if (vehicle.PoppedTyres != null)
+            {
+                foreach (var tyreIndex in vehicle.PoppedTyres)
+                {
+                    entity.popTyre(tyreIndex);
+                }
+            }
+            if (vehicle.Neons != null)
+            {
+                foreach (var neon in vehicle.Neons)
+                {
+                    entity.setNeons(neon.Index, neon.IsTurnedOn);
+                }
+            }
+
+            if (vehicle.EnginePowerMultiplier.HasValue)
+            {
+                entity.enginePowerMultiplier = vehicle.EnginePowerMultiplier.Value;
+            }
+            if (vehicle.EngineTorqueMultiplier.HasValue)
+            {
+                entity.engineTorqueMultiplier = vehicle.EngineTorqueMultiplier.Value;
+            }
+
+            if (vehicle.CustomPrimaryColor.HasValue)
+            {
+                entity.customPrimaryColor = vehicle.CustomPrimaryColor.Value.ToColor();
+            }
+            if (vehicle.CustomSecondaryColor.HasValue)
+            {
+                entity.customSecondaryColor = vehicle.CustomSecondaryColor.Value.ToColor();
+            }
+            if (vehicle.ModColor1.HasValue)
+            {
+                entity.modColor1 = vehicle.ModColor1.Value.ToColor();
+            }
+            if (vehicle.ModColor2.HasValue)
+            {
+                entity.modColor2 = vehicle.ModColor2.Value.ToColor();
+            }
+            if (vehicle.NeonColor.HasValue)
+            {
+                entity.neonColor = vehicle.NeonColor.Value.ToColor();
+            }
+            if (vehicle.TyreSmokeColor.HasValue)
+            {
+                entity.tyreSmokeColor = vehicle.TyreSmokeColor.Value.ToColor();
+            }
+            if (vehicle.WheelColor.HasValue)
+            {
+                entity.wheelColor = vehicle.WheelColor.Value;
+            }
+            if (vehicle.WheelType.HasValue)
+            {
+                entity.wheelType = vehicle.WheelType.Value;
+            }
+            if (vehicle.WindowTint.HasValue)
+            {
+                entity.windowTint = vehicle.WindowTint.Value;
+            }
+            if (vehicle.DashboardColor.HasValue)
+            {
+                entity.dashboardColor = vehicle.DashboardColor.Value;
+            }
+            if (vehicle.Health.HasValue)
+            {
+                entity.health = vehicle.Health.Value;
+            }
+            if (vehicle.Livery.HasValue)
+            {
+                entity.livery = vehicle.Livery.Value;
+            }
+            if (vehicle.PearlescentColor.HasValue)
+            {
+                entity.pearlescentColor = vehicle.PearlescentColor.Value;
+            }
+
+            entity.locked = vehicle.IsLocked;
+            entity.freezePosition = vehicle.IsPositionFrozen;
+            entity.engineStatus = vehicle.IsEngineRunning;
+            entity.bulletproofTyres = vehicle.HasBulletproofTyres;
+            entity.invincible = vehicle.IsInvincible;
+            entity.collisionless = vehicle.IsCollisionless;
+        }
+
+        public bool IsClearRange(Vector3f point, float range, float height)
+        {
+            var vehicles = api.getAllVehicles();
+            if (vehicles != null)
+            {
+                foreach(var vehicle in vehicles)
+                {
+                    var pos = api.getEntityPosition(vehicle);
+                    if (Math.IsPointInSphere(point, range, pos.ToVector3f()))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         static FreeroamCustomizationData CreateFreeroamCustomizationData()

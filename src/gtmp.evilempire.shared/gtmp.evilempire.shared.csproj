@@ -78,6 +78,7 @@
     <Compile Include="entities\Vector3f.cs" />
     <Compile Include="entities\Vehicle.cs" />
     <Compile Include="IClient.cs" />
+    <Compile Include="Math.cs" />
     <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />
     <Compile Include="ServiceContainer.cs" />

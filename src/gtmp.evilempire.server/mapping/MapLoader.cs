@@ -114,7 +114,13 @@ namespace gtmp.evilempire.server.mapping
                 var color1 = mapObject.Element("PrimaryColor")?.Value?.AsInt() ?? 0;
                 var color2 = mapObject.Element("SecondaryColor")?.Value?.AsInt() ?? 0;
 
-                var vehicle = new MapVehicle(templateName, hash, position, rotation, color1, color2);
+                var vehicle = new Vehicle();
+                vehicle.Hash = hash;
+                vehicle.Position = position;
+                vehicle.Rotation = rotation;
+                vehicle.Color1 = color1;
+                vehicle.Color2 = color2;
+                vehicle.TemplateName = templateName;
 
                 // optional
                 vehicle.IsInvincible = mapObject.Element("IsInvincible")?.Value?.AsBool() ?? false;
@@ -136,12 +142,12 @@ namespace gtmp.evilempire.server.mapping
                 var neonElements = mapObject.Elements("Neon");
                 if(neonElements != null)
                 {
-                    List<MapVehicle.Neon> neons = new List<MapVehicle.Neon>();
+                    List<Vehicle.Neon> neons = new List<Vehicle.Neon>();
                     foreach(var neonElement in neonElements)
                     {
                         var neonIndex = neonElement.Attribute("Slot")?.Value?.AsInt() ?? 0;
                         var isTurnedOn = neonElement.Attribute("On")?.Value?.AsBool() ?? false;
-                        var neon = new MapVehicle.Neon { Index = neonIndex, IsTurnedOn = isTurnedOn };
+                        var neon = new Vehicle.Neon { Index = neonIndex, IsTurnedOn = isTurnedOn };
                         neons.Add(neon);
                     }
                     vehicle.Neons = neons;
@@ -282,11 +288,26 @@ namespace gtmp.evilempire.server.mapping
             }
             var name = dialoguePageElement?.Element("Name")?.Value;
             var markdown = dialoguePageElement?.Element("Markdown")?.Value;
-            var action = dialoguePageElement?.Element("Action");
-            var actionName = action?.Value;
-            var isClientSideAction = action?.Attribute("IsClientSide")?.Value.AsBool() ?? false;
+            var actionElement = dialoguePageElement?.Element("Action");
 
-            var newDialoguePage = (T)Activator.CreateInstance(typeof(T), name, markdown, actionName, isClientSideAction);
+            var isClientSideAction = actionElement?.Attribute("IsClientSide")?.Value.AsBool() ?? false;
+            string actionName;
+            if (isClientSideAction)
+            {
+                actionName = actionElement?.Value;
+            }
+            else
+            {
+                actionName = actionElement?.Element("Name")?.Value;
+            }
+            var action = new MapDialogueAction(isClientSideAction, actionName);
+            var sequenceElement = actionElement?.Element("Sequence");
+            if (sequenceElement != null)
+            {
+                ReadActionSequence(sequenceElement, action);
+            }
+
+            var newDialoguePage = (T)Activator.CreateInstance(typeof(T), name, markdown, action);
             if (dialoguePage != null)
             {
                 dialoguePage.Pages.Add(newDialoguePage);
@@ -315,6 +336,44 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
                     ReadDialoguePage<MapDialoguePage>(dialoguePage, pageElement);
+                }
+            }
+        }
+
+        void ReadActionSequence(XElement element, MapDialogueAction action)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var items = element.Elements("Item");
+            if (items != null)
+            {
+                foreach(var item in items)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    var itemType = item.Attribute("Type")?.Value;
+                    var args = new Dictionary<string, string>();
+                    foreach (var child in item.Elements())
+                    {
+                        if (child == null)
+                        {
+                            continue;
+                        }
+                        args.Add(child.Name.LocalName, child.Value);
+                    }
+
+                    var sequenceItem = new MapDialogueActionSequenceItem(itemType, args);
+                    action.Sequence.Add(sequenceItem);
                 }
             }
         }

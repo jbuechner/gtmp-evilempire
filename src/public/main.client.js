@@ -5,7 +5,8 @@ const ServerClientMessage = {
     CustomizeCharacter: 'req:customizeChar',
     ConfirmCustomizeCharacter: 'req:customizeChar:ok',
     CancelCustomizeCharacter: 'req:customizeChar:cancel',
-    InteractWithEntity: 'req:interactWithEntity'
+    InteractWithEntity: 'req:interactWithEntity',
+    TriggerEntityAction: 'req:triggerEntityAction'
 };
 
 const UserGroups = {
@@ -122,20 +123,20 @@ const ClientEvents = {
             data = {};
         } else {
             if (data) {
-                if (data.EntityId) {
-                    for (let [key, value] of uiTrackedEntities) {
-                        if (value.netHandle && value.netHandle === data.EntityId) {
-                            data.EntityId = key;
-                            break;
-                        }
-                    }
-                }
+                data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
                 if (data.Dialogue) {
                     data.Dialogue = deserializeFromDesignatedJson(data.Dialogue);
                 }
             }
         }
         browser.raiseEventInBrowser('updateview', { what: 'content', value: { entityId: '' + data.EntityId, dialogue: data.Dialogue }});
+    },
+    'res:triggerEntityAction': function __triggerEntityAction_response(success, data) {
+        data = deserializeFromDesignatedJson(data);
+        if (data) {
+            data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
+        }
+        browser.raiseEventInBrowser('updateview', { what: 'entityAction', value: { entityId: '' + data.EntityId } });
     }
 };
 
@@ -156,14 +157,12 @@ const BrowserEvents = {
         sendToServer(ServerClientMessage.CancelCustomizeCharacter);
     },
     'interactWithEntity': function __interactWithEntity(entityId, action) {
-        if (entityId) {
-            entityId = Number.parseInt(entityId);
-            let uiTrackedEntity = uiTrackedEntities.get(entityId);
-            if (uiTrackedEntity && uiTrackedEntity.netHandle) {
-                entityId = uiTrackedEntity.netHandle;
-            }
-        }
+        entityId = resolveNetHandleFromEntityId(entityId);
         sendToServer(ServerClientMessage.InteractWithEntity, [entityId, action]);
+    },
+    'triggerEntityAction': function __triggerEntityAction(entityId, action) {
+        entityId = resolveNetHandleFromEntityId(entityId);
+        sendToServer(ServerClientMessage.TriggerEntityAction, [entityId, action]);
     }
 };
 
@@ -488,6 +487,26 @@ function getUiTrackingOptions(entity) {
     return {
         title: '' + entity.Value
     }
+}
+function resolveNetHandleFromEntityId(entityId) {
+    if (entityId) {
+        entityId = Number.parseInt(entityId);
+        let uiTrackedEntity = uiTrackedEntities.get(entityId);
+        if (uiTrackedEntity && uiTrackedEntity.netHandle) {
+            return uiTrackedEntity.netHandle;
+        }
+    }
+    return entityId;
+}
+function resolveEntityIdFromNetHandle(entityId) {
+    if (entityId) {
+        for (let [key, value] of uiTrackedEntities) {
+            if (value.netHandle && value.netHandle === entityId) {
+                return key;
+            }
+        }
+    }
+    return entityId;
 }
 
 function onUpdate() {
