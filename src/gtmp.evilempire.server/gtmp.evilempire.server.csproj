@@ -62,6 +62,16 @@
     <Compile Include="..\shared\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="actions\ActionExecutionEngine.cs" />
+    <Compile Include="actions\ActionHandler.cs" />
+    <Compile Include="actions\ActionHandlerAttribute.cs" />
+    <Compile Include="actions\ActionSetItem.cs" />
+    <Compile Include="actions\ActionSequence.cs" />
+    <Compile Include="actions\ActionSequenceItem.cs" />
+    <Compile Include="actions\ActionSet.cs" />
+    <Compile Include="actions\GiveItemActionHandler.cs" />
+    <Compile Include="actions\SendMoneyChangedActionHandler.cs" />
+    <Compile Include="actions\SendNotificationActionHandler.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ClientEvents.cs" />
     <Compile Include="commands\Command.cs" />

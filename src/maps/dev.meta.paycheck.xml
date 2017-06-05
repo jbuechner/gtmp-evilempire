@@ -4,12 +4,22 @@
         <Timers>
             <Timer>
                 <Interval>00:00:10</Interval>
-                <Items>
-                    <Item>
-                        <ItemDescriptionId>00001001</ItemDescriptionId>
-                        <Amount>10</Amount>
-                    </Item>
-                </Items>
+                <Actions>
+                    <Action>
+                        <Sequence>
+                            <Item Type="SendNotification">
+                                <Message>You just received your regular allowance. Have fun.</Message>
+                            </Item>
+                            <Item Type="GiveItem">
+                                <ItemDescriptionId>00001001</ItemDescriptionId>
+                                <Amount>10</Amount>
+                            </Item>
+                            <Item Type="SendMoneyChanged">
+                                <Currencies>Dollar</Currencies>
+                            </Item>
+                        </Sequence>
+                    </Action>
+                </Actions>
             </Timer>
         </Timers>
     </Metadata>

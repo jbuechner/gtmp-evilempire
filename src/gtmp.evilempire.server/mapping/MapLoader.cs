@@ -1,4 +1,5 @@
 ﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.server.actions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -480,12 +481,10 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
 
+
                     items = timer.Element("Items")?.Elements("Item");
                     var mapTimer = new MapTimer { Interval = interval.Value };
-                    foreach(var item in LoadItems(items))
-                    {
-                        mapTimer.Items.Add(item);
-                    }
+                    mapTimer.Actions = LoadActionSets(timer.Elements("Actions")).ToList();
                     map.Metadata.Timers.Add(mapTimer);
                 }
             }
@@ -517,6 +516,63 @@ namespace gtmp.evilempire.server.mapping
 
                     yield return new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
                 }
+            }
+        }
+
+        static IEnumerable<ActionSet> LoadActionSets(IEnumerable<XElement> elements)
+        {
+            if (elements == null)
+            {
+                yield break;
+            }
+            foreach(var element in elements)
+            {
+                var actionSet = new ActionSet();
+
+                var actionElements = element?.Elements("Action");
+                if (actionElements == null)
+                {
+                    continue;
+                }
+                foreach(var actionElement in actionElements)
+                {
+                    var action = new ActionSetItem();
+                    actionSet.Actions.Add(action);
+
+                    var sequenceElement = actionElement?.Element("Sequence");
+                    if (sequenceElement == null)
+                    {
+                        continue;
+                    }
+
+                    var sequenceItemElements = sequenceElement.Elements("Item");
+                    if (sequenceItemElements == null)
+                    {
+                        continue;
+                    }
+                    foreach (var sequenceItemElement in sequenceItemElements)
+                    {
+                        var actionType = sequenceItemElement?.Attribute("Type")?.Value;
+                        var sequenceItem = new ActionSequenceItem { ActionType = actionType };
+                        action.Sequence.Items.Add(sequenceItem);
+
+                        var argumentElements = sequenceItemElement.Elements();
+                        if (argumentElements != null)
+                        {
+                            foreach (var argumentElement in argumentElements)
+                            {
+                                if (argumentElement == null)
+                                {
+                                    continue;
+                                }
+                                sequenceItem.Args[argumentElement.Name.LocalName] = argumentElement.Value;
+                            }
+                        }
+
+                    }
+                }
+
+                yield return actionSet;
             }
         }
 

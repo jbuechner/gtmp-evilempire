@@ -29,6 +29,7 @@ namespace gtmp.evilempire
         object GetData(string key);
 
         void SendChatMessage(string message);
+        void SendNotification(string sender, string message);
 
         void Kick(string reason);
     }

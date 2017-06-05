@@ -125,6 +125,11 @@ namespace gtmp.evilempire.server
             _client.sendChatMessage(message);
         }
 
+        public void SendNotification(string sender, string message)
+        {
+            _client.sendNotification(sender, message);
+        }
+
         public void Kick(string reason)
         {
             _client.kick(reason);
