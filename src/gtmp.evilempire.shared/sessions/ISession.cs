@@ -15,6 +15,7 @@ namespace gtmp.evilempire.sessions
         User User { get; set; }
         Character Character { get; set; }
         CharacterCustomization CharacterCustomization { get; set; }
+        CharacterInventory CharacterInventory { get; set; }
         int PrivateDimension { get; set; }
         bool UpdateDatabasePosition { get; set; }
     }

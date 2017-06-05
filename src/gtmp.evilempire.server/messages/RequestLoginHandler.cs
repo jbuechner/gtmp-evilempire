@@ -61,6 +61,14 @@ namespace gtmp.evilempire.server.messages
                     characterCustomization = characters.CreateDefaultCharacterCustomization(character.Id);
                 }
                 session.CharacterCustomization = characterCustomization;
+
+                var characterInventory = characters.GetCharacterInventoryById(character.Id);
+                if (characterInventory == null)
+                {
+                    characterInventory = characters.CreateDefaultCharacterInventory(character.Id);
+                }
+                session.CharacterInventory = characterInventory;
+
                 platform.UpdateCharacterCustomization(session);
 
                 var response = new RequestLoginResponse

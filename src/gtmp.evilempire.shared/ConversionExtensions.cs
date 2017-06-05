@@ -21,6 +21,16 @@ namespace gtmp.evilempire
 
         public static int? AsInt(this object value)
         {
+            return AsInt(value, NumberStyles.Integer);
+        }
+
+        public static int? AsIntFromHex(this object value)
+        {
+            return AsInt(value, NumberStyles.HexNumber);
+        }
+
+        public static int? AsInt(this object value, NumberStyles numberStyles)
+        {
             if (value == null)
             {
                 return null;
@@ -31,7 +41,7 @@ namespace gtmp.evilempire
             }
             string raw = (value as string) ?? value.ToString();
             int v;
-            if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out v))
+            if (int.TryParse(raw, numberStyles, CultureInfo.InvariantCulture, out v))
             {
                 return v;
             }
@@ -94,6 +104,25 @@ namespace gtmp.evilempire
             string raw = (value as string) ?? value.ToString();
             float v;
             if (float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
+            {
+                return v;
+            }
+            return null;
+        }
+
+        public static double? AsDouble(this object value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            if (value is double)
+            {
+                return (double)value;
+            }
+            string raw = (value as string) ?? value.ToString();
+            double v;
+            if (double.TryParse(raw, NumberStyles.Number, CultureInfo.InvariantCulture, out v))
             {
                 return v;
             }

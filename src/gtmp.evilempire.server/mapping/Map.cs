@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.mapping
 {
-    public class Map
+    class Map
     {
         public IList<MapPoint> Points { get; } = new List<MapPoint>();
         public IList<MapMarker> Markers { get; } = new List<MapMarker>();
@@ -29,6 +29,10 @@ namespace gtmp.evilempire.server.mapping
         Dictionary<int, MapPed> RuntimeHandleToPedMap { get; } = new Dictionary<int, MapPed>();
 
         Dictionary<string, MapDialogueServerAction> MapDialogueServerActions = new Dictionary<string, MapDialogueServerAction>();
+
+        public IDictionary<int, ItemDescription> ItemDescriptionMap = new Dictionary<int, ItemDescription>();
+
+        public MapMetadata Metadata { get; } = new MapMetadata();
 
         public MapPoint GetPoint(MapPointType mapPointType, int id)
         {
@@ -173,6 +177,23 @@ namespace gtmp.evilempire.server.mapping
                 return serverAction;
             }
             return null;
+        }
+
+        public void AddItemDescription(ItemDescription itemDescription)
+        {
+            if (itemDescription == null)
+            {
+                throw new ArgumentNullException(nameof(itemDescription));
+            }
+            if (ItemDescriptionMap.ContainsKey(itemDescription.Id))
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"There is already an item description defined with id \"{itemDescription.Id}\" the item will be skipped. Existing item name = {ItemDescriptionMap[itemDescription.Id]?.Name}");
+                    return;
+                }
+            }
+            ItemDescriptionMap.Add(itemDescription.Id, itemDescription);
         }
     }
 }

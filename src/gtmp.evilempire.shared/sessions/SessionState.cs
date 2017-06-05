@@ -10,8 +10,9 @@ namespace gtmp.evilempire.sessions
     {
         None = 0,
         Connected = 1,
-        LoggedIn = 2,
-        CharacterCustomization = 3,
+        Ready = 2,
+        LoggedIn = 3,
+        CharacterCustomization = 4,
         Freeroam = 100
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ItemDescriptions>
+        <ItemDescription>
+            <Id>00001001</Id>
+            <Name>One Dollar</Name>
+            <Weight>0</Weight>
+            <Volume>0</Volume>
+            <IsStackable>true</IsStackable>
+            <MaximumStack>1000</MaximumStack>
+            <AssociatedCurrency>Dollar</AssociatedCurrency>
+            <Denomination>1.0</Denomination>
+        </ItemDescription>
+    </ItemDescriptions>
+</Map>

@@ -28,6 +28,7 @@ namespace gtmp.evilempire.db
             _dbe.AddKnownEntity<User, string>("user", ks => ks.Login, ks => ks.Login, true);
             _dbe.AddKnownEntity<Character, string>("character", ks => ks.AssociatedLogin, ks => ks.AssociatedLogin, false);
             _dbe.AddKnownEntity<CharacterCustomization, int>("characterCustomization", ks => ks.CharacterId, ks => ks.CharacterId, true);
+            _dbe.AddKnownEntity<CharacterInventory, int>("characterInventory", ks => ks.CharacterId, ks => ks.CharacterId, true);
         }
 
         public T Insert<T>(T element)

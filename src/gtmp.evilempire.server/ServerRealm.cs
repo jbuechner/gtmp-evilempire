@@ -96,6 +96,7 @@ namespace gtmp.evilempire.server
             services.Register<ServiceContainer>(services);
             services.Register<ISerializationService, SerializationService>();
             services.Register<IDbService>(new DbService(evilempire.Constants.Database.DatabasePath));
+            services.Register<IItemService, ItemService>();
             services.Register<ISessionService, SessionService>();
             services.Register<IClientService, ClientService>();
             services.Register<IAuthenticationService, AuthenticationService>();
@@ -108,6 +109,7 @@ namespace gtmp.evilempire.server
 
         void AddPlatformHooks(API api)
         {
+            api.onPlayerConnected += OnPlayerConnected;
             api.onPlayerFinishedDownload += OnPlayerFinishedDownload;
             api.onClientEventTrigger += OnClientEventTrigger;
             api.onPlayerDisconnected += OnPlayerDisconnected;
@@ -151,7 +153,7 @@ namespace gtmp.evilempire.server
             }
         }
 
-        void OnPlayerFinishedDownload(Client client)
+        void OnPlayerConnected(Client client)
         {
             var managedClient = clients.CreateFromPlatformObject(client);
             clients.RegisterTuple(managedClient, client);
@@ -160,11 +162,42 @@ namespace gtmp.evilempire.server
             sessionStateTransition.Transit(session, SessionState.Connected);
         }
 
+        void OnPlayerFinishedDownload(Client client)
+        {
+            var managedClient = clients.FindByPlatformObject(client);
+            if (managedClient == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"Client is ready but no managed client object found for {client.name} / {client.address}. Disconnecting client.");
+                }
+                client.kick("Internal Server Error");
+            }
+            var session = sessions.GetSession(managedClient);
+            if (session == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"Client is ready but no session found for {client.name} / {client.address}. Disconnecting client.");
+                }
+                client.kick("Internal Server Error");
+            }
+            sessionStateTransition.Transit(session, SessionState.Ready);
+        }
+
         void OnPlayerDisconnected(Client client, string reason)
         {
             var managedClient = clients.FindByPlatformObject(client);
-            var session = sessions.GetSession(managedClient);
+            if (managedClient == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"Client disconnected but found not managed client object for {client.name} / {client.address}");
+                }
+                return;
+            }
 
+            var session = sessions.GetSession(managedClient);
             if (session == null)
             {
                 using (ConsoleColor.Yellow.Foreground())

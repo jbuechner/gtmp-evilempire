@@ -188,5 +188,52 @@ namespace gtmp.evilempire.tests.db
                 Assert.AreEqual("asd", character.AssociatedLogin);
             }
         }
+
+        [TestMethod]
+        public void SelectSingleCharacterInventoryById()
+        {
+            using (var db = DbServiceFactory())
+            {
+                var character =  db.Insert(new Character { Id = db.NextValueFor("character") });
+                var insertedInventory = db.Insert(new CharacterInventory { CharacterId = character.Id });
+
+                var characterInventory = db.Select<CharacterInventory, int>(character.Id);
+
+                Assert.IsNotNull(characterInventory);
+                Assert.AreEqual(characterInventory, insertedInventory.CharacterId);
+            }
+        }
+
+        [TestMethod]
+        public void InsertCharacterInventoryWithCashAndReselectIt()
+        {
+            using (var db = DbServiceFactory())
+            {
+                var character = db.Insert(new Character { Id = db.NextValueFor("a") });
+                var inventory = new CharacterInventory { CharacterId = character.Id };
+
+                var moneyItemDescription = new ItemDescription { Id = 0x100, Name = "A Dollar", AssociatedCurrency = Currency.Dollar, Denomination = 1 };
+                var moneyItemA = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 25 };
+                var moneyItemB = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 1 };
+                var moneyItemC = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 5 };
+
+                inventory.Money.Add(moneyItemA);
+                inventory.Money.Add(moneyItemB);
+                inventory.Money.Add(moneyItemC);
+
+                db.Insert(inventory);
+
+                var reselectedCharacterInventory = db.Select<CharacterInventory, int>(character.Id);
+
+                Assert.IsNotNull(reselectedCharacterInventory);
+                Assert.IsNotNull(reselectedCharacterInventory.Money);
+                Assert.AreEqual(3, reselectedCharacterInventory.Money.Count);
+                Assert.AreEqual(25, reselectedCharacterInventory.Money.ElementAt(0).Amount);
+                Assert.AreEqual(1, reselectedCharacterInventory.Money.ElementAt(1).Amount);
+                Assert.AreEqual(5, reselectedCharacterInventory.Money.ElementAt(2).Amount);
+
+                Assert.AreEqual(moneyItemDescription.Id, reselectedCharacterInventory.Money.ElementAt(2).ItemDescriptionId);
+            }
+        }
     }
 }

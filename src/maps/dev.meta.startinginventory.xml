@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Metadata>
+        <StartingInventory>
+            <Items>
+                <Item>
+                    <ItemDescriptionId>00001001</ItemDescriptionId>
+                    <Amount>350</Amount>
+                </Item>
+            </Items>
+        </StartingInventory>
+    </Metadata>
+</Map>

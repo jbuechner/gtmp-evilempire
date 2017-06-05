@@ -63,15 +63,19 @@
     <Compile Include="DelegatedDisposable.cs" />
     <Compile Include="entities\AuthUserGroup.cs" />
     <Compile Include="entities\Character.cs" />
+    <Compile Include="entities\CharacterInventory.cs" />
     <Compile Include="entities\CharacterCustomization.cs" />
     <Compile Include="entities\CharacterFaceCustomization.cs" />
     <Compile Include="entities\Color.cs" />
+    <Compile Include="entities\Currency.cs" />
     <Compile Include="entities\customization\FreeroamCustomizationData.cs" />
     <Compile Include="entities\customization\FreeroamFace.cs" />
     <Compile Include="entities\customization\FreeroamHairColor.cs" />
     <Compile Include="entities\customization\FreeroamHairStyle.cs" />
     <Compile Include="entities\customization\FreeroamModel.cs" />
     <Compile Include="entities\Gender.cs" />
+    <Compile Include="entities\Item.cs" />
+    <Compile Include="entities\ItemDescription.cs" />
     <Compile Include="entities\processors\IEntityProcessor.cs" />
     <Compile Include="entities\processors\UserPasswordHashProcessor.cs" />
     <Compile Include="entities\User.cs" />
@@ -87,6 +91,7 @@
     <Compile Include="services\IClientService.cs" />
     <Compile Include="services\ICommandService.cs" />
     <Compile Include="services\IDbService.cs" />
+    <Compile Include="services\IItemService.cs" />
     <Compile Include="services\IPlatformService.cs" />
     <Compile Include="services\ISerializationService.cs" />
     <Compile Include="services\ISessionService.cs" />

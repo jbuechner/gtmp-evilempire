@@ -36,8 +36,6 @@ namespace gtmp.evilempire.server.sessions
             client.CanMove = false;
             client.Position = loadingPoint;
             client.StopAnimation();
-
-            client.TriggerClientEvent(ClientEvents.DisplayLoginScreen);
             session.State = SessionState.Connected;
             return true;
         }

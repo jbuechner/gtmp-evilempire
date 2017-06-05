@@ -1,20 +1,26 @@
 ﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace gtmp.evilempire.server.services
 {
     class CharacterService : ICharacterService
     {
+        Map map;
         IDbService db;
+        IItemService items;
         IPlatformService platform;
 
-        public CharacterService(IDbService db, IPlatformService platform)
+        public CharacterService(Map map, IDbService db, IPlatformService platform, IItemService items)
         {
+            this.map = map;
             this.db = db;
             this.platform = platform;
+            this.items = items;
         }
 
         public Character GetActiveCharacter(ISession session)
@@ -47,6 +53,12 @@ namespace gtmp.evilempire.server.services
             return characterCustomization;
         }
 
+        public CharacterInventory GetCharacterInventoryById(int characterId)
+        {
+            var characterInventory = db.Select<CharacterInventory, int>(characterId);
+            return characterInventory;
+        }
+
         public CharacterCustomization CreateDefaultCharacterCustomization(int characterId)
         {
             var characterCustomization = platform.GetDefaultCharacterCustomization();
@@ -54,6 +66,18 @@ namespace gtmp.evilempire.server.services
             characterCustomization.Gender = Gender.Male;
             db.Insert<CharacterCustomization>(characterCustomization);
             return characterCustomization;
+        }
+
+        public CharacterInventory CreateDefaultCharacterInventory(int characterId)
+        {
+            var characterInventory = new CharacterInventory();
+            foreach(var item in map.Metadata.StartingInventoryItems)
+            {
+                var newItems = items.CreateItem(item.ItemDescriptionId, item.Amount);
+                AddToCharacterInventory(characterInventory, newItems);
+            }
+            db.Insert<CharacterInventory>(characterInventory);
+            return characterInventory;
         }
 
         public void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation)
@@ -68,6 +92,47 @@ namespace gtmp.evilempire.server.services
                 character.Rotation = rotation;
             }
             db.Update<Character>(character);
+        }
+
+        void AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        {
+            if (characterInventory == null)
+            {
+                throw new ArgumentNullException(nameof(characterInventory));
+            }
+            if (items != null)
+            {
+                foreach(var item in items)
+                {
+                    if (item.Id < 0)
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} does not has a valid Id value (must be selected from sequence before). Tried to add an item of item description id {item.ItemDescriptionId} to to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                        }
+                        continue;
+                    }
+
+                    var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
+                    if (itemDescription == null)
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} uses an unknwon item description id {item.ItemDescriptionId} to add an item to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                        }
+                        continue;
+                    }
+
+                    if (itemDescription.AssociatedCurrency == Currency.None)
+                    {
+                        characterInventory.Items.Add(item);
+                    }
+                    else
+                    {
+                        characterInventory.Money.Add(item);
+                    }
+                }
+            }
         }
     }
 }

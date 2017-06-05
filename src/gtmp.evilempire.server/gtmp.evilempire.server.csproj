@@ -81,6 +81,7 @@
     <Compile Include="mapping\MapDialoguePage.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
+    <Compile Include="mapping\MapMetadata.cs" />
     <Compile Include="mapping\MapProp.cs" />
     <Compile Include="mapping\MapObjectType.cs" />
     <Compile Include="mapping\MapPed.cs" />
@@ -111,10 +112,12 @@
     <Compile Include="services\ClientService.cs" />
     <Compile Include="services\CommandService.cs" />
     <Compile Include="services\GtmpPlatformService.cs" />
+    <Compile Include="services\ItemService.cs" />
     <Compile Include="services\SessionService.cs" />
     <Compile Include="services\SessionStateTransitionService.cs" />
     <Compile Include="sessions\Session.cs" />
     <Compile Include="sessions\SessionCharacterCustomizationStateHandler.cs" />
+    <Compile Include="sessions\SessionReadyStateHandler.cs" />
     <Compile Include="sessions\SessionConnectedStateHandler.cs" />
     <Compile Include="sessions\SessionFreeroamStateHandler.cs" />
     <Compile Include="sessions\SessionLoggedInStateHandler.cs" />

@@ -11,6 +11,7 @@
             public static class Sequences
             {
                 public static readonly string CharacterIdSequence = "characterId";
+                public static readonly string ItemIdSequence = "itemId";
             }
         }
     }

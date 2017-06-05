@@ -10,13 +10,13 @@ using System.Xml.Linq;
 
 namespace gtmp.evilempire.server.mapping
 {
-    public class MapLoader
+    class MapLoader
     {
         IList<Action<Map, XDocument>> Handlers { get; }
 
         public MapLoader()
         {
-            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadProps, LoadPeds, LoadVehicles, LoadBlips };
+            Handlers = new List<Action<Map, XDocument>> { LoadMarkers, LoadMapPoints, LoadProps, LoadPeds, LoadVehicles, LoadBlips, LoadItemDescriptions, LoadMetas };
         }
 
         public static Map LoadFrom(string directory)
@@ -33,6 +33,7 @@ namespace gtmp.evilempire.server.mapping
             {
                 mapLoader.Load(file, map);
             }
+            ValidateMap(map);
             return map;
         }
 
@@ -374,6 +375,135 @@ namespace gtmp.evilempire.server.mapping
 
                     var sequenceItem = new MapDialogueActionSequenceItem(itemType, args);
                     action.Sequence.Add(sequenceItem);
+                }
+            }
+        }
+
+        void LoadItemDescriptions(Map map, XDocument doc)
+        {
+            if (map == null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
+            if (doc == null)
+            {
+                throw new ArgumentNullException(nameof(doc));
+            }
+
+            var itemDescriptionsElement = doc.Root.Element("ItemDescriptions");
+            if (itemDescriptionsElement == null)
+            {
+                return;
+            }
+
+            var itemDescriptionElements = itemDescriptionsElement.Elements("ItemDescription");
+            if (itemDescriptionElements == null)
+            {
+                return;
+            }
+            foreach(var itemDescriptionElement in itemDescriptionElements)
+            {
+                if (itemDescriptionElement == null)
+                {
+                    continue;
+                }
+
+                var id = itemDescriptionElement.Element("Id")?.Value?.AsIntFromHex();
+                var name = itemDescriptionElement.Element("Name")?.Value;
+                var weight = itemDescriptionElement.Element("Weight")?.Value.AsDouble();
+                var volume = itemDescriptionElement.Element("Volume")?.Value.AsDouble();
+                var isStackable = itemDescriptionElement.Element("IsStackable")?.Value.AsBool();
+                var maximumStack = itemDescriptionElement.Element("MaximumStack")?.Value.AsInt();
+                var associateCurrencyAsRawEnumValue = itemDescriptionElement.Element("AssociatedCurrency")?.Value;
+                var currencyDenomination = itemDescriptionElement.Element("Denomination")?.Value.AsDouble();
+
+                Currency currency;
+                if (!Enum.TryParse<Currency>(associateCurrencyAsRawEnumValue, out currency))
+                {
+                    using (ConsoleColor.Yellow.Foreground())
+                    {
+                        Console.WriteLine($"The associated currency {associateCurrencyAsRawEnumValue} is not a known member of {typeof(Currency).Name}. Item Id = {id}");
+                        continue;
+                    }
+                }
+
+                if (!id.HasValue)
+                {
+                    using (ConsoleColor.Yellow.Foreground())
+                    {
+                        Console.WriteLine($"No item id specified for the given item. Skipping.");
+                        continue;
+                    }
+                }
+
+                var itemDescription = new ItemDescription { Id = id.Value, Name = name, Volume = volume ?? 0, Weight = weight ?? 0, IsStackable = isStackable ?? false, MaximumStack = maximumStack ?? 1, AssociatedCurrency = currency, Denomination = currencyDenomination ?? 1 };
+                map.AddItemDescription(itemDescription);
+            }
+        }
+
+        void LoadMetas(Map map, XDocument doc)
+        {
+            if (map == null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
+            if (doc == null)
+            {
+                throw new ArgumentNullException(nameof(doc));
+            }
+
+            var items = doc.Root?.Element("Metadata")?.Element("StartingInventory")?.Element("Items")?.Elements("Item");
+            if (items != null)
+            {
+                foreach(var item in items)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    var itemDescriptionIdElement = item.Element("ItemDescriptionId");
+                    var itemDescriptionId = itemDescriptionIdElement?.Value?.AsIntFromHex();
+                    var amount = item.Element("Amount")?.Value?.AsInt() ?? 1;
+
+                    if (!itemDescriptionId.HasValue)
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine("The starting inventory item does not have a item description id. Skipping.");
+                        }
+                        continue;
+                    }
+
+                    map.Metadata.StartingInventoryItems.Add(new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount });
+                }
+            }
+        }
+
+        static void ValidateMap(Map map)
+        {
+            var metadata = map.Metadata;
+            var startingInventoryItems = metadata.StartingInventoryItems;
+            foreach(var item in startingInventoryItems)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+                ItemDescription itemDescription;
+                if (!map.ItemDescriptionMap.TryGetValue(item.ItemDescriptionId, out itemDescription) || itemDescription == null)
+                {
+                    using (ConsoleColor.Yellow.Foreground())
+                    {
+                        Console.WriteLine($"[ValidateMap] The starting inventory item with item description id {item.ItemDescriptionId} is invalid because there is not item description with the given id.");
+                    }
+                }
+                if (item.Amount < 0)
+                {
+                    using (ConsoleColor.Yellow.Foreground())
+                    {
+                        Console.WriteLine($"[ValidateMap] The starting inventory item with item description id {item.ItemDescriptionId} is invalid because the amount is negative.");
+                    }
                 }
             }
         }

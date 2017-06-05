@@ -7,8 +7,13 @@ namespace gtmp.evilempire.services
     {
         Character GetActiveCharacter(ISession session);
         Character GetCharacterById(int characterId);
+
         CharacterCustomization GetCharacterCustomizationById(int characterId);
+        CharacterInventory GetCharacterInventoryById(int characterId);
+
         CharacterCustomization CreateDefaultCharacterCustomization(int characterId);
+        CharacterInventory CreateDefaultCharacterInventory(int characterId);
+
         void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
     }
 }
