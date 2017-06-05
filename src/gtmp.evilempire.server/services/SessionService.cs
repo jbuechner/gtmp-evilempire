@@ -163,10 +163,13 @@ namespace gtmp.evilempire.server.services
                 currencies = Enum.GetValues(typeof(Currency)).Cast<Currency>().Where(p => p != Currency.None).ToArray();
             }
 
-            foreach (var currency in currencies)
+            if (session.CharacterInventory != null)
             {
-                var amount = characters.GetTotalAmountOfMoney(session.CharacterInventory.CharacterId, currency);
-                session.Client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)currency, amount);
+                foreach (var currency in currencies)
+                {
+                    var amount = characters.GetTotalAmountOfMoney(session.CharacterInventory.CharacterId, currency);
+                    session.Client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)currency, amount);
+                }
             }
         }
 

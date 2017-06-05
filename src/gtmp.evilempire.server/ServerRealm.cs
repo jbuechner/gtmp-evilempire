@@ -4,7 +4,6 @@ using gtmp.evilempire.db;
 using gtmp.evilempire.entities;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;
-using gtmp.evilempire.server.mapping.actions;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
 using gtmp.evilempire.services;
@@ -67,7 +66,6 @@ namespace gtmp.evilempire.server
             AddPlatformHooks(api);
             AddChatCommands();
             AddSessionStateTransitions();
-            AddDialogueServerActions();
             BeginHeartbeat();
         }
 
@@ -138,19 +136,6 @@ namespace gtmp.evilempire.server
                 {
                     var sessionStateHandler = (SessionStateHandlerBase)Activator.CreateInstance(sessionStateHandlerType, new[] { services });
                     sessionStateTransition.RegisterTransition(sessionStateHandler);
-                }
-            }
-        }
-
-        void AddDialogueServerActions()
-        {
-            var dialogueActionTypes = typeof(ServerRealm).Assembly.GetTypes().Where(p => p.IsSubclassOf(typeof(MapDialogueServerAction)));
-            if (dialogueActionTypes != null)
-            {
-                foreach(var dialogueActionType in dialogueActionTypes)
-                {
-                    var dialogueAction = (MapDialogueServerAction)Activator.CreateInstance(dialogueActionType, new[] { services });
-                    map.AddDialogueServerAction(dialogueAction);
                 }
             }
         }

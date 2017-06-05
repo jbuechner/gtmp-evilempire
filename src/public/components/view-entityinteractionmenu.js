@@ -1,3 +1,9 @@
+'use strict';
+const KnownClientSideActions = new Map();
+KnownClientSideActions.set('@CLOSEACTIVEENTITYINTERACTION', function __closeActiveEntityInteraction() {
+    this.dialogue = null;
+});
+
 Slim.tag('view-entityinteractionmenu', class extends Slim {
     get isVirtual() { return false; }
     get isInteractive() { return true; }
@@ -43,18 +49,14 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         switch (('' + action).toUpperCase()) {
             case 'JUMPTOPAGE':
                 let page = this.dialogue.findPage(target, true);
-                if (page.action) {
-                    let invariantAction = page.action.toUpperCase();
-                    if (invariantAction === 'CLOSEACTIVEENTITYINTERACTION') {
-                        this.dialogue = null;
-                        return;
-                    }
-                    if (invariantAction.startsWith('@')) {
-                        this.followUpContent = page.markdown;
-                        this.markdown = '';
-                        this.triggerServerAction(page.action);
-                        return;
-                    }
+                if (page.clientSideActions) {
+                    this.runClientSideAction(page.clientSideActions);
+                }
+                if (page.hasServerSideActions) {
+                    this.followUpContent = page.markdown;
+                    this.markdown = '';
+                    this.triggerServerAction(target);
+                    return;
                 }
 
                 if (page && page.markdown) {
@@ -163,6 +165,18 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
     resetIsLoading() {
         this.isLoading = false;
         this.loadingText = 'Please wait ...';
+    }
+
+    runClientSideAction(clientSideActions) {
+        clientSideActions.forEach(action => {
+            if (typeof action === 'string') {
+                action = action.toUpperCase();
+            }
+            let fn = KnownClientSideActions.get(action);
+            if (typeof fn === 'function') {
+                fn.apply(this);
+            }
+        });
     }
 
     triggerServerAction(serverAction) {

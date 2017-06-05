@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using gtmp.evilempire.sessions;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.mapping;
+using gtmp.evilempire.server.actions;
 
 namespace gtmp.evilempire.server.messages
 {
     class RequestTriggerEntityAction : MessageHandlerBase
     {
+        ServiceContainer services;
         ISerializationService serialization;
         Map map;
 
@@ -25,6 +27,12 @@ namespace gtmp.evilempire.server.messages
         public RequestTriggerEntityAction(ServiceContainer services)
             : base(services)
         {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            this.services = services;
             serialization = services.Get<ISerializationService>();
             map = services.Get<Map>();
         }
@@ -32,7 +40,7 @@ namespace gtmp.evilempire.server.messages
         public override bool ProcessClientMessage(ISession session, params object[] args)
         {
             var entityId = args.At(0).AsInt();
-            var action = args.At(1).AsString();
+            var pageKey = args.At(1).AsString();
 
             if (!entityId.HasValue)
             {
@@ -46,19 +54,16 @@ namespace gtmp.evilempire.server.messages
             var ped = map.GetPedByRuntimeHandle(entityId.Value);
             if (ped != null && ped.Dialogue != null)
             {
-                var dialogueAction = FindDialogueAction(ped.Dialogue, action);
-                if (dialogueAction != null)
+                var dialoguePage = FindDialoguePage(ped.Dialogue, pageKey);
+                if (dialoguePage != null)
                 {
-                    var overallSuccess = true;
-                    foreach(var item in dialogueAction.Sequence)
+                    foreach (var set in dialoguePage.Actions)
                     {
-                        var serverAction = map.FindDialogueServerActionByName(item.Type);
-                        if (serverAction != null)
-                        {
-                            overallSuccess &= serverAction.PerformAction(session, item.Args);
-                        }
+                        var executionEngine = new ActionExecutionEngine(services, set);
+                        executionEngine.Run(session);
                     }
-                    client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, overallSuccess, responseData);
+                    client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, true, responseData);
+                    return true;
                 }
             }
 
@@ -66,7 +71,7 @@ namespace gtmp.evilempire.server.messages
             return false;
         }
 
-        static MapDialogueAction FindDialogueAction(MapDialogue dialogue, string actionName)
+        static MapDialoguePage FindDialoguePage(MapDialogue dialogue, string pageKey)
         {
             Stack<MapDialoguePage> remainingPages = new Stack<MapDialoguePage>(new[] { dialogue });
             while (remainingPages.Count > 0)
@@ -74,9 +79,9 @@ namespace gtmp.evilempire.server.messages
                 var page = remainingPages.Pop();
                 if (page != null)
                 {
-                    if (page.Action != null && string.Compare(page.Action.Name, actionName, StringComparison.InvariantCultureIgnoreCase) == 0)
+                    if (string.Compare(page.Key, pageKey, StringComparison.InvariantCultureIgnoreCase) == 0)
                     {
-                        return page.Action;
+                        return page;
                     }
                     if (page.Pages != null)
                     {

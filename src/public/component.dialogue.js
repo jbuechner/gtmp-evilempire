@@ -3,7 +3,8 @@ class BranchingDialoguePage {
     constructor(options) {
         this.pages = new Map();
         this.markdown = options.__markdown;
-        this.action = options.__action;
+        this.hasServerSideActions = options.__hasServerSideActions;
+        this.clientSideActions = options.__clientSideActions;
         this.addPagesFrom(options);
     }
 

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.mapping
 {
-    public class MapDialogue : MapDialoguePage
+    class MapDialogue : MapDialoguePage
     {
         public string Name { get; }
 
-        public MapDialogue(string key, string markdown, MapDialogueAction action)
-            : base(key, markdown, action)
+        public MapDialogue(string key, string markdown)
+            : base(key, markdown)
         {
             Name = key;
         }

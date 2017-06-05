@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.mapping
 {
-    public class MapPed
+    class MapPed
     {
         public string TemplateName { get; }
         public int Hash { get; }

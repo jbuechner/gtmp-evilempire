@@ -1,5 +1,4 @@
 ﻿using gtmp.evilempire.entities;
-using gtmp.evilempire.server.mapping.actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +26,6 @@ namespace gtmp.evilempire.server.mapping
         Dictionary<string, MapDialogue> Dialogues { get; } = new Dictionary<string, MapDialogue>();
 
         Dictionary<int, MapPed> RuntimeHandleToPedMap { get; } = new Dictionary<int, MapPed>();
-
-        Dictionary<string, MapDialogueServerAction> MapDialogueServerActions = new Dictionary<string, MapDialogueServerAction>();
 
         public IDictionary<int, ItemDescription> ItemDescriptionMap = new Dictionary<int, ItemDescription>();
 
@@ -160,21 +157,6 @@ namespace gtmp.evilempire.server.mapping
             if (RuntimeHandleToPedMap.TryGetValue(runtimeHandle, out ped))
             {
                 return ped;
-            }
-            return null;
-        }
-
-        public void AddDialogueServerAction(MapDialogueServerAction serverAction)
-        {
-            MapDialogueServerActions[serverAction.Name] = serverAction;
-        }
-
-        public MapDialogueServerAction FindDialogueServerActionByName(string name)
-        {
-            MapDialogueServerAction serverAction;
-            if (MapDialogueServerActions.TryGetValue(name, out serverAction))
-            {
-                return serverAction;
             }
             return null;
         }

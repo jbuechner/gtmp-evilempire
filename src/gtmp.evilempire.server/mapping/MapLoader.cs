@@ -275,7 +275,6 @@ namespace gtmp.evilempire.server.mapping
                 var startDialoguePage = dialogueElement.Element("Pages")?.Elements("Page")?.Where(p => p != null && string.CompareOrdinal(p.Element("Name")?.Value, startDialoguePageKey) == 0).FirstOrDefault();
                 var mapDialogue = ReadDialoguePage<MapDialogue>(null, startDialoguePage);
                 ReadDialoguePages(mapDialogue, dialogueElement);
-                //next: name
                 return mapDialogue;
             }
             return null;
@@ -290,26 +289,9 @@ namespace gtmp.evilempire.server.mapping
             }
             var name = dialoguePageElement?.Element("Name")?.Value;
             var markdown = dialoguePageElement?.Element("Markdown")?.Value;
-            var actionElement = dialoguePageElement?.Element("Action");
+            var newDialoguePage = (T)Activator.CreateInstance(typeof(T), name, markdown);
+            newDialoguePage.Actions = LoadActionSets(dialoguePageElement.Elements("Actions")).ToList();
 
-            var isClientSideAction = actionElement?.Attribute("IsClientSide")?.Value.AsBool() ?? false;
-            string actionName;
-            if (isClientSideAction)
-            {
-                actionName = actionElement?.Value;
-            }
-            else
-            {
-                actionName = actionElement?.Element("Name")?.Value;
-            }
-            var action = new MapDialogueAction(isClientSideAction, actionName);
-            var sequenceElement = actionElement?.Element("Sequence");
-            if (sequenceElement != null)
-            {
-                ReadActionSequence(sequenceElement, action);
-            }
-
-            var newDialoguePage = (T)Activator.CreateInstance(typeof(T), name, markdown, action);
             if (dialoguePage != null)
             {
                 dialoguePage.Pages.Add(newDialoguePage);
@@ -338,44 +320,6 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
                     ReadDialoguePage<MapDialoguePage>(dialoguePage, pageElement);
-                }
-            }
-        }
-
-        void ReadActionSequence(XElement element, MapDialogueAction action)
-        {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
-            var items = element.Elements("Item");
-            if (items != null)
-            {
-                foreach(var item in items)
-                {
-                    if (item == null)
-                    {
-                        continue;
-                    }
-
-                    var itemType = item.Attribute("Type")?.Value;
-                    var args = new Dictionary<string, string>();
-                    foreach (var child in item.Elements())
-                    {
-                        if (child == null)
-                        {
-                            continue;
-                        }
-                        args.Add(child.Name.LocalName, child.Value);
-                    }
-
-                    var sequenceItem = new MapDialogueActionSequenceItem(itemType, args);
-                    action.Sequence.Add(sequenceItem);
                 }
             }
         }
@@ -469,7 +413,6 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
 
-                    //var invariant = new TimeSpan(0, 0, 0, 5, 100).ToString("d.hh:mm:ss.fffffff", CultureInfo.InvariantCulture);
                     var intervalValue = timer.Element("Interval")?.Value;
                     var interval = intervalValue?.AsTimeSpan();
                     if (!interval.HasValue)

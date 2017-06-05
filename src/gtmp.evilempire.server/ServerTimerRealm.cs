@@ -1,13 +1,9 @@
-﻿using gtmp.evilempire.entities;
-using gtmp.evilempire.server.actions;
+﻿using gtmp.evilempire.server.actions;
 using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.services;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server
 {
@@ -53,18 +49,6 @@ namespace gtmp.evilempire.server
                                 var executionEngine = new ActionExecutionEngine(services, action);
                                 executionEngine.Run(session);
                             }
-
-
-                            //if (session != null && session.CharacterInventory != null)
-                            //{
-                            //    // simple approach, we do not store individual timers on the respective characters, therefore a player can login and receive a allowance because the global tick
-                            //    // happened not because he was long enough online
-                            //    characters.AddToCharacterInventory(session.CharacterInventory.CharacterId, items);
-                            //    if (currencies != null && currencies.Length > 0)
-                            //    {
-                            //        sessions.SendMoneyChangedEvents(session, currencies);
-                            //    }
-                            //}
                             return !cancellationToken.IsCancellationRequested;
                         }
                     );

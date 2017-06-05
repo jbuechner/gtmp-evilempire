@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace gtmp.evilempire.server.messages
 {
@@ -91,11 +93,43 @@ namespace gtmp.evilempire.server.messages
                 writer.WritePropertyName("__markdown");
                 writer.WriteValue(page.Markdown);
             }
-            if (page.Action != null)
+
+            bool hasServerSideActions = false;
+            List<string> clientSideActions = new List<string>();
+            if (page.Actions != null)
             {
-                writer.WritePropertyName("__action");
-                writer.WriteValue(page.Action.Name);
+                foreach(var set in page.Actions)
+                {
+                    if (set == null)
+                    {
+                        continue;
+                    }
+                    foreach (var action in set.Actions)
+                    {
+                        foreach (var item in action.Sequence.Items)
+                        {
+                            if (item.ActionType.StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                clientSideActions.Add(item.ActionType);
+                            }
+                            else
+                            {
+                                hasServerSideActions = true;
+                            }
+                        }
+                    }
+                }
             }
+
+            writer.WritePropertyName("__hasServerSideActions");
+            writer.WriteValue(hasServerSideActions);
+            writer.WritePropertyName("__clientSideActions");
+            writer.WriteStartArray();
+            foreach(var clientSideAction in clientSideActions)
+            {
+                writer.WriteValue(clientSideAction);
+            }
+            writer.WriteEndArray();
 
             if (writeNestedPages && page.Pages != null)
             {

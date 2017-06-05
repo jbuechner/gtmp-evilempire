@@ -91,23 +91,26 @@ Ignoriere mich bitte einfach.
                     </Page>
                     <Page>
                         <Name>close</Name>
-                        <Action IsClientSide="true">closeActiveEntityInteraction</Action>
+                        <Actions>
+                            <Action>
+                                <Sequence>
+                                    <Item Type="@CloseActiveEntityInteraction"></Item>
+                                </Sequence>
+                            </Action>
+                        </Actions>
                     </Page>
                     <Page>
                         <Name>car</Name>
-                        <Action>
-                            <Name>@CreateCar</Name>
-                            <Sequence>
-                                <Item Type="SpawnEntity">
-                                    <Type>Vehicle</Type>
-                                    <Template>DEV_VehicleSpawn</Template>
-                                </Item>
-                                <Item Type="Change">
-                                    <Property>Cash</Property>
-                                    <Value>-2000</Value>
-                                </Item>
-                            </Sequence>
-                        </Action>
+                        <Actions>
+                            <Action>
+                                <Sequence>
+                                    <Item Type="SpawnEntity">
+                                        <Type>Vehicle</Type>
+                                        <Template>DEV_VehicleSpawn</Template>
+                                    </Item>
+                                </Sequence>
+                            </Action>
+                        </Actions>
                         <Markdown><![CDATA[Da ist es. [Endlich!](#close)]]></Markdown>
                     </Page>
                 </Pages>

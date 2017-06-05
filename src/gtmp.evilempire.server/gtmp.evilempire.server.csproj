@@ -72,6 +72,7 @@
     <Compile Include="actions\GiveItemActionHandler.cs" />
     <Compile Include="actions\SendMoneyChangedActionHandler.cs" />
     <Compile Include="actions\SendNotificationActionHandler.cs" />
+    <Compile Include="actions\SpawnEntityActionHandler.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ClientEvents.cs" />
     <Compile Include="commands\Command.cs" />
@@ -80,14 +81,9 @@
     <Compile Include="commands\HelpCommand.cs" />
     <Compile Include="commands\TeleportCommand.cs" />
     <Compile Include="GtmpMainScript.cs" />
-    <Compile Include="mapping\actions\ChangePropertyServerAction.cs" />
-    <Compile Include="mapping\actions\MapDialogueServerAction.cs" />
-    <Compile Include="mapping\actions\SpawnEntityServerAction.cs" />
     <Compile Include="mapping\Map.cs" />
     <Compile Include="mapping\MapBlip.cs" />
     <Compile Include="mapping\MapDialogue.cs" />
-    <Compile Include="mapping\MapDialogueAction.cs" />
-    <Compile Include="mapping\MapDialogueActionSequenceItem.cs" />
     <Compile Include="mapping\MapDialoguePage.cs" />
     <Compile Include="mapping\MapLoader.cs" />
     <Compile Include="mapping\MapMarker.cs" />
