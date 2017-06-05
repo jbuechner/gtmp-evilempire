@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace gtmp.evilempire.server.mapping
 {
-    class MapMetadata
+    class MapTimer
     {
-        public IList<Item> StartingInventoryItems { get; } = new List<Item>();
-
-        public IList<MapTimer> Timers { get; } = new List<MapTimer>();
+        public TimeSpan Interval { get; set; }
+        public IList<Item> Items { get; } = new List<Item>();
     }
 }

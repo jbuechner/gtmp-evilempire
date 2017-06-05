@@ -145,5 +145,24 @@ namespace gtmp.evilempire
             }
             return null;
         }
+
+        public static TimeSpan? AsTimeSpan(this object value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            if (value is TimeSpan)
+            {
+                return (TimeSpan)value;
+            }
+            string raw = (value as string) ?? value.ToString();
+            TimeSpan timeSpan;
+            if (TimeSpan.TryParse(raw, CultureInfo.InvariantCulture, out timeSpan))
+            {
+                return timeSpan;
+            }
+            return null;
+        }
     }
 }

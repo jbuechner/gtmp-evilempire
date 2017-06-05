@@ -87,6 +87,7 @@
     <Compile Include="mapping\MapPed.cs" />
     <Compile Include="mapping\MapPoint.cs" />
     <Compile Include="mapping\MapPointType.cs" />
+    <Compile Include="mapping\MapTimer.cs" />
     <Compile Include="mapping\MarkerType.cs" />
     <Compile Include="mapping\ServerMapLoader.cs" />
     <Compile Include="messages\MessageHandlerBase.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />
     <Compile Include="ServerRealm.cs" />
+    <Compile Include="ServerTimerRealm.cs" />
     <Compile Include="services\AuthenticationService.cs" />
     <Compile Include="services\CharacterService.cs" />
     <Compile Include="services\ClientService.cs" />

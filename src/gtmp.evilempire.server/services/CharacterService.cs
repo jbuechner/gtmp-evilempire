@@ -44,6 +44,20 @@ namespace gtmp.evilempire.server.services
             return character;
         }
 
+        public void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation)
+        {
+            var character = GetCharacterById(characterId);
+            if (position.HasValue)
+            {
+                character.Position = position;
+            }
+            if (rotation.HasValue)
+            {
+                character.Rotation = rotation;
+            }
+            db.Update<Character>(character);
+        }
+
         public Character GetCharacterById(int characterId)
         {
             var character = db.Select<Character, int>(ks => ks.Id, characterId);
@@ -77,28 +91,10 @@ namespace gtmp.evilempire.server.services
 
         public CharacterInventory CreateDefaultCharacterInventory(int characterId)
         {
-            var characterInventory = new CharacterInventory();
-            foreach(var item in map.Metadata.StartingInventoryItems)
-            {
-                var newItems = items.CreateItem(item.ItemDescriptionId, item.Amount);
-                AddToCharacterInventory(characterInventory, newItems);
-            }
+            var characterInventory = new CharacterInventory() { CharacterId = characterId };
             db.Insert<CharacterInventory>(characterInventory);
+            AddToCharacterInventory(characterInventory, map.Metadata.StartingInventoryItems);
             return characterInventory;
-        }
-
-        public void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation)
-        {
-            var character = GetCharacterById(characterId);
-            if (position.HasValue)
-            {
-                character.Position = position;
-            }
-            if (rotation.HasValue)
-            {
-                character.Rotation = rotation;
-            }
-            db.Update<Character>(character);
         }
 
         public double GetTotalAmountOfMoney(int characterId, Currency currency)
@@ -115,7 +111,26 @@ namespace gtmp.evilempire.server.services
             return 0;
         }
 
+        public void AddToCharacterInventory(int characterId, IEnumerable<Item> items)
+        {
+            var characterInventory = GetCharacterInventoryById(characterId);
+            if (characterInventory != null)
+            {
+                AddToCharacterInventory(characterInventory, items);
+            }
+        }
+
         void AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        {
+            foreach (var item in items)
+            {
+                var newItems = this.items.CreateItem(item.ItemDescriptionId, item.Amount);
+                AddItemsToCharacterInventory(characterInventory, newItems);
+            }
+            db.Update<CharacterInventory>(characterInventory);
+        }
+
+        void AddItemsToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
             if (characterInventory == null)
             {
@@ -171,6 +186,7 @@ namespace gtmp.evilempire.server.services
             }
 
             var characterMoneyStatistic = characterMoney.GetOrAdd(characterInventory.CharacterId, key => new ConcurrentDictionary<Currency, double>());
+            characterMoneyStatistic.Clear();
 
             var money = characterInventory.Money;
             if (money != null)

@@ -1,4 +1,5 @@
-﻿using gtmp.evilempire.sessions;
+﻿using gtmp.evilempire.entities;
+using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,9 @@ namespace gtmp.evilempire.services
         void RemoveSession(ISession session);
         void RemoveStaleSessions();
         void StoreSessionState();
+
+        void SendMoneyChangedEvents(ISession session, params Currency[] currencies);
+
+        void ForEachSession(Func<ISession, bool> fn);
     }
 }

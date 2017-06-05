@@ -69,9 +69,7 @@ namespace gtmp.evilempire.server.messages
                     characterInventory = characters.CreateDefaultCharacterInventory(character.Id);
                 }
                 session.CharacterInventory = characterInventory;
-
-                var amount = characters.GetTotalAmountOfMoney(character.Id, Currency.Dollar);
-                client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)Currency.Dollar, amount);
+                sessions.SendMoneyChangedEvents(session);
 
                 platform.UpdateCharacterCustomization(session);
 

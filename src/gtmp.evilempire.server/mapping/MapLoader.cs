@@ -453,9 +453,49 @@ namespace gtmp.evilempire.server.mapping
             }
 
             var items = doc.Root?.Element("Metadata")?.Element("StartingInventory")?.Element("Items")?.Elements("Item");
+            foreach(var item in LoadItems(items))
+            {
+                map.Metadata.StartingInventoryItems.Add(item);
+            }
+
+            var timers = doc.Root?.Element("Metadata")?.Element("Timers")?.Elements("Timer");
+            if (timers != null)
+            {
+                foreach(var timer in timers)
+                {
+                    if (timer == null)
+                    {
+                        continue;
+                    }
+
+                    //var invariant = new TimeSpan(0, 0, 0, 5, 100).ToString("d.hh:mm:ss.fffffff", CultureInfo.InvariantCulture);
+                    var intervalValue = timer.Element("Interval")?.Value;
+                    var interval = intervalValue?.AsTimeSpan();
+                    if (!interval.HasValue)
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine($"The map timer has an invalid interval and will be skipped. Raw value was {intervalValue}.");
+                        }
+                        continue;
+                    }
+
+                    items = timer.Element("Items")?.Elements("Item");
+                    var mapTimer = new MapTimer { Interval = interval.Value };
+                    foreach(var item in LoadItems(items))
+                    {
+                        mapTimer.Items.Add(item);
+                    }
+                    map.Metadata.Timers.Add(mapTimer);
+                }
+            }
+        }
+
+        static IEnumerable<Item> LoadItems(IEnumerable<XElement> items)
+        {
             if (items != null)
             {
-                foreach(var item in items)
+                foreach (var item in items)
                 {
                     if (item == null)
                     {
@@ -475,7 +515,7 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
 
-                    map.Metadata.StartingInventoryItems.Add(new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount });
+                    yield return new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
                 }
             }
         }
@@ -484,7 +524,27 @@ namespace gtmp.evilempire.server.mapping
         {
             var metadata = map.Metadata;
             var startingInventoryItems = metadata.StartingInventoryItems;
-            foreach(var item in startingInventoryItems)
+            ValidateItems(map, startingInventoryItems, "starting inventory");
+
+            var timers = metadata.Timers;
+            foreach(var timer in timers)
+            {
+                if (timer == null)
+                {
+                    continue;
+                }
+                if (timer.Interval.TotalMilliseconds < 1)
+                {
+                    Console.WriteLine($"[ValidateMap] A timers interval is less than one millisecond and will not be used.");
+                    continue;
+                }
+                ValidateItems(map, startingInventoryItems, "timer");
+            }
+        }
+
+        static void ValidateItems(Map map, IEnumerable<Item> items, string subject)
+        {
+            foreach (var item in items)
             {
                 if (item == null)
                 {
@@ -495,14 +555,14 @@ namespace gtmp.evilempire.server.mapping
                 {
                     using (ConsoleColor.Yellow.Foreground())
                     {
-                        Console.WriteLine($"[ValidateMap] The starting inventory item with item description id {item.ItemDescriptionId} is invalid because there is not item description with the given id.");
+                        Console.WriteLine($"[ValidateMap] The {subject} item with item description id {item.ItemDescriptionId} is invalid because there is not item description with the given id.");
                     }
                 }
                 if (item.Amount < 0)
                 {
                     using (ConsoleColor.Yellow.Foreground())
                     {
-                        Console.WriteLine($"[ValidateMap] The starting inventory item with item description id {item.ItemDescriptionId} is invalid because the amount is negative.");
+                        Console.WriteLine($"[ValidateMap] The {subject} item with item description id {item.ItemDescriptionId} is invalid because the amount is negative.");
                     }
                 }
             }

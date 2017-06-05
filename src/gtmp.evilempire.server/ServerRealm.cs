@@ -1,17 +1,17 @@
 ﻿using GrandTheftMultiplayer.Server.API;
 using GrandTheftMultiplayer.Server.Elements;
-using GrandTheftMultiplayer.Shared;
 using gtmp.evilempire.db;
+using gtmp.evilempire.entities;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.server.mapping.actions;
 using gtmp.evilempire.server.messages;
 using gtmp.evilempire.server.services;
-using gtmp.evilempire.server.sessions;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -35,6 +35,7 @@ namespace gtmp.evilempire.server
         ISessionStateTransitionService sessionStateTransition;
         ICommandService commands;
 
+        readonly ServerTimerRealm timers;
         readonly IDictionary<string, MessageHandlerBase> clientMessageHandlers;
 
         public ServerRealm(API api)
@@ -51,8 +52,9 @@ namespace gtmp.evilempire.server
 
             map = MapLoader.LoadFrom("maps");
             ServerMapLoader.Load(map, platform, api);
-
             services.Register(map);
+
+            timers = new ServerTimerRealm(services);
 
             clients = services.Get<IClientService>();
             sessions = services.Get<ISessionService>();
@@ -281,29 +283,36 @@ namespace gtmp.evilempire.server
 
         void Heartbeat(CancellationToken cancellationToken)
         {
-            const int maxDirtyCounts = 200;
+            const int sleepTime = 10;
+            const int maxDirtyCounts = 10000 / sleepTime;
             int dirtyCounts = 0;
 
+            Stopwatch sw = new Stopwatch();
             while (!cancellationToken.IsCancellationRequested)
             {
+                var delta = sw.ElapsedMilliseconds;
+                sw.Restart();
+                timers.Process(cancellationToken, delta);
+
                 if (dirtyCounts++ > maxDirtyCounts)
                 {
-                    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                    sw.Start();
+                    Stopwatch laundryRuntime = new Stopwatch();
+                    laundryRuntime.Start();
 
                     sessions.RemoveStaleSessions();
 
                     sessions.StoreSessionState();
 
                     dirtyCounts = 0;
-                    sw.Stop();
+                    laundryRuntime.Stop();
                     using (ConsoleColor.Cyan.Foreground())
                     {
-                        Console.WriteLine($"Heartbeat completed within {sw.ElapsedMilliseconds}ms.");
+                        Console.WriteLine($"Heartbeat completed within {laundryRuntime.ElapsedMilliseconds}ms.");
                     }
                 }
-                Thread.Sleep(100);
+                Thread.Sleep(sleepTime);
             }
+            sw.Stop();
         }
 
         static IDictionary<string, MessageHandlerBase> GetClientMessageHandlers(ServiceContainer services)

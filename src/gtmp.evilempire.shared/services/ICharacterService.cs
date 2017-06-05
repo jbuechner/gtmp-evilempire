@@ -1,5 +1,6 @@
 ﻿using gtmp.evilempire.entities;
 using gtmp.evilempire.sessions;
+using System.Collections.Generic;
 
 namespace gtmp.evilempire.services
 {
@@ -13,6 +14,8 @@ namespace gtmp.evilempire.services
 
         CharacterCustomization CreateDefaultCharacterCustomization(int characterId);
         CharacterInventory CreateDefaultCharacterInventory(int characterId);
+
+        void AddToCharacterInventory(int characterId, IEnumerable<Item> items);
 
         void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
 

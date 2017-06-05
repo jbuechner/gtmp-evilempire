@@ -1,9 +1,11 @@
 ﻿using gtmp.evilempire.services;
 using System;
+using System.Linq;
 using gtmp.evilempire.sessions;
 using System.Collections.Concurrent;
 using gtmp.evilempire.server.sessions;
 using System.Collections.Generic;
+using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.server.services
 {
@@ -13,6 +15,7 @@ namespace gtmp.evilempire.server.services
         const int NumberOfMaximumPrivateDimensions = 10000;
 
         bool updateSessionsCopy = true;
+        bool isSessionsCopyDirty = false;
         IList<ISession> sessionsCopy = null;
 
         ConcurrentDictionary<Session, byte> sessions = new ConcurrentDictionary<Session, byte>();
@@ -46,6 +49,7 @@ namespace gtmp.evilempire.server.services
                 Console.WriteLine($"[{client.Name}] Private Dimensions = {session.PrivateDimension} ");
             sessions.TryAdd(session, 1);
             clientToSessionMap.TryAdd(client, session);
+            isSessionsCopyDirty = true;
             UpdateSessionsCopy();
             return session;
         }
@@ -126,33 +130,77 @@ namespace gtmp.evilempire.server.services
             {
                 session.Client.Kick("Session removed.");
             }
+            isSessionsCopyDirty = true;
             UpdateSessionsCopy();
         }
 
         public void StoreSessionState()
         {
-            foreach(var session in sessionsCopy)
+            if (sessionsCopy != null)
             {
-                if (session.Character == null || session.State != SessionState.Freeroam)
+                foreach (var session in sessionsCopy)
                 {
-                    continue;
-                }
+                    if (session.Character == null || session.State != SessionState.Freeroam)
+                    {
+                        continue;
+                    }
 
-                if (session.UpdateDatabasePosition)
-                {
-                    var client = session.Client;
-                    var position = client.Position;
-                    var rotation = client.Rotation;
-                    characters.UpdatePosition(session.Character.Id, position, rotation);
+                    if (session.UpdateDatabasePosition)
+                    {
+                        var client = session.Client;
+                        var position = client.Position;
+                        var rotation = client.Rotation;
+                        characters.UpdatePosition(session.Character.Id, position, rotation);
+                    }
                 }
             }
         }
 
+        public void SendMoneyChangedEvents(ISession session, params Currency[] currencies)
+        {
+            if (currencies == null || currencies.Length < 1)
+            {
+                currencies = Enum.GetValues(typeof(Currency)).Cast<Currency>().Where(p => p != Currency.None).ToArray();
+            }
+
+            foreach (var currency in currencies)
+            {
+                var amount = characters.GetTotalAmountOfMoney(session.CharacterInventory.CharacterId, currency);
+                session.Client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)currency, amount);
+            }
+        }
+
+        public void ForEachSession(Func<ISession, bool> fn)
+        {
+            if (fn == null || sessionsCopy == null)
+            {
+                return;
+            }
+
+            using (new DelegatedDisposable(() => updateSessionsCopy = true))
+            {
+                updateSessionsCopy = false;
+
+                if (sessionsCopy != null)
+                {
+                    foreach (var session in sessionsCopy)
+                    {
+                        if (!fn(session))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            UpdateSessionsCopy();
+        }
+
         void UpdateSessionsCopy()
         {
-            if (updateSessionsCopy)
+            if (updateSessionsCopy && isSessionsCopyDirty)
             {
                 sessionsCopy = new List<ISession>(sessions.Keys);
+                isSessionsCopyDirty = false;
             }
         }
 
