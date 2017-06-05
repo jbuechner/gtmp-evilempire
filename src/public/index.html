@@ -65,6 +65,10 @@
             document.dispatchEvent(new CustomEvent(args.eventName, { detail: args.data }));
         }
 
+        const Currencies = {
+            Dollar: 1
+		};
+
         class App {
             login(username, password) {
                 this.callBackend('login', argumentsToArray(arguments));
@@ -102,6 +106,8 @@
         function argumentsToArray(args) {
             return Array.prototype.slice.call(args, 0);
         }
+
+        document.addEventListener('displayInfoChanged', ev => window.displayInfo = ev.detail );
 
         resourceCall('browser_ready');
     </script>

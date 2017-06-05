@@ -82,6 +82,14 @@ const ClientEvents = {
         browser.removeView('view-login');
         browser.removeView('view-character-customization');
         browser.addView('view-status', { displayCoordinates: Client.hasRequiredUserGroup(UserGroups.GameMaster) });
+
+        for (let [key, value] of moneyMap) {
+            browser.raiseEventInBrowser('moneyChanged', { currency: key, amount: value});
+        }
+    },
+    'moneyChanged': function __moneyUpdated(currency, amount) {
+        moneyMap.set(currency, amount);
+        browser.raiseEventInBrowser('moneyChanged', { currency, amount });
     },
     '::display:login': function __display_login() {
         client.cursor = true;
@@ -610,6 +618,8 @@ let pushViewDataTickCount = 0;
 let user = null;
 let character = null;
 let characterCustomization = null;
+let moneyMap = new Map();
+let displayInfo = { minimap: { margin: { left: 0, bottom: 0 }, width: 0, height: 0 } };
 
 let browser = null;
 let client = null;
@@ -624,6 +634,12 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     API.onEntityStreamIn.connect(onEntityStreamIn);
     API.onEntityDataChange.connect(onEntityDataChange);
     API.onUpdate.connect(onUpdate);
+
+    let res = API.getScreenResolution();
+    displayInfo.minimap.margin.left = res.Width / 64;
+    displayInfo.minimap.margin.bottom = res.Height / 60;
+    displayInfo.minimap.width = res.Width / 7.11;
+    displayInfo.minimap.height = res.Height / 5.71;
 
     client = new Client();
     inputs = new InputController();
@@ -640,6 +656,8 @@ function browser_ready() {
     processServerEventTriggers();
 
     API.onUpdate.connect(() => pushViewData());
+
+    browser.raiseEventInBrowser('displayInfoChanged', displayInfo);
 
     inputs.addMapping(KEYS.CTRL, { onDown: () => client.cursorToggle = true, onUp: () => client.cursorToggle = false });
     inputs.addMapping(KEYS.F12, () => client.cursor = !client.cursor);

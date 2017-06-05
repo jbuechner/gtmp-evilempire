@@ -15,5 +15,7 @@ namespace gtmp.evilempire.services
         CharacterInventory CreateDefaultCharacterInventory(int characterId);
 
         void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
+
+        double GetTotalAmountOfMoney(int characterId, Currency currency);
     }
 }

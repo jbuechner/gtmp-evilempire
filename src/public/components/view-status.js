@@ -5,11 +5,15 @@ Slim.tag('view-status', class extends Slim {
     onBeforeCreated() {
         this.app = window.app;
         let self = this;
+
+        document.addEventListener('moneyChanged', ev => {
+            if (ev.detail.currency === Currencies.Dollar) {
+                this.cash =  ev.detail.amount;
+            }
+        });
+
         document.addEventListener('updateview', (ev) => {
             switch(ev.detail.what) {
-                case 'cash':
-                    this.cash = ev.detail.value;
-                    break;
                 case 'coordinates':
                     let v = ev.detail.value;
                     this.coordinateX = v.coord.x;
@@ -24,17 +28,21 @@ Slim.tag('view-status', class extends Slim {
     }
 
     onCreated() {
+        this.currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency',  currency: 'USD',  minimumFractionDigits: 2, });
         this.cash = 'n/a';
         this.displayCoordinates = false;
         this.coordinateX = this.coordinateY = this.coordinateZ = 0;
         this.rotationX = this.rotationY = this.rotationZ = 0;
+
+        this.cashDisplay.style.left = (window.displayInfo.minimap.margin.left * 2 + window.displayInfo.minimap.width) + 'px';
+        this.cashDisplay.style.bottom = (window.displayInfo.minimap.margin.bottom) + 'px';
     }
 
     asCurrency(v) {
         if (typeof v === 'string') {
             return v;
         }
-        return this.app.formatters.currency.format(v);
+        return this.currencyFormatter.format(v);
     }
 
     formatCoordinate(v) {
@@ -63,7 +71,7 @@ Slim.tag('view-status', class extends Slim {
 
     get template() {
         return `
-<div class="ui-big with-shadow" style="position: absolute; left: 12px; bottom: 0;">
+<div slim-id="cashDisplay" class="ui-big with-shadow" style="position: absolute; left: 12px; bottom: 0;">
 <span bind>[[asCurrency(cash)]]</span>
 </div>
 <div class="ui-tiny with-shadow monospace" style="position: absolute; left: calc(50% - 180px); bottom: 0;" slim-if="displayCoordinates">

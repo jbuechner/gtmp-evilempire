@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using gtmp.evilempire.sessions;
 using gtmp.evilempire.services;
 using gtmp.evilempire.server.messages.transfer;
+using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.server.messages
 {
@@ -68,6 +69,9 @@ namespace gtmp.evilempire.server.messages
                     characterInventory = characters.CreateDefaultCharacterInventory(character.Id);
                 }
                 session.CharacterInventory = characterInventory;
+
+                var amount = characters.GetTotalAmountOfMoney(character.Id, Currency.Dollar);
+                client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)Currency.Dollar, amount);
 
                 platform.UpdateCharacterCustomization(session);
 
