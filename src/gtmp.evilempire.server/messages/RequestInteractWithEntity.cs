@@ -96,30 +96,30 @@ namespace gtmp.evilempire.server.messages
 
             bool hasServerSideActions = false;
             List<string> clientSideActions = new List<string>();
-            if (page.Actions != null)
-            {
-                foreach(var set in page.Actions)
-                {
-                    if (set == null)
-                    {
-                        continue;
-                    }
-                    foreach (var action in set.Actions)
-                    {
-                        foreach (var item in action.Sequence.Items)
-                        {
-                            if (item.ActionType.StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                clientSideActions.Add(item.ActionType);
-                            }
-                            else
-                            {
-                                hasServerSideActions = true;
-                            }
-                        }
-                    }
-                }
-            }
+            //if (page.Actions != null)
+            //{
+            //    foreach(var set in page.Actions)
+            //    {
+            //        if (set == null)
+            //        {
+            //            continue;
+            //        }
+            //        foreach (var action in set.Actions)
+            //        {
+            //            foreach (var item in action.Sequence.Items)
+            //            {
+            //                if (item.ActionType.StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
+            //                {
+            //                    clientSideActions.Add(item.ActionType);
+            //                }
+            //                else
+            //                {
+            //                    hasServerSideActions = true;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
 
             writer.WritePropertyName("__hasServerSideActions");
             writer.WriteValue(hasServerSideActions);

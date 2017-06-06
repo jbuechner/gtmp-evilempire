@@ -31,10 +31,12 @@ namespace gtmp.evilempire.server.sessions
             if (!session.Character.HasBeenThroughInitialCustomization)
             {
                 sessionStateTransition.Transit(session, SessionState.CharacterCustomization);
+                session.State = SessionState.CharacterCustomization;
             }
             else
             {
                 sessionStateTransition.Transit(session, SessionState.Freeroam);
+                session.State = SessionState.Freeroam;
             }
             return true;
         }

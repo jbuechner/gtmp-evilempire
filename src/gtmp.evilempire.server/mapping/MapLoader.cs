@@ -472,51 +472,131 @@ namespace gtmp.evilempire.server.mapping
             {
                 var actionSet = new ActionSet();
 
+                var ifElement = element?.Element("If");
+                var thenElement = element?.Element("Then");
+                var elseElement = element?.Element("Else");
                 var actionElements = element?.Elements("Action");
-                if (actionElements == null)
+
+                if (ifElement == null && actionElements != null)
                 {
-                    continue;
+                    actionSet.Condition = ActionConditionalOperation.True;
+                    foreach (var actionElement in actionElements)
+                    {
+                        var thenAction = LoadActionSetActions(actionElement);
+                        actionSet.ThenActions.Add(thenAction);
+                    }
                 }
-                foreach(var actionElement in actionElements)
+                else
                 {
-                    var action = new ActionSetItem();
-                    actionSet.Actions.Add(action);
-
-                    var sequenceElement = actionElement?.Element("Sequence");
-                    if (sequenceElement == null)
+                    if (ifElement != null)
                     {
-                        continue;
-                    }
+                        actionSet.Condition = LoadActionSetCondition(ifElement?.Element("Operation"));
 
-                    var sequenceItemElements = sequenceElement.Elements("Item");
-                    if (sequenceItemElements == null)
-                    {
-                        continue;
-                    }
-                    foreach (var sequenceItemElement in sequenceItemElements)
-                    {
-                        var actionType = sequenceItemElement?.Attribute("Type")?.Value;
-                        var sequenceItem = new ActionSequenceItem { ActionType = actionType };
-                        action.Sequence.Items.Add(sequenceItem);
-
-                        var argumentElements = sequenceItemElement.Elements();
-                        if (argumentElements != null)
+                        foreach (var actionElement in element?.Element("Then")?.Elements("Action"))
                         {
-                            foreach (var argumentElement in argumentElements)
-                            {
-                                if (argumentElement == null)
-                                {
-                                    continue;
-                                }
-                                sequenceItem.Args[argumentElement.Name.LocalName] = argumentElement.Value;
-                            }
+                            var thenAction = LoadActionSetActions(actionElement);
+                            actionSet.ThenActions.Add(thenAction);
                         }
 
+                        foreach (var actionElement in element?.Element("Else")?.Elements("Action"))
+                        {
+                            var thenAction = LoadActionSetActions(actionElement);
+                            actionSet.ElseActions.Add(thenAction);
+                        }
+                    }
+                    else
+                    {
+                        using (ConsoleColor.Yellow.Foreground())
+                        {
+                            Console.WriteLine("[MapLoader] The action set uses an unsupported form. Either use Action elements directly beneath Actions or use If/Then/Else elements respectively.");
+                        }
                     }
                 }
 
                 yield return actionSet;
             }
+        }
+
+        static ActionSetItem LoadActionSetActions(XElement actionElement)
+        {
+            var sequenceElement = actionElement?.Element("Sequence");
+            if (sequenceElement == null)
+            {
+                return null;
+            }
+
+            var sequenceItemElements = sequenceElement.Elements("Item");
+            if (sequenceItemElements == null)
+            {
+                return null;
+            }
+            var action = new ActionSetItem();
+            foreach (var sequenceItemElement in sequenceItemElements)
+            {
+                var actionType = sequenceItemElement?.Attribute("Type")?.Value;
+                var sequenceItem = new ActionSequenceItem { ActionType = actionType };
+                action.Sequence.Items.Add(sequenceItem);
+
+                var argumentElements = sequenceItemElement.Elements();
+                if (argumentElements != null)
+                {
+                    foreach (var argumentElement in argumentElements)
+                    {
+                        if (argumentElement == null)
+                        {
+                            continue;
+                        }
+                        sequenceItem.Args[argumentElement.Name.LocalName] = argumentElement.Value;
+                    }
+                }
+
+            }
+            return action;
+        }
+
+        static ActionConditionalOperation LoadActionSetCondition(XElement element)
+        {
+
+            var comparatorElement = element.Attribute("Comparator")?.Value;
+            var comparator = ActionConditionalComparator.GetComparator(comparatorElement);
+            if (comparator == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"[MapLoader] There is no comparator with the name \"{comparator}\".");
+                }
+                return null;
+            }
+
+            var operandA = LoadActionSetConditionOperand(element.Element("OperandA"));
+            var operandB = LoadActionSetConditionOperand(element.Element("OperandB"));
+
+            return new ActionConditionalOperation(comparator, operandA, operandB);
+        }
+
+        static ActionConditionalOperand LoadActionSetConditionOperand(XElement element)
+        {
+            var operationElement = element.Element("Operation");
+            if (operationElement != null)
+            {
+                return LoadActionSetCondition(operationElement);
+            }
+            var constantElement = element.Element("Constant");
+            if (constantElement != null)
+            {
+                return new ActionConditionalOperand.Constant(constantElement.Value);
+            }
+            var propertyElement = element.Element("Property");
+            if (propertyElement != null)
+            {
+                return new ActionConditionalOperand.Property(propertyElement.Value);
+            }
+
+            using (ConsoleColor.Yellow.Foreground())
+            {
+                Console.WriteLine("[MapLoader] Unknown operation operand. Either expected a Property / Constant or another Operation element inside.");
+            }
+            return null;
         }
 
         static void ValidateMap(Map map)

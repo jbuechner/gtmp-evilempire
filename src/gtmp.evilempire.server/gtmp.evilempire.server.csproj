@@ -62,6 +62,9 @@
     <Compile Include="..\shared\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="actions\ActionConditionalComparator.cs" />
+    <Compile Include="actions\ActionConditionalOperand.cs" />
+    <Compile Include="actions\ActionConditionalOperation.cs" />
     <Compile Include="actions\ActionExecutionEngine.cs" />
     <Compile Include="actions\ActionHandler.cs" />
     <Compile Include="actions\ActionHandlerAttribute.cs" />

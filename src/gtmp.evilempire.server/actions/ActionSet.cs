@@ -8,6 +8,9 @@ namespace gtmp.evilempire.server.actions
 {
     class ActionSet
     {
-        public IList<ActionSetItem> Actions { get; } = new List<ActionSetItem>();
+        public ActionConditionalOperation Condition { get; set; }
+
+        public IList<ActionSetItem> ThenActions { get; } = new List<ActionSetItem>();
+        public IList<ActionSetItem> ElseActions { get; } = new List<ActionSetItem>();
     }
 }

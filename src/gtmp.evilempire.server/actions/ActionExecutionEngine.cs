@@ -22,20 +22,41 @@ namespace gtmp.evilempire.server.actions
 
         public void Run(ISession session)
         {
-            foreach (var action in set.Actions)
+            IList<ActionSetItem> actionItems = null;
+            if (set.Condition == null)
             {
-                foreach(var item in action.Sequence.Items)
+                actionItems = set.ThenActions;
+            }
+            else
+            {
+                var result = set.Condition.ProvideValue(session);
+                if (result != null && (result.AsBool() ?? false))
                 {
-                    var actionHandler = ResolveAction(item, services, item.Args);
-                    if (actionHandler == null)
+                    actionItems = set.ThenActions;
+                }
+                else
+                {
+                    actionItems = set.ElseActions;
+                }
+            }
+
+            if (actionItems != null)
+            {
+                foreach (var action in actionItems)
+                {
+                    foreach (var item in action.Sequence.Items)
                     {
-                        using (ConsoleColor.Yellow.Foreground())
+                        var actionHandler = ResolveAction(item, services, item.Args);
+                        if (actionHandler == null)
                         {
-                            Console.WriteLine($"There is no action handler registered for the action type \"{item.ActionType}\".");
+                            using (ConsoleColor.Yellow.Foreground())
+                            {
+                                Console.WriteLine($"There is no action handler registered for the action type \"{item.ActionType}\".");
+                            }
+                            continue;
                         }
-                        continue;
+                        actionHandler.Handle(session);
                     }
-                    actionHandler.Handle(session);
                 }
             }
         }
