@@ -262,6 +262,7 @@ class Browser {
 
 class Client {
     constructor() {
+        this._isInVehicle = false;
         this._cursor = false;
         this._cursorToggle = false;
     }
@@ -277,6 +278,16 @@ class Client {
         }
     }
 
+    get isInVehicle() {
+        return this._isInVehicle;
+    }
+
+    set isInVehicle(v) {
+        if (this._isInVehicle !== v) {
+            this._isInVehicle = v;
+        }
+    }
+
     get cursorToggle() {
         return this._cursorToggle;
     }
@@ -286,6 +297,10 @@ class Client {
             this._cursorToggle = v;
             this._onCursorStateChanged();
         }
+    }
+
+    get canDisplayUiTrackedElements() {
+        return !this.isInVehicle || this.cursor || this.cursorToggle;
     }
 
     setCamera(x, y, z, rx, ry, rz) {
@@ -448,14 +463,16 @@ function addUiTrackedEntity(entity) {
     let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
 
     let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
-    uiTrackedEntities.set(entityId, { id: entityId, netHandle, entity, position, positionAbove });
+    if (client.canDisplayUiTrackedElements) { // check netHandle
+        uiTrackedEntities.set(entityId, {id: entityId, netHandle, entity, position, positionAbove});
 
-    let options = getUiTrackingOptions(entity);
-    if (options) {
-        options.entityId = '' + entityId;
-        options.pos = {x: viewPoint.X, y: viewPoint.Y};
+        let options = getUiTrackingOptions(entity);
+        if (options) {
+            options.entityId = '' + entityId;
+            options.pos = {x: viewPoint.X, y: viewPoint.Y};
 
-        browser.addView('view-entityinteractionmenu', options);
+            browser.addView('view-entityinteractionmenu', options);
+        }
     }
 }
 function updateUiTrackedEntities() {
@@ -467,19 +484,29 @@ function updateUiTrackedEntities() {
         browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { entityId: '' + value.id, x: viewPoint.X, y: viewPoint.Y} });
     });
 }
-function removeUiTrackedEntitiesThatAreOutOfRange() {
-    let player = API.getLocalPlayer();
-    let playerPosition = API.getEntityPosition(player);
+function removeAllUiTrackedEntities(predicate) {
+    if (uiTrackedEntities.size < 1) {
+        return;
+    }
+
+    predicate = predicate || ((value, key) => true);
     let removable = [];
     uiTrackedEntities.forEach((value, key) => {
-        let distance = Vector3.Distance(playerPosition, value.position);
-        if (distance > testRange) {
+        if (predicate(value, key)) {
             removable.push(key);
-            browser.removeView('view-entityinteractionmenu[data-entityId="' + value.id + '"]')
+            browser.removeView('view-entityinteractionmenu[data-entityId="' + value.id + '"]');
         }
     });
     removable.forEach(key => {
         uiTrackedEntities.delete(key);
+    });
+}
+function removeUiTrackedEntitiesThatAreOutOfRange() {
+    let player = API.getLocalPlayer();
+    let playerPosition = API.getEntityPosition(player);
+    removeAllUiTrackedEntities((value, key) => {
+        let distance = Vector3.Distance(playerPosition, value.position);
+        return distance > testRange;
     });
 }
 function getUiTrackingOptions(entity) {
@@ -537,10 +564,38 @@ function onUpdate() {
                 addUiTrackedEntity(raycast.hitEntity);
             }
         }
+        if (client.isInVehicle) {
+
+            if (client.canDisplayUiTrackedElements) {
+                let vehicle = API.getPlayerVehicle(player);
+                if (vehicle) {
+                    addUiTrackedEntity(vehicle);
+                }
+            } else {
+                removeAllUiTrackedEntities();
+            }
+        }
         removeUiTrackedEntitiesThatAreOutOfRange();
     }
     if (updateCount % 10 === 0) {
         updateUiTrackedEntities();
+    }
+}
+
+function onPlayerEnterVehicle(localPlayerHandle) {
+    let player = API.getLocalPlayer();
+    if (player.value === localPlayerHandle.value) {
+        client.isInVehicle = true;
+        if (!client.canDisplayUiTrackedElements) {
+            removeAllUiTrackedEntities();
+        }
+    }
+}
+
+function onPlayerExitVehicle(localPlayerHandle) {
+    let player = API.getLocalPlayer();
+    if (player.value === localPlayerHandle.value) {
+        client.isInVehicle = false;
     }
 }
 
@@ -554,30 +609,30 @@ function onEntityDataChange(entity, key, oldValue) {
 
 function updateCharacterCustomization(entity) {
     try {
-            let entityType = API.getEntitySyncedData(entity, 'ENTITY_TYPE');
-            if (typeof entityType !== 'undefined') {
-                if (entityType === 6 || entityType === 8) {
-                    let shapeFirst = API.getEntitySyncedData(entity, 'FACE::SHAPEFIRST');
-                    let shapeSecond = API.getEntitySyncedData(entity, 'FACE::SHAPESECOND');
-                    let skinFirst = API.getEntitySyncedData(entity, 'FACE::SKINFIRST');
-                    let skinSecond = API.getEntitySyncedData(entity, 'FACE::SKINSECOND');
-                    let shapeMix = API.getEntitySyncedData(entity, 'FACE::SHAPEMIX');
-                    let skinMix = API.getEntitySyncedData(entity, 'FACE::SKINMIX');
+        let entityType = API.getEntitySyncedData(entity, 'ENTITY_TYPE');
+        if (typeof entityType !== 'undefined') {
+            if (entityType === 6 || entityType === 8) {
+                let shapeFirst = API.getEntitySyncedData(entity, 'FACE::SHAPEFIRST');
+                let shapeSecond = API.getEntitySyncedData(entity, 'FACE::SHAPESECOND');
+                let skinFirst = API.getEntitySyncedData(entity, 'FACE::SKINFIRST');
+                let skinSecond = API.getEntitySyncedData(entity, 'FACE::SKINSECOND');
+                let shapeMix = API.getEntitySyncedData(entity, 'FACE::SHAPEMIX');
+                let skinMix = API.getEntitySyncedData(entity, 'FACE::SKINMIX');
 
-                    let hairStyle = API.getEntitySyncedData(entity, 'HAIR::STYLE');
-                    let hairColor = API.getEntitySyncedData(entity, 'HAIR::COLOR');
+                let hairStyle = API.getEntitySyncedData(entity, 'HAIR::STYLE');
+                let hairColor = API.getEntitySyncedData(entity, 'HAIR::COLOR');
 
-                    if (typeof shapeFirst !== 'undefined' && typeof shapeSecond !== 'undefined' && typeof skinFirst !== 'undefined' && skinSecond !== 'undefined' && typeof shapeMix !== 'undefined' && skinMix !== 'undefined') {
-                        API.callNative('0x9414E18B9434C2FE', entity, shapeFirst, shapeSecond, 0, skinFirst, skinSecond, 0, shapeMix, skinMix, 0, false);
-                    }
-                    if (typeof hairStyle !== 'undefined') {
-                        API.callNative('0x262B14F48D29DE80', entity, 2, hairStyle, 0, 0);
-                    }
-                    if (typeof hairColor !== 'undefined') {
-                        API.callNative('0x4CFFC65454C93A49', entity, hairColor, 0);
-                    }
+                if (typeof shapeFirst !== 'undefined' && typeof shapeSecond !== 'undefined' && typeof skinFirst !== 'undefined' && skinSecond !== 'undefined' && typeof shapeMix !== 'undefined' && skinMix !== 'undefined') {
+                    API.callNative('0x9414E18B9434C2FE', entity, shapeFirst, shapeSecond, 0, skinFirst, skinSecond, 0, shapeMix, skinMix, 0, false);
+                }
+                if (typeof hairStyle !== 'undefined') {
+                    API.callNative('0x262B14F48D29DE80', entity, 2, hairStyle, 0, 0);
+                }
+                if (typeof hairColor !== 'undefined') {
+                    API.callNative('0x4CFFC65454C93A49', entity, hairColor, 0);
                 }
             }
+        }
     } catch(ex) {
         debugOut(ex);
     }
@@ -641,6 +696,9 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     API.onEntityStreamIn.connect(onEntityStreamIn);
     API.onEntityDataChange.connect(onEntityDataChange);
     API.onUpdate.connect(onUpdate);
+
+    API.onPlayerEnterVehicle.connect(onPlayerEnterVehicle);
+    API.onPlayerExitVehicle.connect(onPlayerExitVehicle);
 
     let res = API.getScreenResolution();
     displayInfo.minimap.margin.left = res.Width / 64;
