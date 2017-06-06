@@ -451,10 +451,12 @@ function addUiTrackedEntity(entity) {
     uiTrackedEntities.set(entityId, { id: entityId, netHandle, entity, position, positionAbove });
 
     let options = getUiTrackingOptions(entity);
-    options.entityId = '' + entityId;
-    options.pos = { x: viewPoint.X, y: viewPoint.Y };
+    if (options) {
+        options.entityId = '' + entityId;
+        options.pos = {x: viewPoint.X, y: viewPoint.Y};
 
-    browser.addView('view-entityinteractionmenu', options);
+        browser.addView('view-entityinteractionmenu', options);
+    }
 }
 function updateUiTrackedEntities() {
     uiTrackedEntities.forEach(value => {
@@ -489,16 +491,17 @@ function getUiTrackingOptions(entity) {
     }
     if (API.isPed(entity)) {
         let actions = [];
-        let title = API.getEntitySyncedData(entity, 'ENTITY:TITLE') || 'PED';
-        if (API.hasEntitySyncedData(entity, 'DIALOGUE:NAME')) {
-            actions.push('speak');
+        let title = API.getEntitySyncedData(entity, 'ENTITY:TITLE');
+        if (title && typeof title === 'string') {
+            if (API.hasEntitySyncedData(entity, 'DIALOGUE:NAME')) {
+                actions.push('speak');
+            }
+
+            return {title: title, actions};
         }
-        return { title: title, actions };
     }
 
-    return {
-        title: '' + entity.Value
-    }
+    return null;
 }
 function resolveNetHandleFromEntityId(entityId) {
     if (entityId) {

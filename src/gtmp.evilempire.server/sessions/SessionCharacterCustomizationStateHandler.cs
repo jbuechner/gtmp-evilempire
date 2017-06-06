@@ -38,7 +38,7 @@ namespace gtmp.evilempire.server.sessions
             session?.Client?.TriggerClientEvent(ClientEvents.DisplayCharacterCustomization, data);
             session.State = SessionState.CharacterCustomization;
             session.UpdateDatabasePosition = false;
-            session.PrivateDimension = session.PrivateDimension;
+            session.Client.Dimension = session.PrivateDimension;
 
             var mapPoint = map.GetPointByName(WellKnownNamedPoints.CharacterCustomizationLocation);
             if (mapPoint != null)
