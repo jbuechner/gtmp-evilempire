@@ -200,7 +200,7 @@ namespace gtmp.evilempire.tests.db
                 var characterInventory = db.Select<CharacterInventory, int>(character.Id);
 
                 Assert.IsNotNull(characterInventory);
-                Assert.AreEqual(characterInventory, insertedInventory.CharacterId);
+                Assert.AreEqual(characterInventory.CharacterId, insertedInventory.CharacterId);
             }
         }
 
@@ -213,9 +213,9 @@ namespace gtmp.evilempire.tests.db
                 var inventory = new CharacterInventory { CharacterId = character.Id };
 
                 var moneyItemDescription = new ItemDescription { Id = 0x100, Name = "A Dollar", AssociatedCurrency = Currency.Dollar, Denomination = 1 };
-                var moneyItemA = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 25 };
-                var moneyItemB = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 1 };
-                var moneyItemC = new Item { Id = db.NextValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 5 };
+                var moneyItemA = new Item { Id = db.NextInt64ValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 25 };
+                var moneyItemB = new Item { Id = db.NextInt64ValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 1 };
+                var moneyItemC = new Item { Id = db.NextInt64ValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 5 };
 
                 inventory.Money.Add(moneyItemA);
                 inventory.Money.Add(moneyItemB);

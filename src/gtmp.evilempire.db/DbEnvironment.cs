@@ -165,6 +165,17 @@ namespace gtmp.evilempire.db
             return bson["value"].AsInt32;
         }
 
+        public long? Int64ValueFor(string sequence)
+        {
+            var collection = _db.GetCollection(string.Concat("__sequence64_", sequence));
+            var bson = collection.FindOne(p => true);
+            if (bson == null)
+            {
+                return null;
+            }
+            return bson["value"].AsInt64;
+        }
+
         public int NextValueFor(string sequence)
         {
             var collection = _db.GetCollection(string.Concat("__sequence_", sequence));
@@ -181,6 +192,30 @@ namespace gtmp.evilempire.db
                 else
                 {
                     var next = bson["value"].AsInt32 + 1;
+                    bson["value"] = new BsonValue(next);
+                    collection.Update(bson);
+                    t.Commit();
+                    return next;
+                }
+            }
+        }
+
+        public long NextInt64ValueFor(string sequence)
+        {
+            var collection = _db.GetCollection(string.Concat("__sequence64_", sequence));
+            using (var t = _db.BeginTrans())
+            {
+                var bson = collection.FindOne(p => true);
+                if (bson == null)
+                {
+                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue((long)0) } });
+                    collection.Insert(bson);
+                    t.Commit();
+                    return 0;
+                }
+                else
+                {
+                    long next = bson["value"].AsInt64 + 1;
                     bson["value"] = new BsonValue(next);
                     collection.Update(bson);
                     t.Commit();

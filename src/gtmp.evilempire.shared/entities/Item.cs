@@ -8,7 +8,7 @@ namespace gtmp.evilempire.entities
 {
     public class Item
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int ItemDescriptionId { get; set; }
 
         public int Amount { get; set; }

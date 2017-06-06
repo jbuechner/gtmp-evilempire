@@ -46,6 +46,11 @@ namespace gtmp.evilempire.tests.db
                 return _decorated.NextValueFor(sequence);
             }
 
+            public long NextInt64ValueFor(string sequence)
+            {
+                return _decorated.NextInt64ValueFor(sequence);
+            }
+
             public T Select<T, TKey>(TKey key)
             {
                 return _decorated.Select<T, TKey>(key);
@@ -69,6 +74,11 @@ namespace gtmp.evilempire.tests.db
             public int? ValueFor(string sequence)
             {
                 return _decorated.ValueFor(sequence);
+            }
+
+            public long? Int64ValueFor(string sequence)
+            {
+                return _decorated.Int64ValueFor(sequence);
             }
         }
 

@@ -84,5 +84,40 @@ namespace gtmp.evilempire.tests.db
                 Assert.AreEqual(hashSet.Count, workerCount * max);
             }
         }
+
+        [TestCategory(TestConstants.LongRunningCategory)]
+        [TestMethod]
+        public void CreateNewSequenceAndIncrementMultipleTimesUsingHighConcurrencyForInt64Values()
+        {
+            using (IDbService dbService = DbServiceFactory())
+            {
+                var sequence = "x";
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                var workerCount = 100;
+                var max = 1000;
+
+                List<Task> workers = new List<Task>();
+                HashSet<long> hashSet = new HashSet<long>();
+                for (var i = 0; i < workerCount; i++)
+                {
+                    workers.Add(new Task(() =>
+                    {
+                        for (var x = 0; x < max; x++)
+                        {
+                            long v = dbService.NextInt64ValueFor(sequence);
+                            Assert.IsTrue(hashSet.Add(v));
+                        }
+                    }));
+                }
+                var r = Parallel.ForEach(workers, t =>
+                {
+                    t.Start();
+                    t.Wait();
+                });
+
+                Assert.AreEqual(hashSet.Count, workerCount * max);
+            }
+        }
     }
 }

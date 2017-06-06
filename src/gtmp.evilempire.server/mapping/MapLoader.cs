@@ -457,7 +457,7 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
 
-                    yield return new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
+                    yield return new Item { Id = long.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
                 }
             }
         }

@@ -65,9 +65,19 @@ namespace gtmp.evilempire.db
             return _dbe.NextValueFor(sequence);
         }
 
+        public long NextInt64ValueFor(string sequence)
+        {
+            return _dbe.NextInt64ValueFor(sequence);
+        }
+
         public int? ValueFor(string sequence)
         {
             return _dbe.ValueFor(sequence);
+        }
+
+        public long? Int64ValueFor(string sequence)
+        {
+            return _dbe.Int64ValueFor(sequence);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_dbe")]

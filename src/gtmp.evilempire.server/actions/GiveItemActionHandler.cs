@@ -42,7 +42,7 @@ namespace gtmp.evilempire.server.actions
                     ItemDescription itemDescription;
                     if (map.ItemDescriptionMap.TryGetValue(itemDescriptionId.Value, out itemDescription) && itemDescription != null)
                     {
-                        items = new Item[1] { new Item { Id = int.MinValue, ItemDescriptionId = itemDescription.Id, Amount = amount.Value } };
+                        items = new Item[1] { new Item { Id = long.MinValue, ItemDescriptionId = itemDescription.Id, Amount = amount.Value } };
                     }
                 }
                 else

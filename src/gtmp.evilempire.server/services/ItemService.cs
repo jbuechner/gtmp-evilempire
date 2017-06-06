@@ -81,7 +81,7 @@ namespace gtmp.evilempire.server.services
 
         Item CreateSingleItem(int itemDescriptionId, int amount)
         {
-            var itemId = db.NextValueFor(Constants.Database.Sequences.ItemIdSequence);
+            var itemId = db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence);
             var item = new Item { Id = itemId, ItemDescriptionId = itemDescriptionId, Amount = amount };
             return item;
         }

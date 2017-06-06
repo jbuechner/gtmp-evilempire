@@ -43,6 +43,7 @@ namespace gtmp.evilempire.server.messages
 
             db.Update<CharacterCustomization>(session.CharacterCustomization);
             sessionStateTransition.Transit(session, SessionState.Freeroam);
+            session.State = SessionState.Freeroam;
             return true;
         }
     }

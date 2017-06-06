@@ -17,6 +17,7 @@ namespace gtmp.evilempire.server.services
         IPlatformService platform;
 
         ConcurrentDictionary<int, ConcurrentDictionary<Currency, double>> characterMoney = new ConcurrentDictionary<int, ConcurrentDictionary<Currency, double>>();
+        ConcurrentDictionary<int, object> characterInventoriesInModification = new ConcurrentDictionary<int, object>();
 
         public CharacterService(Map map, IDbService db, IPlatformService platform, IItemService items)
         {
@@ -137,38 +138,65 @@ namespace gtmp.evilempire.server.services
                 throw new ArgumentNullException(nameof(characterInventory));
             }
 
-            bool hasMoneyChanged = false;
-            if (items != null)
+            var sync = characterInventoriesInModification.GetOrAdd(characterInventory.CharacterId, _ => new object());
+            var hasMoneyChanged = false;
+            lock (sync)
             {
-                foreach(var item in items)
+                if (items != null)
                 {
-                    if (item.Id < 0)
+                    foreach (var item in items)
                     {
-                        using (ConsoleColor.Yellow.Foreground())
+                        if (item.Id < 0)
                         {
-                            Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} does not has a valid Id value (must be selected from sequence before). Tried to add an item of item description id {item.ItemDescriptionId} to to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                            using (ConsoleColor.Yellow.Foreground())
+                            {
+                                Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} does not has a valid Id value (must be selected from sequence before). Tried to add an item of item description id {item.ItemDescriptionId} to to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
 
-                    var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
-                    if (itemDescription == null)
-                    {
-                        using (ConsoleColor.Yellow.Foreground())
+                        var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
+                        if (itemDescription == null)
                         {
-                            Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} uses an unknwon item description id {item.ItemDescriptionId} to add an item to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                            using (ConsoleColor.Yellow.Foreground())
+                            {
+                                Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} uses an unknwon item description id {item.ItemDescriptionId} to add an item to character inventory with id {characterInventory.CharacterId}. Skipped.");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
 
-                    if (itemDescription.AssociatedCurrency == Currency.None)
-                    {
-                        characterInventory.Items.Add(item);
-                    }
-                    else
-                    {
-                        characterInventory.Money.Add(item);
-                        hasMoneyChanged = true;
+                        IList<Item> targetList = null;
+                        if (itemDescription.AssociatedCurrency == Currency.None)
+                        {
+                            targetList = characterInventory.Items;
+                        }
+                        else
+                        {
+                            targetList = characterInventory.Money;
+                            hasMoneyChanged = true;
+                        }
+
+                        // Stack amount to existing items with stack size left
+                        var itemsWithAvailableAmountLeft = targetList.Where(p => p.ItemDescriptionId == item.ItemDescriptionId && p.Amount < itemDescription.MaximumStack);
+                        var stackLeft = item.Amount;
+                        foreach(var itemWithAvailableAmountLeft in itemsWithAvailableAmountLeft)
+                        {
+                            var available = itemDescription.MaximumStack - itemWithAvailableAmountLeft.Amount;
+                            var used = available > stackLeft ? stackLeft : available;
+                            stackLeft -= used;
+                            item.Amount -= used;
+                            itemWithAvailableAmountLeft.Amount += used;
+
+                            if (stackLeft <= 0)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (item.Amount > 0)
+                        {
+                            targetList.Add(item);
+                        }
                     }
                 }
             }
