@@ -14,18 +14,20 @@ namespace gtmp.evilempire.server.messages
     {
         public int EntityId { get; set; }
         public string Content { get; set; }
+        public string Action { get; set; }
 
-        public EntityContentResponse(ISerializationService serialization, int entityId, MapDialoguePage page)
+        public EntityContentResponse(ISerializationService serialization, int entityId, MapDialoguePage page, string action)
+            : this(entityId, null, action)
         {
             var content = SerializeDialoguePage(page);
             Content = serialization.DecorateAsJson(content);
-            EntityId = entityId;
         }
 
-        public EntityContentResponse(int entityId, string content)
+        public EntityContentResponse(int entityId, string content, string action)
         {
             EntityId = entityId;
             Content = content;
+            Action = action;
         }
 
         static string SerializeDialoguePage(MapDialoguePage page)

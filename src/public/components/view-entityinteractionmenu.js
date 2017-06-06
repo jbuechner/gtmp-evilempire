@@ -1,7 +1,10 @@
 'use strict';
 const KnownClientSideActions = new Map();
-KnownClientSideActions.set('@CLOSEACTIVEENTITYINTERACTION', function __closeActiveEntityInteraction() {
-    this.dialogue = null;
+KnownClientSideActions.set('CLOSEACTIVEENTITYINTERACTION', function __closeActiveEntityInteraction() {
+    this.contentKey = null;
+    this.markdown = '';
+    this.isContentVisible = false;
+    this.resetActiveActions();
 });
 
 Slim.tag('view-entityinteractionmenu', class extends Slim {
@@ -17,9 +20,15 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         this.pos = { x: ev.detail.value.x, y: ev.detail.value.y };
                         break;
                     case 'content':
-                        this.contentKey = ev.detail.value.content.key;
-                        this.markdown = ev.detail.value.content.markdown;
                         this.resetIsLoading();
+
+                        let content = ev.detail.value.content;
+                        if (!content || typeof content === 'undefined' || content === null || typeof content.markdown === 'undefined' || content.markdown === null) {
+                            this.runClientSideAction([ 'closeActiveEntityInteraction' ]);
+                        } else {
+                            this.contentKey = content.key;
+                            this.markdown = content.markdown;
+                        }
                         break;
                 }
             }
@@ -58,23 +67,6 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
             if (typeof href === 'string' && href.startsWith('#')) {
                 link.setAttribute('data-dialogue-action', 'triggerServerSideAction');
                 link.setAttribute('data-dialogue-target', href.substring(1));
-            }
-        }
-    }
-
-    get dialogue() {
-        return this._dialogue;
-    }
-
-    set dialogue(v) {
-        if (v !== this.dialogue) {
-            this._dialogue = v;
-            if (v) {
-                this.markdown = v.markdown;
-            } else {
-                this.markdown = null;
-                this.isContentVisible = false;
-                this.resetActiveActions();
             }
         }
     }

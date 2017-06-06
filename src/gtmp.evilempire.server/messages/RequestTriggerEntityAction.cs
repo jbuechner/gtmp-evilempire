@@ -67,19 +67,17 @@ namespace gtmp.evilempire.server.messages
                         }
                     }
 
-                    var response = new EntityContentResponse(serialization, entityId.Value, dialoguePage);
+                    var response = new EntityContentResponse(serialization, entityId.Value, dialoguePage, null);
                     var responseData = serialization.SerializeAsDesignatedJson(response);
                     client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, true, responseData);
+                    return true;
                 }
-                return true;
             }
-            else
-            {
-                var response = new EntityContentResponse(entityId.Value, null);
-                var responseData = serialization.SerializeAsDesignatedJson(response);
-                client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, false, responseData);
-                return false;
-            }
+
+            var fallbackResponse = new EntityContentResponse(entityId.Value, null, null);
+            var fallbackResponseData = serialization.SerializeAsDesignatedJson(fallbackResponse);
+            client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, false, fallbackResponseData);
+            return false;
         }
 
         static MapDialoguePage FindDialoguePage(MapDialogue dialogue, string pageKey)

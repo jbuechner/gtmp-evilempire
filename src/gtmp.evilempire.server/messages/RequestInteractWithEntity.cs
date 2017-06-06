@@ -48,7 +48,7 @@ namespace gtmp.evilempire.server.messages
             {
                 if (ped.Dialogue != null)
                 {
-                    var response = new EntityContentResponse(serialization, entityId.Value, ped.Dialogue);
+                    var response = new EntityContentResponse(serialization, entityId.Value, ped.Dialogue, null);
                     var responseData = serialization.SerializeAsDesignatedJson(response);
                     client.TriggerClientEvent(ClientEvents.RequestInteractWithEntityResponse, true, responseData);
                     return true;

@@ -90,16 +90,6 @@ Ignoriere mich bitte einfach.
                         </Markdown>
                     </Page>
                     <Page>
-                        <Name>close</Name>
-                        <Actions>
-                            <Action>
-                                <Sequence>
-                                    <Item Type="@CloseActiveEntityInteraction"></Item>
-                                </Sequence>
-                            </Action>
-                        </Actions>
-                    </Page>
-                    <Page>
                         <Name>car</Name>
                         <Actions>
                             <Action>

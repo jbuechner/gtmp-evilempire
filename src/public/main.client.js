@@ -135,16 +135,20 @@ const ClientEvents = {
     'entityContentResponse': function __triggerEntityContentResponse(success, data) {
         data = deserializeFromDesignatedJson(data);
         if (!success) {
-            data = {};
-        } else {
-            if (data) {
-                data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
-                if (data.Content) {
-                    data.Content = deserializeFromDesignatedJson(data.Content);
-                }
+            data = data || {};
+            data.EntityId = data.EntityId || 0;
+        }
+
+        if (data) {
+            data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
+            if (data.Content) {
+                data.Content = deserializeFromDesignatedJson(data.Content);
             }
         }
-        browser.raiseEventInBrowser('updateview', { what: 'content', value: { entityId: '' + data.EntityId, content: data.Content }});
+        browser.raiseEventInBrowser('updateview', {
+            what: 'content',
+            value: {entityId: '' + data.EntityId, content: data.Content}
+        });
     }
 };
 
