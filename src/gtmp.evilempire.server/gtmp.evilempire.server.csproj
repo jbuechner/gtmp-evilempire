@@ -105,11 +105,10 @@
     <Compile Include="messages\RequestCharacterCustomizationOkay.cs" />
     <Compile Include="messages\RequestCharacterCustomizationResponse.cs" />
     <Compile Include="messages\RequestInteractWithEntity.cs" />
-    <Compile Include="messages\RequestInteractWithEntityResponse.cs" />
+    <Compile Include="messages\EntityContentResponse.cs" />
     <Compile Include="messages\RequestLoginHandler.cs" />
     <Compile Include="messages\RequestLoginResponse.cs" />
     <Compile Include="messages\RequestTriggerEntityAction.cs" />
-    <Compile Include="messages\RequestTriggerEntityActionResponse.cs" />
     <Compile Include="messages\transfer\ClientCharacter.cs" />
     <Compile Include="messages\transfer\ClientCharacterCustomization.cs" />
     <Compile Include="messages\transfer\ClientCharacterFaceCustomization.cs" />

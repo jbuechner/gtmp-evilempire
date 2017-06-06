@@ -17,16 +17,9 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         this.pos = { x: ev.detail.value.x, y: ev.detail.value.y };
                         break;
                     case 'content':
-                        this.dialogue = new BranchingDialogue(ev.detail.value.dialogue);
+                        this.contentKey = ev.detail.value.content.key;
+                        this.markdown = ev.detail.value.content.markdown;
                         this.resetIsLoading();
-                        break;
-                    case 'entityAction':
-                        this.resetIsLoading();
-                        if (this.followUpContent && this.followUpContent.length > 0) {
-                            this.markdown = this.followUpContent;
-                            this.iContentVisible = true;
-                            this.followUpContent = '';
-                        }
                         break;
                 }
             }
@@ -40,6 +33,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         this._dialogue = null;
         this.resetIsLoading();
         this.isContentVisible = false;
+        this.contentKey = null;
     }
 
     onContentDomLinkClick(e) {
@@ -47,23 +41,9 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         let action = e.target.getAttribute('data-dialogue-action');
         let target = e.target.getAttribute('data-dialogue-target');
         switch (('' + action).toUpperCase()) {
-            case 'JUMPTOPAGE':
-                let page = this.dialogue.findPage(target, true);
-                if (page.clientSideActions) {
-                    this.runClientSideAction(page.clientSideActions);
-                }
-                if (page.hasServerSideActions) {
-                    this.followUpContent = page.markdown;
-                    this.markdown = '';
-                    this.triggerServerAction(target);
-                    return;
-                }
-
-                if (page && page.markdown) {
-                    this.markdown = page.markdown;
-                    break;
-                }
-
+            case 'TRIGGERSERVERSIDEACTION':
+                this.triggerServerAction(target);
+                this.markdown = '';
                 break;
         }
     }
@@ -76,7 +56,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
 
             let href = link.getAttribute('href');
             if (typeof href === 'string' && href.startsWith('#')) {
-                link.setAttribute('data-dialogue-action', 'jumpToPage');
+                link.setAttribute('data-dialogue-action', 'triggerServerSideAction');
                 link.setAttribute('data-dialogue-target', href.substring(1));
             }
         }

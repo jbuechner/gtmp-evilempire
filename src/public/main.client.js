@@ -126,25 +126,25 @@ const ClientEvents = {
         browser.raiseEventInBrowser('res:customizeChar', data);
     },
     'res:interactWithEntity': function __interactWithEntity_response(success, data) {
+        ClientEvents.entityContentResponse(success, data);
+    },
+    'res:triggerEntityAction': function __triggerEntityAction_response(success, data) {
+        ClientEvents.entityContentResponse(success, data);
+    },
+
+    'entityContentResponse': function __triggerEntityContentResponse(success, data) {
         data = deserializeFromDesignatedJson(data);
         if (!success) {
             data = {};
         } else {
             if (data) {
                 data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
-                if (data.Dialogue) {
-                    data.Dialogue = deserializeFromDesignatedJson(data.Dialogue);
+                if (data.Content) {
+                    data.Content = deserializeFromDesignatedJson(data.Content);
                 }
             }
         }
-        browser.raiseEventInBrowser('updateview', { what: 'content', value: { entityId: '' + data.EntityId, dialogue: data.Dialogue }});
-    },
-    'res:triggerEntityAction': function __triggerEntityAction_response(success, data) {
-        data = deserializeFromDesignatedJson(data);
-        if (data) {
-            data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
-        }
-        browser.raiseEventInBrowser('updateview', { what: 'entityAction', value: { entityId: '' + data.EntityId } });
+        browser.raiseEventInBrowser('updateview', { what: 'content', value: { entityId: '' + data.EntityId, content: data.Content }});
     }
 };
 

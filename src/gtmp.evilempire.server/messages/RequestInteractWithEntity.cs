@@ -48,98 +48,15 @@ namespace gtmp.evilempire.server.messages
             {
                 if (ped.Dialogue != null)
                 {
-                    var dialogueData = serialization.DecorateAsJson( SerializeDialogue(ped.Dialogue));
-                    var response = new RequestInteractWithEntityResponse { EntityId = entityId.Value, Dialogue = dialogueData };
-
+                    var response = new EntityContentResponse(serialization, entityId.Value, ped.Dialogue);
                     var responseData = serialization.SerializeAsDesignatedJson(response);
                     client.TriggerClientEvent(ClientEvents.RequestInteractWithEntityResponse, true, responseData);
                     return true;
                 }
             }
 
-
             client.TriggerClientEvent(ClientEvents.RequestInteractWithEntityResponse, false, null);
             return false;
-        }
-
-        static string SerializeDialogue(MapDialogue dialogue)
-        {
-            var builder = new StringBuilder();
-            using (var textWriter = new StringWriter(builder))
-            using (var writer = new JsonTextWriter(textWriter))
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName("__start");
-                writer.WriteValue(dialogue.Name);
-
-                SerializeDialoguePage(dialogue, writer, false);
-
-                foreach(var page in dialogue.Pages)
-                {
-                    SerializeDialoguePage(page, writer, true);
-                }
-                writer.WriteEndObject();
-                writer.Flush();
-            }
-            return builder.ToString();
-        }
-
-        static void SerializeDialoguePage(MapDialoguePage page, JsonTextWriter writer, bool writeNestedPages)
-        {
-            writer.WritePropertyName(page.Key);
-            writer.WriteStartObject();
-            if (!string.IsNullOrEmpty(page.Markdown))
-            {
-                writer.WritePropertyName("__markdown");
-                writer.WriteValue(page.Markdown);
-            }
-
-            bool hasServerSideActions = false;
-            List<string> clientSideActions = new List<string>();
-            //if (page.Actions != null)
-            //{
-            //    foreach(var set in page.Actions)
-            //    {
-            //        if (set == null)
-            //        {
-            //            continue;
-            //        }
-            //        foreach (var action in set.Actions)
-            //        {
-            //            foreach (var item in action.Sequence.Items)
-            //            {
-            //                if (item.ActionType.StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
-            //                {
-            //                    clientSideActions.Add(item.ActionType);
-            //                }
-            //                else
-            //                {
-            //                    hasServerSideActions = true;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-
-            writer.WritePropertyName("__hasServerSideActions");
-            writer.WriteValue(hasServerSideActions);
-            writer.WritePropertyName("__clientSideActions");
-            writer.WriteStartArray();
-            foreach(var clientSideAction in clientSideActions)
-            {
-                writer.WriteValue(clientSideAction);
-            }
-            writer.WriteEndArray();
-
-            if (writeNestedPages && page.Pages != null)
-            {
-                foreach(var nestedPage in page.Pages)
-                {
-                    SerializeDialoguePage(nestedPage, writer, writeNestedPages);
-                }
-            }
-
-            writer.WriteEndObject();
         }
     }
 }

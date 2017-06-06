@@ -47,9 +47,6 @@ namespace gtmp.evilempire.server.messages
                 return false;
             }
 
-            var response = new RequestTriggerEntityActionResponse { EntityId = entityId.Value };
-            var responseData = serialization.SerializeAsDesignatedJson(response);
-
             var client = session.Client;
             var ped = map.GetPedByRuntimeHandle(entityId.Value);
             if (ped != null && ped.Dialogue != null)
@@ -57,18 +54,32 @@ namespace gtmp.evilempire.server.messages
                 var dialoguePage = FindDialoguePage(ped.Dialogue, pageKey);
                 if (dialoguePage != null)
                 {
-                    foreach (var set in dialoguePage.Actions)
+                    if (dialoguePage.Actions == null || dialoguePage.Actions.Count < 1)
                     {
-                        var executionEngine = new ActionExecutionEngine(services, set);
-                        executionEngine.Run(session);
-                    }
-                    client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, true, responseData);
-                    return true;
-                }
-            }
 
-            client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, false, responseData);
-            return false;
+                    }
+                    else
+                    {
+                        foreach (var set in dialoguePage.Actions)
+                        {
+                            var executionEngine = new ActionExecutionEngine(services, set);
+                            executionEngine.Run(session);
+                        }
+                    }
+
+                    var response = new EntityContentResponse(serialization, entityId.Value, dialoguePage);
+                    var responseData = serialization.SerializeAsDesignatedJson(response);
+                    client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, true, responseData);
+                }
+                return true;
+            }
+            else
+            {
+                var response = new EntityContentResponse(entityId.Value, null);
+                var responseData = serialization.SerializeAsDesignatedJson(response);
+                client.TriggerClientEvent(ClientEvents.RequestTriggerEntityInteractionResponse, false, responseData);
+                return false;
+            }
         }
 
         static MapDialoguePage FindDialoguePage(MapDialogue dialogue, string pageKey)
