@@ -15,8 +15,8 @@ namespace gtmp.evilempire.services
 
         object InsertOrUpdate(object element);
 
-        int NextValueFor(string sequence);
-        long NextInt64ValueFor(string sequence);
+        int NextValueFor(string sequence, int seed = 0);
+        long NextInt64ValueFor(string sequence, long seed = 0);
         int? ValueFor(string sequence);
         long? Int64ValueFor(string sequence);
     }

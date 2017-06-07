@@ -60,14 +60,14 @@ namespace gtmp.evilempire.db
             return _dbe.InsertOrUpdate(element);
         }
 
-        public int NextValueFor(string sequence)
+        public int NextValueFor(string sequence, int seed = 0)
         {
-            return _dbe.NextValueFor(sequence);
+            return _dbe.NextValueFor(sequence, seed);
         }
 
-        public long NextInt64ValueFor(string sequence)
+        public long NextInt64ValueFor(string sequence, long seed = 0)
         {
-            return _dbe.NextInt64ValueFor(sequence);
+            return _dbe.NextInt64ValueFor(sequence, seed);
         }
 
         public int? ValueFor(string sequence)

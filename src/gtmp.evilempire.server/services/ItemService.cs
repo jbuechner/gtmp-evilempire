@@ -11,16 +11,13 @@ namespace gtmp.evilempire.server.services
 {
     class ItemService : IItemService
     {
-        IDbService db;
         IDictionary<int, ItemDescription> ItemDescriptions { get; } = new Dictionary<int, ItemDescription>();
 
         IDictionary<Tuple<Currency, double>, ItemDescription> CurrencyItems { get; } = new Dictionary<Tuple<Currency, double>, ItemDescription>();
 
-        public ItemService(Map map, IDbService db)
+        public ItemService(Map map)
         {
             InitializeFromMapItemDescriptions(map.ItemDescriptionMap.Values);
-
-            this.db = db;
         }
 
         public IEnumerable<Item> CreateMoney(Currency currency, int amount)
@@ -81,8 +78,7 @@ namespace gtmp.evilempire.server.services
 
         Item CreateSingleItem(int itemDescriptionId, int amount)
         {
-            var itemId = db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence);
-            var item = new Item { Id = itemId, ItemDescriptionId = itemDescriptionId, Amount = amount };
+            var item = new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId, Amount = amount };
             return item;
         }
 

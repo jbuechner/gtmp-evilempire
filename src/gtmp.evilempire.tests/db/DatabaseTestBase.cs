@@ -41,14 +41,14 @@ namespace gtmp.evilempire.tests.db
                 return _decorated.InsertOrUpdate(element);
             }
 
-            public int NextValueFor(string sequence)
+            public int NextValueFor(string sequence, int seed = 0)
             {
-                return _decorated.NextValueFor(sequence);
+                return _decorated.NextValueFor(sequence, seed);
             }
 
-            public long NextInt64ValueFor(string sequence)
+            public long NextInt64ValueFor(string sequence, long seed = 0)
             {
-                return _decorated.NextInt64ValueFor(sequence);
+                return _decorated.NextInt64ValueFor(sequence, seed);
             }
 
             public T Select<T, TKey>(TKey key)

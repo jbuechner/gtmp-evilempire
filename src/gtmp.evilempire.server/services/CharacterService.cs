@@ -195,6 +195,7 @@ namespace gtmp.evilempire.server.services
 
                         if (item.Amount > 0)
                         {
+                            item.Id = item.Id == long.MinValue ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence, int.MinValue + 1) : item.Id;
                             targetList.Add(item);
                         }
                     }

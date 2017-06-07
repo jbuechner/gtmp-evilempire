@@ -176,7 +176,7 @@ namespace gtmp.evilempire.db
             return bson["value"].AsInt64;
         }
 
-        public int NextValueFor(string sequence)
+        public int NextValueFor(string sequence, int seed = 0)
         {
             var collection = _db.GetCollection(string.Concat("__sequence_", sequence));
             using (var t = _db.BeginTrans())
@@ -184,10 +184,10 @@ namespace gtmp.evilempire.db
                 var bson = collection.FindOne(p => true);
                 if (bson == null)
                 {
-                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue(0) } });
+                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue(seed) } });
                     collection.Insert(bson);
                     t.Commit();
-                    return 0;
+                    return seed;
                 }
                 else
                 {
@@ -200,7 +200,7 @@ namespace gtmp.evilempire.db
             }
         }
 
-        public long NextInt64ValueFor(string sequence)
+        public long NextInt64ValueFor(string sequence, long seed = 0)
         {
             var collection = _db.GetCollection(string.Concat("__sequence64_", sequence));
             using (var t = _db.BeginTrans())
@@ -208,10 +208,10 @@ namespace gtmp.evilempire.db
                 var bson = collection.FindOne(p => true);
                 if (bson == null)
                 {
-                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue((long)0) } });
+                    bson = new BsonDocument(new Dictionary<string, BsonValue> { { "value", new BsonValue(seed) } });
                     collection.Insert(bson);
                     t.Commit();
-                    return 0;
+                    return seed;
                 }
                 else
                 {

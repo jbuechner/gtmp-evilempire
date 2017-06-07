@@ -91,7 +91,7 @@ namespace gtmp.evilempire.tests.db
         {
             using (IDbService dbService = DbServiceFactory())
             {
-                var sequence = "x";
+                var sequence = "x22";
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 var workerCount = 100;
@@ -117,6 +117,38 @@ namespace gtmp.evilempire.tests.db
                 });
 
                 Assert.AreEqual(hashSet.Count, workerCount * max);
+            }
+        }
+
+        [TestMethod]
+        public void CreateSequenceWithSeed()
+        {
+            using (var dbService = DbServiceFactory())
+            {
+                var seed = -15;
+                var sequence = "y";
+                var round = 100;
+                for (var i = 0; i < round; i++)
+                {
+                    var next = dbService.NextValueFor(sequence, seed);
+                    Assert.AreEqual(seed + i, next);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void CreateInt64SequenceWithSeed()
+        {
+            using (var dbService = DbServiceFactory())
+            {
+                var seed = long.MinValue + 1;
+                var sequence = "y";
+                var round = 400;
+                for (var i = 0; i < round; i++)
+                {
+                    var next = dbService.NextInt64ValueFor(sequence, seed);
+                    Assert.AreEqual(next, seed + i);
+                }
             }
         }
     }
