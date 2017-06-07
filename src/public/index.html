@@ -16,6 +16,7 @@
 	<script src="components/view-login.js"></script>
 	<script src="components/view-entityinteractionmenu.js"></script>
 	<script src="components/view-character-customization.js"></script>
+	<script src="components/view-inventory.js"></script>
 </head>
 <body>
 	<core-watermark></core-watermark>
@@ -35,6 +36,14 @@
         function addView(args) {
             args = deserializeFromDesignatedJson(args);
             console.log('addView', args);
+
+            if (args.allowOnlyOne) {
+                let elements = document.querySelectorAll(args.selector);
+                if (elements && elements.length > 0) {
+                    return;
+				}
+			}
+
             let el = document.createElement(args.selector);
             document.body.appendChild(el);
 

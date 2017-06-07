@@ -78,6 +78,136 @@ h1, h2, h3 {
 .hover-box-content::-webkit-scrollbar-thumb:vertical{height:24px;background-color:#f0f0f0;-webkit-border-radius:0;-webkit-border-bottom-right-radius:5px;-webkit-border-top-right-radius:5px;}
 .hover-box-content::-webkit-scrollbar-thumb:horizontal{width:24px;background-color:#f0f0f0;-webkit-border-radius:0;-webkit-border-bottom-right-radius:5px;-webkit-border-top-right-radius:5px;}
 
+.dialogue {
+    position: absolute;
+    background-color: #202020;
+    color: #fafafa;
+    border-radius: 5px;
+}
+
+.dialogue > .outer-header {
+    background-color: #101010;
+    padding: 10px 10px 0 10px;
+    border-radius: 5px 5px 0 0;
+}
+
+.dialogue > .outer-header > .header {
+    font-size: 18px;
+}
+
+.dialogue > .content {
+    margin: 0 10px 10px 10px;
+}
+
+.dialogue > .footer {
+    margin: 0;
+    padding: 5px;
+    font-size: 12px;
+    background-color: #202020;
+}
+
+.dialogue input {
+    text-align: right;
+    width: 50px;
+    font-size: 9px;
+    background-color: #303030;
+    border: 0;
+    color: #fafafa;
+    padding: 2px;
+    position: relative;
+    top: -2px;
+}
+
+.dialogue input:focus {
+    border: 0;
+    outline: 0;
+}
+
+.dialogue .button {
+    padding: 0;
+    margin: 0;
+    height: 1em;
+    font-size: 16px;
+    color: #fafafa;
+    background-color: transparent;
+    border: 0;
+}
+
+.dialogue .button:hover {
+    color: #b0b0b0;
+}
+
+.dialogue span.button {
+    font-size: 14px;
+}
+
+.dialogue input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.inventory.list {
+    width: 300px;
+    height: 400px;
+    max-height: 400px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.inventory.description-box {
+    color: #d0d0d0;
+    width: 200px;
+    font-size: 12px;
+}
+
+.inventory.description-box h1 {
+    color: #fafafa;
+    font-weight: 100;
+    font-size: 24px;
+    margin: 0 0 0.2em 0;
+}
+
+.inventory.description-box p {
+    text-align: justify;
+}
+
+.inventory.list::-webkit-scrollbar{ width: 6px; height: 6px;}
+.inventory.list::-webkit-scrollbar-button:start:decrement,.hover-box-content ::-webkit-scrollbar-button:end:increment{ display:block;height:0; background-color:transparent;}
+.inventory.list::-webkit-scrollbar-track-piece{background-color:#202020;-webkit-border-radius:4px;}
+.inventory.list::-webkit-scrollbar-thumb:vertical{height:18px;background-color:#fafafa;-webkit-border-radius:4px;}
+.inventory.list::-webkit-scrollbar-thumb:horizontal{width:18px;background-color:#fafafa;-webkit-border-radius:4px;}
+
+.inventory.list > .item {
+    padding: 5px 5px 5px 0;
+    border-radius: 5px;
+}
+
+.inventory.list > .item:hover {
+    cursor: pointer;
+    background-color: rgba(220, 220, 220, 0.1);
+}
+
+.inventory .item.selected {
+    background-color: rgba(220, 220, 220, 0.2);
+}
+
+.inventory .item.common {
+    color: #d0d0d0;
+}
+
+.inventory .item.trash {
+    color: #808080;
+}
+
+.inventory > .item.name {
+    padding: 0 0 0 5px;
+    font-size: 12px;
+}
+
+.inventory > .item.additional {
+    padding: 0 0 0 5px;
+    font-size: 9px;
+}
+
 .monospace {
     font-family: 'Cutive Mono', monospace;;
 }

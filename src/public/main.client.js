@@ -175,6 +175,9 @@ const BrowserEvents = {
     'triggerEntityAction': function __triggerEntityAction(entityId, action) {
         entityId = resolveNetHandleFromEntityId(entityId);
         sendToServer(ServerClientMessage.TriggerEntityAction, [entityId, action]);
+    },
+    'closeInventory': function __closeInventory() {
+        client.displayInventory = false;
     }
 };
 
@@ -242,8 +245,9 @@ class Browser {
         this._instance.call('raiseEvent', serializeToDesignatedJson(({ eventName, data })));
     }
 
-    addView(viewName, data) {
-        this._instance.call('addView', serializeToDesignatedJson({ selector: viewName, options: data }));
+    addView(viewName, data, allowOnlyOne) {
+        allowOnlyOne = allowOnlyOne || false;
+        this._instance.call('addView', serializeToDesignatedJson({ selector: viewName, options: data, allowOnlyOne }));
     }
 
     removeView(viewName) {
@@ -265,6 +269,7 @@ class Client {
         this._isInVehicle = false;
         this._cursor = false;
         this._cursorToggle = false;
+        this._displayInventory = false;
     }
 
     get cursor() {
@@ -301,6 +306,24 @@ class Client {
 
     get canDisplayUiTrackedElements() {
         return !this.isInVehicle || this.cursor || this.cursorToggle;
+    }
+
+    get displayInventory() {
+        return this._displayInventory;
+    }
+
+    set displayInventory(v) {
+        if (v !== this._displayInventory) {
+            if (v) {
+                if (!this.cursorToggle && !this.cursor) {
+                    this._displayInventory = v;
+                    browser.addView('view-inventory', {}, true);
+                }
+            } else {
+                this._displayInventory = v;
+                browser.removeView('view-inventory');
+            }
+        }
     }
 
     setCamera(x, y, z, rx, ry, rz) {
@@ -725,6 +748,7 @@ function browser_ready() {
     browser.raiseEventInBrowser('displayInfoChanged', displayInfo);
 
     inputs.addMapping(KEYS.CTRL, { onDown: () => client.cursorToggle = true, onUp: () => client.cursorToggle = false });
+    inputs.addMapping(KEYS.I, () => client.displayInventory = !client.displayInventory);
     inputs.addMapping(KEYS.F12, () => client.cursor = !client.cursor);
 }
 

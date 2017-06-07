@@ -9,26 +9,18 @@
 <body>
     <script>
         'use strict';
+        let test = testViewInventory;
+
         function testViewEntityInteractionMenu() {
             mockBackendCallResponse('interactWithEntity', function(entityId, action) {
-
                 let branchingDialogue = {
-                    __start: 'hello',
-                    hello: {
-                        __markdown: 'Hello, hello. You can either [buy](#buy) or [leave](#leave).'
-                    },
-                    buy: {
-                        __markdown: 'First class stuff, yo.'
-                    },
-                    leave: {
-                        __action: 'closeActiveEntityInteraction'
-                    }
+                    markdown: 'Hello, hello. You can either [buy](#buy) or [leave](#leave).'
                 };
 
 
                 let json = JSON.stringify({
                     eventName: 'updateview',
-                    data: { what: 'content', value: { entityId: entityId, dialogue: branchingDialogue } }
+                    data: { what: 'content', value: { entityId: entityId, content: branchingDialogue } }
                 });
                 raiseEvent('$json' + json);
             }, 340);
@@ -36,6 +28,10 @@
                 selector: 'view-entityinteractionmenu',
                 options: {entityId: 109, title: 'Test', pos: {x: 100, y: 200}, actions: [ 'speak' ]}
             });
+        }
+
+        function testViewInventory() {
+            addView({ selector: 'view-inventory', options: {} });
         }
 
         let mockedBackendCalls = new Map();
@@ -61,7 +57,7 @@
             };
 
             console.log('run test');
-            testViewEntityInteractionMenu();
+            test();
         }
 
         document.onreadystatechange = function() {
