@@ -52,6 +52,12 @@ namespace gtmp.evilempire.server.actions
             if (operandA.ResultType != operandB.ResultType)
             {
                 operandBConversion = MakeConversion(operandB.ResultType, operandA.ResultType);
+                if (operandB is Constant)
+                {
+                    var convertedValue = operandBConversion(operandB.ProvideValue(null));
+                    operandB = new Constant(convertedValue);
+                    operandBConversion = null;
+                }
             }
         }
 
