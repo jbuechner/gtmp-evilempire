@@ -6,7 +6,8 @@ const ServerClientMessage = {
     ConfirmCustomizeCharacter: 'req:customizeChar:ok',
     CancelCustomizeCharacter: 'req:customizeChar:cancel',
     InteractWithEntity: 'req:interactWithEntity',
-    TriggerEntityAction: 'req:triggerEntityAction'
+    TriggerEntityAction: 'req:triggerEntityAction',
+    RequestCharacterInventory: 'req:charInventory'
 };
 
 const UserGroups = {
@@ -131,6 +132,15 @@ const ClientEvents = {
     'res:triggerEntityAction': function __triggerEntityAction_response(success, data) {
         ClientEvents.entityContentResponse(success, data);
     },
+    'res:charInventory': function __characterInventory_response(success, data) {
+        data = deserializeFromDesignatedJson(data);
+        if (!success) {
+            data = data || {};
+            data.Items = data.Items || [];
+            data.Money = data.Money || [];
+        }
+        browser.raiseEventInBrowser('res:charInventory', data);
+    },
 
     'entityContentResponse': function __triggerEntityContentResponse(success, data) {
         data = deserializeFromDesignatedJson(data);
@@ -178,6 +188,9 @@ const BrowserEvents = {
     },
     'closeInventory': function __closeInventory() {
         client.displayInventory = false;
+    },
+    'requestCharacterInventory': function __requestCharacterInventory() {
+        sendToServer(ServerClientMessage.RequestCharacterInventory);
     }
 };
 

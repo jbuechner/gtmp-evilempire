@@ -20,5 +20,7 @@ namespace gtmp.evilempire.entities
 
         public Currency AssociatedCurrency { get; set; }
         public double Denomination { get; set; }
+
+        public string Description { get; set; }
     }
 }

@@ -146,15 +146,6 @@ namespace gtmp.evilempire.server.services
                 {
                     foreach (var item in items)
                     {
-                        if (item.Id < 0)
-                        {
-                            using (ConsoleColor.Yellow.Foreground())
-                            {
-                                Console.WriteLine($"[AddToCharacterInventory] The item {item.Id} does not has a valid Id value (must be selected from sequence before). Tried to add an item of item description id {item.ItemDescriptionId} to to character inventory with id {characterInventory.CharacterId}. Skipped.");
-                            }
-                            continue;
-                        }
-
                         var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
                         if (itemDescription == null)
                         {
@@ -195,7 +186,7 @@ namespace gtmp.evilempire.server.services
 
                         if (item.Amount > 0)
                         {
-                            item.Id = item.Id == long.MinValue ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence, int.MinValue + 1) : item.Id;
+                            item.Id = item.Id == long.MinValue ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence, long.MinValue + 1) : item.Id;
                             targetList.Add(item);
                         }
                     }

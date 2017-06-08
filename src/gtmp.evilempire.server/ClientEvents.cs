@@ -24,6 +24,8 @@ namespace gtmp.evilempire.server
         public static readonly string RequestInteractWithEntityResponse = "res:interactWithEntity";
         public static readonly string RequestTriggerEntityInteraction = "req:triggerEntityAction";
         public static readonly string RequestTriggerEntityInteractionResponse = "res:triggerEntityAction";
+        public static readonly string RequestCharacterInventory = "req:charInventory";
+        public static readonly string RequestCharacterInventoryResponse = "res:charInventory";
 
         public static readonly string MoneyChanged = "moneyChanged";
     }

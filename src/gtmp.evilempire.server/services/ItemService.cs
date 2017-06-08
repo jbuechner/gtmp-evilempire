@@ -76,9 +76,17 @@ namespace gtmp.evilempire.server.services
             return null;
         }
 
+        public IEnumerable<ItemDescription> GetItemDescriptions()
+        {
+            foreach(var itemDescription in ItemDescriptions)
+            {
+                yield return itemDescription.Value;
+            }
+        }
+
         Item CreateSingleItem(int itemDescriptionId, int amount)
         {
-            var item = new Item { Id = int.MinValue, ItemDescriptionId = itemDescriptionId, Amount = amount };
+            var item = new Item { Id = long.MinValue, ItemDescriptionId = itemDescriptionId, Amount = amount };
             return item;
         }
 

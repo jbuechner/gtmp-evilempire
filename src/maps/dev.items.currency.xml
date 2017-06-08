@@ -10,6 +10,7 @@
             <MaximumStack>1000</MaximumStack>
             <AssociatedCurrency>Dollar</AssociatedCurrency>
             <Denomination>1.0</Denomination>
+            <Description><![CDATA[A *one* dollar bill. Worth your time.]]></Description>
         </ItemDescription>
     </ItemDescriptions>
 </Map>

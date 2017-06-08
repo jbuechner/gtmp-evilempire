@@ -176,17 +176,17 @@ h1, h2, h3 {
 .inventory.list::-webkit-scrollbar-thumb:vertical{height:18px;background-color:#fafafa;-webkit-border-radius:4px;}
 .inventory.list::-webkit-scrollbar-thumb:horizontal{width:18px;background-color:#fafafa;-webkit-border-radius:4px;}
 
-.inventory.list > .item {
+.inventory.list .item {
     padding: 5px 5px 5px 0;
     border-radius: 5px;
 }
 
-.inventory.list > .item:hover {
+.inventory.list .item:hover {
     cursor: pointer;
     background-color: rgba(220, 220, 220, 0.1);
 }
 
-.inventory .item.selected {
+.inventory .item[data-selected=true] {
     background-color: rgba(220, 220, 220, 0.2);
 }
 
@@ -198,12 +198,12 @@ h1, h2, h3 {
     color: #808080;
 }
 
-.inventory > .item.name {
+.inventory .item-name {
     padding: 0 0 0 5px;
     font-size: 12px;
 }
 
-.inventory > .item.additional {
+.inventory .item-additional {
     padding: 0 0 0 5px;
     font-size: 9px;
 }

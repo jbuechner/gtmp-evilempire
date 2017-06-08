@@ -110,6 +110,10 @@
             triggerEntityAction(entityId, action) {
                 this.callBackend('triggerEntityAction', argumentsToArray(arguments));
 			}
+
+			requestCharacterInventory() {
+                this.callBackend('requestCharacterInventory');
+			}
         }
         window.app = new App();
         function argumentsToArray(args) {
@@ -117,6 +121,12 @@
         }
 
         document.addEventListener('displayInfoChanged', ev => window.displayInfo = ev.detail );
+        document.addEventListener('res:login', ev => {
+            window.itemDescriptions = new Map();
+			(ev.detail.ItemDescriptions || []).forEach(itemDescription => {
+				window.itemDescriptions.set(itemDescription.Id, itemDescription);
+			});
+		});
 
         resourceCall('browser_ready');
     </script>

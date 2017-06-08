@@ -361,6 +361,7 @@ namespace gtmp.evilempire.server.mapping
                 var maximumStack = itemDescriptionElement.Element("MaximumStack")?.Value.AsInt();
                 var associateCurrencyAsRawEnumValue = itemDescriptionElement.Element("AssociatedCurrency")?.Value;
                 var currencyDenomination = itemDescriptionElement.Element("Denomination")?.Value.AsDouble();
+                var description = itemDescriptionElement.Element("Description")?.Value;
 
                 Currency currency;
                 if (!Enum.TryParse<Currency>(associateCurrencyAsRawEnumValue, out currency))
@@ -382,6 +383,7 @@ namespace gtmp.evilempire.server.mapping
                 }
 
                 var itemDescription = new ItemDescription { Id = id.Value, Name = name, Volume = volume ?? 0, Weight = weight ?? 0, IsStackable = isStackable ?? false, MaximumStack = maximumStack ?? 1, AssociatedCurrency = currency, Denomination = currencyDenomination ?? 1 };
+                itemDescription.Description = description;
                 map.AddItemDescription(itemDescription);
             }
         }

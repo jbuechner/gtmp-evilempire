@@ -13,5 +13,7 @@ namespace gtmp.evilempire.services
         IEnumerable<Item> CreateItem(ItemDescription itemDescription, int amount);
         IEnumerable<Item> CreateItem(int itemDescriptionId, int amount);
         ItemDescription GetItemDescription(int itemDescriptionId);
+
+        IEnumerable<ItemDescription> GetItemDescriptions();
     }
 }

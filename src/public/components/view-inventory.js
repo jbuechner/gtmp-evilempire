@@ -10,6 +10,9 @@ Slim.tag('view-inventory', class extends Slim {
         this.app = window.app;
         this.isDragging = false;
         this.dragPoint = { x: 0, y:0 };
+        this.items = [];
+        this.money = [];
+        this.selectedItem = null;
 
         this.capturedOnDragStop = () => this.onDragStop();
         this.capturedOnDragMouseMove = (e) => this.onDragMouseMove(e);
@@ -21,15 +24,93 @@ Slim.tag('view-inventory', class extends Slim {
             document.addEventListener('mouseup', this.capturedOnDragStop);
             document.addEventListener('mousemove', this.capturedOnDragMouseMove);
         });
+        document.addEventListener('res:charInventory', e => {
+            this.items = e.detail.Items || [];
+            this.money = e.detail.Money || [];
+
+            let allItems = this.items.concat(this.money);
+            allItems.forEach(item => {
+                item.itemDescription = this.lookupItemDescription(item);
+                item.displayAmount = item.itemDescription.IsStackable ? item.Amount + 'x' : '';
+            });
+
+            this.allItems = allItems;
+            this.selectItem(this.allItems.length > 0 ? this.allItems[0] : null);
+        });
 
         if (ViewInventoryStorage.position !== null) {
             this.container.style.left = ViewInventoryStorage.position.left;
             this.container.style.top = ViewInventoryStorage.position.top;
         }
+
+        this.app.requestCharacterInventory();
     }
 
     close() {
         this.app.callBackend('closeInventory');
+    }
+
+    lookupItemDescription(item) {
+        return window.itemDescriptions.get(item.ItemDescriptionId) || { Id: -1, Name: 'n/a', Description: 'n/a', Weight: 0, Volume: 0 };
+    }
+
+    selectItem(item) {
+        this.selectedItem = item;
+        if (item && item.itemDescription) {
+            this.renderSelectedItemDescription(item.itemDescription.Description);
+        } else {
+            this.renderSelectedItemDescription('*No item selected*');
+        }
+        this.updateSelected();
+    }
+
+    renderSelectedItemDescription(markdown) {
+        let converter = new showdown.Converter();
+        let html = converter.makeHtml(markdown || '*Keine Beschreibung*');
+        this.itemDescriptionContent.innerHTML = html;
+        this.postProcessContentDom(this.itemDescriptionContent);
+    }
+
+    postProcessContentDom(root) {
+        let links = root.querySelectorAll('a');
+        for (let i = 0; i < links.length; i++) {
+            let link = links.item(i);
+            link.onclick = (e) => e.preventDefault();
+        }
+    }
+
+    updateSelected() {
+        let elements = this.querySelectorAll('[data-selected]');
+        for (let i = 0; i < elements.length; i++) {
+            elements.item(i).setAttribute('data-selected', 'false');
+        }
+
+        if (this.selectedItem) {
+            let selected = this.querySelectorAll('[data-item-id="' + this.selectedItem.Id + '"]');
+            for (let i = 0; i < selected.length; i++) {
+                selected.item(i).setAttribute('data-selected', 'true');
+            }
+        }
+    }
+
+    onSelectItem(ev) {
+        if (ev && ev.target) {
+            let item = null;
+
+            let el = ev.target;
+            let itemId = null;
+            do {
+                let itemIdValue = el.getAttribute('data-item-id');
+                if (typeof itemIdValue === 'string') {
+                    itemId = itemIdValue;
+                    break;
+                }
+                el = el.parentNode;
+            } while (el && el.getAttribute);
+
+            item = this.allItems.find(v => v.Id === itemId);
+            this.selectItem(item);
+        }
     }
 
     onDragStop() {
@@ -67,28 +148,24 @@ Slim.tag('view-inventory', class extends Slim {
         </div>
     </div>
     <div class="content" style="display:flex;">
-        <div class="inventory list" >
-            <div class="inventory item common">
-                <div class="item name">
-                    <span>1x</span>
-                    <span>Schlüssel</span>
+        <div class="inventory list">
+            <div class="inventory item common" slim-repeat="allItems" slim-repeat-as="item" data-item-id="[[item.Id]]" click="onSelectItem">
+                <div class="item-name">
+                    <span bind>[[item.displayAmount]]</span>
+                    <span bind>[[item.itemDescription.Name]]</span>
                 </div>
-                <div class="item additional monospace">0.0 kg, 0 Slots</div>
-            </div> 
-                   
-            <div class="inventory item trash selected">
-                <div class="item name">
-                    <span></span>
-                    <span>Flyer</span>
+                <div class="item-additional monospace">
+                    <span bind>[[item.itemDescription.Weight]]</span>
+                    <span>kg</span>
+                    <span>&nbsp;</span>
+                    <span bind>[[item.itemDescription.Volume]]</span>
+                    <span>Slots</span>
                 </div>
-                <div class="item additional monospace">0.0 kg, 0 Slots</div>
-            </div>     
+            </div>
         </div>
         <div class="inventory description-box">
-            <h1>Schlüssel</h1>
-            <p>
-                Ein einfacher Schlüssel nichts besonderes.            
-            </p>
+            <h1 bind>[[selectedItem.itemDescription.Name]]</h1>
+            <p slim-id="itemDescriptionContent"></p>            
         </div>
     </div>
     <div class="footer">

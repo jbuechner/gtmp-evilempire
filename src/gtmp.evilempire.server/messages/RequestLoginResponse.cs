@@ -12,5 +12,7 @@ namespace gtmp.evilempire.server.messages
         public ClientUser User { get; set; }
         public ClientCharacter Character { get; set; }
         public ClientCharacterCustomization CharacterCustomization { get; set; }
+
+        public IEnumerable<ClientItemDescription> ItemDescriptions { get; set; }
     }
 }

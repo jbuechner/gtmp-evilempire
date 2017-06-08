@@ -55,7 +55,7 @@ namespace gtmp.evilempire.server.actions
                 if (operandB is Constant)
                 {
                     var convertedValue = operandBConversion(operandB.ProvideValue(null));
-                    operandB = new Constant(convertedValue);
+                    OperandB = operandB = new Constant(convertedValue);
                     operandBConversion = null;
                 }
             }

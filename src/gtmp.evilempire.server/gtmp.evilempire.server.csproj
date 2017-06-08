@@ -104,6 +104,7 @@
     <Compile Include="messages\RequestCharacterCustomizationCancel.cs" />
     <Compile Include="messages\RequestCharacterCustomizationOkay.cs" />
     <Compile Include="messages\RequestCharacterCustomizationResponse.cs" />
+    <Compile Include="messages\RequestCharacterInventory.cs" />
     <Compile Include="messages\RequestInteractWithEntity.cs" />
     <Compile Include="messages\EntityContentResponse.cs" />
     <Compile Include="messages\RequestLoginHandler.cs" />
@@ -112,6 +113,9 @@
     <Compile Include="messages\transfer\ClientCharacter.cs" />
     <Compile Include="messages\transfer\ClientCharacterCustomization.cs" />
     <Compile Include="messages\transfer\ClientCharacterFaceCustomization.cs" />
+    <Compile Include="messages\transfer\ClientCharacterInventory.cs" />
+    <Compile Include="messages\transfer\ClientItem.cs" />
+    <Compile Include="messages\transfer\ClientItemDescription.cs" />
     <Compile Include="messages\transfer\ClientUser.cs" />
     <Compile Include="PlatformClient.cs" />
     <Compile Include="PlatformConversions.cs" />
