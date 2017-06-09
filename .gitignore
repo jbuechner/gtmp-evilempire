@@ -8,6 +8,7 @@ testresults
 
 *.suo
 *.user.xml
+*.csproj.user
 
 /dist
 /src/**/bin

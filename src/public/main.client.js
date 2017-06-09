@@ -591,27 +591,31 @@ function onUpdate() {
     if (updateCount++ > 30) {
         updateCount = 0;
 
-        let player = API.getLocalPlayer();
-        let playerPos = API.getEntityPosition(player);
-        let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
-        let raycast = API.createRaycast(playerPos, tar,  10 | 12, player);
-        if (raycast && raycast.didHitEntity) {
-            if (!API.isPed(raycast.hitEntity) || !raycast.hitEntity.IsHuman) {
-                addUiTrackedEntity(raycast.hitEntity);
-            }
-        }
-        if (client.isInVehicle) {
-
-            if (client.canDisplayUiTrackedElements) {
-                let vehicle = API.getPlayerVehicle(player);
-                if (vehicle) {
-                    addUiTrackedEntity(vehicle);
+        if (client.cursor || client.cursorToggle) {
+            let player = API.getLocalPlayer();
+            let playerPos = API.getEntityPosition(player);
+            let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
+            let raycast = API.createRaycast(playerPos, tar, 10 | 12, player);
+            if (raycast && raycast.didHitEntity) {
+                if (!API.isPed(raycast.hitEntity) || !raycast.hitEntity.IsHuman) {
+                    addUiTrackedEntity(raycast.hitEntity);
                 }
-            } else {
-                removeAllUiTrackedEntities();
             }
+            if (client.isInVehicle) {
+
+                if (client.canDisplayUiTrackedElements) {
+                    let vehicle = API.getPlayerVehicle(player);
+                    if (vehicle) {
+                        addUiTrackedEntity(vehicle);
+                    }
+                } else {
+                    removeAllUiTrackedEntities();
+                }
+            }
+            removeUiTrackedEntitiesThatAreOutOfRange();
+        } else {
+            removeAllUiTrackedEntities();
         }
-        removeUiTrackedEntitiesThatAreOutOfRange();
     }
     if (updateCount % 10 === 0) {
         updateUiTrackedEntities();
