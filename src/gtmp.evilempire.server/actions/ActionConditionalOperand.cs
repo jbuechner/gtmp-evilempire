@@ -1,5 +1,4 @@
-﻿using gtmp.evilempire.sessions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -27,7 +26,7 @@ namespace gtmp.evilempire.server.actions
                 resultType = value == null ? typeof(object) : value.GetType();
             }
 
-            public override object ProvideValue(ISession session)
+            public override object ProvideValue(ActionExecutionContext context)
             {
                 return value;
             }
@@ -37,7 +36,7 @@ namespace gtmp.evilempire.server.actions
         {
             string propertyName;
             Type resultType;
-            Func<ISession, object> getter;
+            Func<ActionExecutionContext, object> getter;
 
             public override Type ResultType
             {
@@ -55,10 +54,10 @@ namespace gtmp.evilempire.server.actions
                 var parts = this.propertyName.Split('.');
                 if (parts != null)
                 {
-                    var sessionParameter = Expression.Parameter(typeof(ISession));
+                    var inputParameter = Expression.Parameter(typeof(ActionExecutionContext));
 
-                    var current = typeof(ISession);
-                    ParameterExpression input = sessionParameter;
+                    var current = inputParameter.Type;
+                    ParameterExpression input = inputParameter;
                     var nullConstant = Expression.Constant(null);
                     var variables = new List<ParameterExpression>();
                     var expressions = new List<Expression>();
@@ -98,19 +97,19 @@ namespace gtmp.evilempire.server.actions
                     expressions.Add(Expression.Label(returnLabel, nullConstant));
 
                     var body = Expression.Block(variables, expressions);
-                    var lambda = Expression.Lambda<Func<ISession, object>>(body, sessionParameter);
+                    var lambda = Expression.Lambda<Func<ActionExecutionContext, object>>(body, inputParameter);
                     getter = lambda.Compile();
                 }
             }
 
-            public override object ProvideValue(ISession session)
+            public override object ProvideValue(ActionExecutionContext context)
             {
-                return getter(session);
+                return getter(context);
             }
         }
 
         public abstract Type ResultType { get; }
 
-        public abstract object ProvideValue(ISession session);
+        public abstract object ProvideValue(ActionExecutionContext context);
     }
 }

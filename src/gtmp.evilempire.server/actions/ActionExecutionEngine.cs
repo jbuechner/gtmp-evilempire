@@ -20,7 +20,7 @@ namespace gtmp.evilempire.server.actions
             this.set = set;
         }
 
-        public void Run(ISession session)
+        public void Run(ActionExecutionContext context)
         {
             IList<ActionSetItem> actionItems = null;
             if (set.Condition == null)
@@ -29,7 +29,7 @@ namespace gtmp.evilempire.server.actions
             }
             else
             {
-                var result = set.Condition.ProvideValue(session);
+                var result = set.Condition.ProvideValue(context);
                 if (result != null && (result.AsBool() ?? false))
                 {
                     actionItems = set.ThenActions;
@@ -55,7 +55,7 @@ namespace gtmp.evilempire.server.actions
                             }
                             continue;
                         }
-                        actionHandler.Handle(session);
+                        actionHandler.Handle(context);
                     }
                 }
             }

@@ -13,6 +13,6 @@ namespace gtmp.evilempire.server.actions
         {
         }
 
-        public abstract void Handle(ISession session);
+        public abstract void Handle(ActionExecutionContext context);
     }
 }

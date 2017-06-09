@@ -61,7 +61,7 @@ namespace gtmp.evilempire.server.actions
             }
         }
 
-        public override object ProvideValue(ISession session)
+        public override object ProvideValue(ActionExecutionContext context)
         {
             if (this == True)
             {
@@ -73,8 +73,8 @@ namespace gtmp.evilempire.server.actions
                 throw new InvalidOperationException("Unable to provide value for ActionConditionOperation because either Comparator, OperandA or OperandB is null.");
             }
 
-            var a = OperandA.ProvideValue(session);
-            var b = OperandB.ProvideValue(session);
+            var a = OperandA.ProvideValue(context);
+            var b = OperandB.ProvideValue(context);
 
             if (operandBConversion != null)
             {

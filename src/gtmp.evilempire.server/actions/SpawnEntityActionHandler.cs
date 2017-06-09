@@ -63,7 +63,7 @@ namespace gtmp.evilempire.server.actions
             }
         }
 
-        public override void Handle(ISession session)
+        public override void Handle(ActionExecutionContext context)
         {
             if (vehicle != null && platform.IsClearRange(vehicle.Position, 5, 5))
             {

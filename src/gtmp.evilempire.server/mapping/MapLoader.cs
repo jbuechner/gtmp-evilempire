@@ -363,8 +363,8 @@ namespace gtmp.evilempire.server.mapping
                 var currencyDenomination = itemDescriptionElement.Element("Denomination")?.Value.AsDouble();
                 var description = itemDescriptionElement.Element("Description")?.Value;
 
-                Currency currency;
-                if (!Enum.TryParse<Currency>(associateCurrencyAsRawEnumValue, out currency))
+                Currency currency = Currency.None;
+                if (!string.IsNullOrEmpty(associateCurrencyAsRawEnumValue) && !Enum.TryParse<Currency>(associateCurrencyAsRawEnumValue, out currency))
                 {
                     using (ConsoleColor.Yellow.Foreground())
                     {

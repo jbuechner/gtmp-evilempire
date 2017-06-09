@@ -71,11 +71,11 @@ namespace gtmp.evilempire.server.actions
             sessions = services.Get<ISessionService>();
         }
 
-        public override void Handle(ISession session)
+        public override void Handle(ActionExecutionContext context)
         {
-            if (session != null)
+            if (context.Session != null)
             {
-                sessions.SendMoneyChangedEvents(session, currencies);
+                sessions.SendMoneyChangedEvents(context.Session, currencies);
             }
         }
     }

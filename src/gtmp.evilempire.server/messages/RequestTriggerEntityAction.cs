@@ -52,6 +52,7 @@ namespace gtmp.evilempire.server.messages
             if (ped != null && ped.Dialogue != null)
             {
                 var dialoguePage = FindDialoguePage(ped.Dialogue, pageKey);
+                var executionContext = new ActionExecutionContext(session);
                 if (dialoguePage != null)
                 {
                     if (dialoguePage.Actions == null || dialoguePage.Actions.Count < 1)
@@ -63,7 +64,7 @@ namespace gtmp.evilempire.server.messages
                         foreach (var set in dialoguePage.Actions)
                         {
                             var executionEngine = new ActionExecutionEngine(services, set);
-                            executionEngine.Run(session);
+                            executionEngine.Run(executionContext);
                         }
                     }
 

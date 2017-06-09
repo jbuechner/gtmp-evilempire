@@ -29,9 +29,9 @@ namespace gtmp.evilempire.server.actions
             sender = intermediate.AsString() ?? string.Empty;
         }
 
-        public override void Handle(ISession session)
+        public override void Handle(ActionExecutionContext context)
         {
-            session.Client.SendNotification(sender, message);
+            context.Session?.Client?.SendNotification(sender, message);
         }
     }
 }

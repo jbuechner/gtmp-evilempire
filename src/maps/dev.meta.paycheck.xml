@@ -8,7 +8,7 @@
                     <If>
                         <Operation Comparator="Equals">
                             <OperandA>
-                                <Property>State</Property>
+                                <Property>Session.State</Property>
                             </OperandA>
                             <OperandB>
                                 <Constant>Freeroam</Constant>

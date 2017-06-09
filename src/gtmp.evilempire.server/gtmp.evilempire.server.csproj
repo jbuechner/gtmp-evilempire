@@ -65,6 +65,7 @@
     <Compile Include="actions\ActionConditionalComparator.cs" />
     <Compile Include="actions\ActionConditionalOperand.cs" />
     <Compile Include="actions\ActionConditionalOperation.cs" />
+    <Compile Include="actions\ActionExecutionContext.cs" />
     <Compile Include="actions\ActionExecutionEngine.cs" />
     <Compile Include="actions\ActionHandler.cs" />
     <Compile Include="actions\ActionHandlerAttribute.cs" />

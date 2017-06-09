@@ -62,8 +62,9 @@ namespace gtmp.evilempire.server.actions
             }
         }
 
-        public override void Handle(ISession session)
+        public override void Handle(ActionExecutionContext context)
         {
+            var session = context.Session;
             if (session != null && session.CharacterInventory != null && items != null)
             {
                 characters.AddToCharacterInventory(session.CharacterInventory.CharacterId, items);

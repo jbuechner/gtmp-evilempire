@@ -44,10 +44,11 @@ namespace gtmp.evilempire.server
                     sessions.ForEachSession(
                         session =>
                         {
+                            var executionContext = new ActionExecutionContext(session);
                             foreach(var action in key.Actions)
                             {
                                 var executionEngine = new ActionExecutionEngine(services, action);
-                                executionEngine.Run(session);
+                                executionEngine.Run(executionContext);
                             }
                             return !cancellationToken.IsCancellationRequested;
                         }
