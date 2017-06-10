@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ItemDescriptions>
+        <ItemDescription>
+            <Id>0x00005001</Id>
+            <Name>Vehicle Key</Name>
+            <Weight>0</Weight>
+            <Volume>0</Volume>
+            <IsStackable>false</IsStackable>
+            <MaximumStack>1</MaximumStack>
+            <Description><![CDATA[A key for a vehicle.]]></Description>
+        </ItemDescription>
+    </ItemDescriptions>
+</Map>

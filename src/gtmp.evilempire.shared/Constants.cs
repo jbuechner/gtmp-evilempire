@@ -12,6 +12,7 @@
             {
                 public static readonly string CharacterIdSequence = "characterId";
                 public static readonly string ItemIdSequence = "itemId";
+                public static readonly string VehicleIdSequence = "verhicleId";
             }
         }
     }

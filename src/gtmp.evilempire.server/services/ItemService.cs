@@ -33,10 +33,10 @@ namespace gtmp.evilempire.server.services
                 }
             }
 
-            return CreateItem(itemDescription, amount);
+            return CreateItem(itemDescription, amount, null, null);
         }
 
-        public IEnumerable<Item> CreateItem(int itemDescriptionId, int amount)
+        public IEnumerable<Item> CreateItem(int itemDescriptionId, int amount, string name, long? keyForEntityId)
         {
             ItemDescription itemDescription = GetItemDescription(itemDescriptionId);
             if (itemDescription == null)
@@ -47,10 +47,10 @@ namespace gtmp.evilempire.server.services
                     return null;
                 }
             }
-            return CreateItem(itemDescription, amount);
+            return CreateItem(itemDescription, amount, name, keyForEntityId);
         }
 
-        public IEnumerable<Item> CreateItem(ItemDescription itemDescription, int amount)
+        public IEnumerable<Item> CreateItem(ItemDescription itemDescription, int amount, string name, long? keyForEntityId)
         {
             if (itemDescription == null)
             {
@@ -60,7 +60,7 @@ namespace gtmp.evilempire.server.services
             while (amount > 0)
             {
                 var nextStack = amount > itemDescription.MaximumStack ? itemDescription.MaximumStack : amount;
-                var newItem = CreateSingleItem(itemDescription.Id, nextStack);
+                var newItem = CreateSingleItem(itemDescription.Id, nextStack, name, keyForEntityId);
                 yield return newItem;
                 amount -= nextStack;
             }
@@ -84,9 +84,9 @@ namespace gtmp.evilempire.server.services
             }
         }
 
-        Item CreateSingleItem(int itemDescriptionId, int amount)
+        Item CreateSingleItem(int itemDescriptionId, int amount, string name, long? keyForEntityId)
         {
-            var item = new Item { Id = long.MinValue, ItemDescriptionId = itemDescriptionId, Amount = amount };
+            var item = new Item { ItemDescriptionId = itemDescriptionId, Amount = amount, Name = name, KeyForEntityId = keyForEntityId };
             return item;
         }
 

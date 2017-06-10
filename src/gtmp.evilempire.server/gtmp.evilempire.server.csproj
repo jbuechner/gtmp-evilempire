@@ -130,6 +130,7 @@
     <Compile Include="services\ItemService.cs" />
     <Compile Include="services\SessionService.cs" />
     <Compile Include="services\SessionStateTransitionService.cs" />
+    <Compile Include="services\VehicleService.cs" />
     <Compile Include="sessions\Session.cs" />
     <Compile Include="sessions\SessionCharacterCustomizationStateHandler.cs" />
     <Compile Include="sessions\SessionReadyStateHandler.cs" />

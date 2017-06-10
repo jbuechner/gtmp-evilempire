@@ -4,7 +4,7 @@
         <StartingInventory>
             <Items>
                 <Item>
-                    <ItemDescriptionId>00001001</ItemDescriptionId>
+                    <ItemDescriptionId>0x00001001</ItemDescriptionId>
                     <Amount>350</Amount>
                 </Item>
             </Items>

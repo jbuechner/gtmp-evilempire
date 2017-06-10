@@ -14,7 +14,7 @@ namespace gtmp.evilempire.server.messages
     {
         ServiceContainer services;
         ISerializationService serialization;
-        Map map;
+        IPlatformService platform;
 
         public override string EventName
         {
@@ -34,7 +34,7 @@ namespace gtmp.evilempire.server.messages
 
             this.services = services;
             serialization = services.Get<ISerializationService>();
-            map = services.Get<Map>();
+            platform = services.Get<IPlatformService>();
         }
 
         public override bool ProcessClientMessage(ISession session, params object[] args)
@@ -48,7 +48,7 @@ namespace gtmp.evilempire.server.messages
             }
 
             var client = session.Client;
-            var ped = map.GetPedByRuntimeHandle(entityId.Value);
+            var ped = (MapPed)platform.GetPedByRuntimeHandle(entityId.Value);
             if (ped != null && ped.Dialogue != null)
             {
                 var dialoguePage = FindDialoguePage(ped.Dialogue, pageKey);

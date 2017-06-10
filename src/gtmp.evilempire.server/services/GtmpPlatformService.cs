@@ -4,6 +4,7 @@ using GrandTheftMultiplayer.Server.Elements;
 using GrandTheftMultiplayer.Shared;
 using gtmp.evilempire.entities;
 using gtmp.evilempire.entities.customization;
+using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.services;
 using gtmp.evilempire.sessions;
 using System;
@@ -16,8 +17,12 @@ namespace gtmp.evilempire.server.services
     class GtmpPlatformService : IPlatformService
     {
         readonly FreeroamCustomizationData freeroamCustomizationData;
+        readonly IDictionary<int, MapPed> RuntimeHandleToPedMap = new Dictionary<int, MapPed>();
+        readonly IDictionary<int, entities.Vehicle> RuntimeHandleToVehicleMap = new Dictionary<int, entities.Vehicle>();
+        readonly IDictionary<entities.Vehicle, GrandTheftMultiplayer.Server.Elements.Vehicle> VehicleMap = new Dictionary<entities.Vehicle, GrandTheftMultiplayer.Server.Elements.Vehicle>();
 
         API api;
+
 
         public GtmpPlatformService(API api)
         {
@@ -66,9 +71,45 @@ namespace gtmp.evilempire.server.services
             api.sendNativeToPlayer(nativeClient, 0x4CFFC65454C93A49, nativeClient.handle, characterCustomization.HairColorId, 0);
         }
 
+        public string GetVehicleModelName(entities.Vehicle vehicle)
+        {
+            return api.getVehicleDisplayName((VehicleHash)vehicle.Hash);
+        }
+
+        public void SpawnPed(object ped)
+        {
+            MapPed mapPed = ped as MapPed;
+            if (mapPed == null)
+            {
+                throw new ArgumentNullException(nameof(MapPed));
+            }
+
+            if (!Enum.IsDefined(typeof(PedHash), mapPed.Hash))
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine(Invariant($"Invalid ped hash {mapPed.Hash}. Skipped."));
+                }
+            }
+            var entity = api.createPed((PedHash)mapPed.Hash, mapPed.Position.ToVector3(), mapPed.Rotation);
+            RuntimeHandleToPedMap.Add(entity.handle.Value, mapPed);
+            entity.invincible = mapPed.IsInvincible;
+            entity.freezePosition = mapPed.IsPositionFrozen;
+            entity.collisionless = mapPed.IsCollisionless;
+
+            if (mapPed.Dialogue != null)
+            {
+                api.setEntitySyncedData(entity, "DIALOGUE:NAME", mapPed.Dialogue.Name);
+            }
+            if (mapPed.Title != null)
+            {
+                api.setEntitySyncedData(entity, "ENTITY:TITLE", mapPed.Title);
+            }
+            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
+        }
+
         public void SpawnVehicle(entities.Vehicle vehicle)
         {
-
             if (!Enum.IsDefined(typeof(VehicleHash), vehicle.Hash))
             {
                 using (ConsoleColor.Yellow.Foreground())
@@ -78,6 +119,8 @@ namespace gtmp.evilempire.server.services
             }
             var hash = (VehicleHash)vehicle.Hash;
             var entity = api.createVehicle(hash, vehicle.Position.ToVector3(), vehicle.Rotation.ToVector3(), vehicle.Color1, vehicle.Color2);
+            RuntimeHandleToVehicleMap.Add(entity.handle.Value, vehicle);
+            VehicleMap.Add(vehicle, entity);
 
             if (vehicle.NumberPlate != null)
             {
@@ -197,6 +240,45 @@ namespace gtmp.evilempire.server.services
             entity.bulletproofTyres = vehicle.HasBulletproofTyres;
             entity.invincible = vehicle.IsInvincible;
             entity.collisionless = vehicle.IsCollisionless;
+
+            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
+        }
+
+        public object GetPedByRuntimeHandle(int handle)
+        {
+            MapPed mapPed;
+            if (RuntimeHandleToPedMap.TryGetValue(handle, out mapPed))
+            {
+                return mapPed;
+            }
+
+            return null;
+        }
+
+        public entities.Vehicle GetVehicleByRuntimeHandle(int handle)
+        {
+            entities.Vehicle vehicle;
+            if (RuntimeHandleToVehicleMap.TryGetValue(handle, out vehicle))
+            {
+                return vehicle;
+            }
+            return null;
+        }
+
+        public void UpdateSpawnedVehicle(entities.Vehicle vehicle)
+        {
+            GrandTheftMultiplayer.Server.Elements.Vehicle entity;
+            if (!VehicleMap.TryGetValue(vehicle, out entity) || entity == null)
+            {
+                using (ConsoleColor.Yellow.Foreground())
+                {
+                    Console.WriteLine($"[UpdateSpawnedVehicle] There is no spawned vehicle for {vehicle.Id}.");
+                }
+                return;
+            }
+
+            entity.locked = vehicle.IsLocked;
+            entity.engineStatus = vehicle.IsEngineRunning;
         }
 
         public bool IsClearRange(Vector3f point, float range, float height)

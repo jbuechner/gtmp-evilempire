@@ -22,7 +22,7 @@
                                     <Message>You just received your regular allowance. Have fun.</Message>
                                 </Item>
                                 <Item Type="GiveItem">
-                                    <ItemDescriptionId>00001001</ItemDescriptionId>
+                                    <ItemDescriptionId>0x00001001</ItemDescriptionId>
                                     <Amount>10</Amount>
                                 </Item>
                                 <Item Type="SendMoneyChanged">

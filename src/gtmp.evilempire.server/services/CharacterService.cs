@@ -98,6 +98,26 @@ namespace gtmp.evilempire.server.services
             return characterInventory;
         }
 
+        public IEnumerable<Item> GetKeys(int characterId, Vehicle vehicle)
+        {
+            var characterInventory = GetCharacterInventoryById(characterId);
+            if (characterInventory == null)
+            {
+                yield break;
+            }
+            foreach(var item in characterInventory.Items)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+                if (item.KeyForEntityId.HasValue && item.KeyForEntityId.Value == vehicle.Id)
+                {
+                    yield return item;
+                }
+            }
+        }
+
         public double GetTotalAmountOfMoney(int characterId, Currency currency)
         {
             ConcurrentDictionary<Currency, double> money;
@@ -125,7 +145,7 @@ namespace gtmp.evilempire.server.services
         {
             foreach (var item in items)
             {
-                var newItems = this.items.CreateItem(item.ItemDescriptionId, item.Amount);
+                var newItems = this.items.CreateItem(item.ItemDescriptionId, item.Amount, item.Name, item.KeyForEntityId);
                 AddItemsToCharacterInventory(characterInventory, newItems);
             }
             db.Update<CharacterInventory>(characterInventory);
@@ -186,7 +206,7 @@ namespace gtmp.evilempire.server.services
 
                         if (item.Amount > 0)
                         {
-                            item.Id = item.Id == long.MinValue ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence, long.MinValue + 1) : item.Id;
+                            item.Id = item.Id == Item.ZeroId ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence) : item.Id;
                             targetList.Add(item);
                         }
                     }

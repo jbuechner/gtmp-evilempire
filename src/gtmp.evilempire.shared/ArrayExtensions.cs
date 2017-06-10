@@ -16,5 +16,17 @@ namespace gtmp.evilempire
             }
             return default(T);
         }
+
+        public static T[] Copy<T>(this T[] array)
+        {
+            if (array == null)
+            {
+                return null;
+            }
+
+            var r = new T[array.Length];
+            Array.Copy(array, r, r.Length);
+            return r;
+        }
     }
 }

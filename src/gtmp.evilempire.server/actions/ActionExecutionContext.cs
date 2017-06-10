@@ -10,6 +10,7 @@ namespace gtmp.evilempire.server.actions
     class ActionExecutionContext
     {
         public ISession Session { get; }
+        public IDictionary<string, object> KeyValues { get; } = new Dictionary<string, object>();
 
         public ActionExecutionContext(ISession session)
         {

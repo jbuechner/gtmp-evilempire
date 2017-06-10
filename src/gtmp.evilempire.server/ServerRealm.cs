@@ -103,6 +103,7 @@ namespace gtmp.evilempire.server
             services.Register<ICharacterService, CharacterService>();
             services.Register<ICommandService, CommandService>();
             services.Register<ISessionStateTransitionService, SessionStateTransitionService>();
+            services.Register<IVehicleService, VehicleService>();
 
             return services;
         }

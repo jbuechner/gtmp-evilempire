@@ -8,11 +8,15 @@ namespace gtmp.evilempire.entities
 {
     public class Vehicle
     {
-        public class Neon
+        public static readonly long ZeroId = long.MinValue;
+
+        public struct Neon
         {
             public int Index { get; set; }
             public bool IsTurnedOn { get; set; }
         }
+
+        public long Id { get; set; } = ZeroId;
 
         public string TemplateName { get; set; }
 
@@ -59,5 +63,61 @@ namespace gtmp.evilempire.entities
         public float? Health { get; set; }
         public int? Livery { get; set; }
         public int? PearlescentColor { get; set; }
+
+        public Vehicle()
+        {
+        }
+
+        public Vehicle(Vehicle other)
+        {
+            if (other == null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            TemplateName = other.TemplateName;
+            Hash = other.Hash;
+            Position = other.Position;
+            Rotation = other.Rotation;
+            Color1 = other.Color1;
+            Color2 = other.Color2;
+            IsInvincible = other.IsInvincible;
+            IsLocked = other.IsLocked;
+            IsCollisionless = other.IsCollisionless;
+            IsEngineRunning = other.IsEngineRunning;
+            HasBulletproofTyres = other.HasBulletproofTyres;
+            IsPositionFrozen = other.IsPositionFrozen;
+            NumberPlate = other.NumberPlate;
+            NumberPlateStyle = other.NumberPlateStyle;
+            IsSpecialLightEnabled = other.IsSpecialLightEnabled;
+            TrimColor = other.TrimColor;
+
+            BrokenWindows = other.BrokenWindows == null ? null : new List<int>(other.BrokenWindows).ToArray();
+            BrokenDoors = other.BrokenDoors == null ? null : new List<int>(other.BrokenDoors).ToArray();
+            PoppedTyres = other.PoppedTyres == null ? null : new List<int>(other.PoppedTyres).ToArray();
+            Neons = other.Neons == null ? null : new List<Neon>(other.Neons).ToArray();
+
+            EnginePowerMultiplier = other.EnginePowerMultiplier;
+            EngineTorqueMultiplier = other.EngineTorqueMultiplier;
+
+            CustomPrimaryColor = other.CustomPrimaryColor;
+            CustomSecondaryColor = other.CustomSecondaryColor;
+
+            ModColor1 = other.ModColor1;
+            ModColor2 = other.ModColor2;
+
+            NeonColor = other.NeonColor;
+            TyreSmokeColor = other.TyreSmokeColor;
+
+            WheelColor = other.WheelColor;
+            WheelType = other.WheelType;
+            WindowTint = other.WindowTint;
+
+            DashboardColor = other.DashboardColor;
+            Health = other.Health;
+
+            Livery = other.Livery;
+            PearlescentColor = other.PearlescentColor;
+        }
     }
 }

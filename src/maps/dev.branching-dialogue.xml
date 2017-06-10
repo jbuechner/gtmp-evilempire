@@ -45,6 +45,7 @@
             </Quaternion>
             <PrimaryColor>111</PrimaryColor>
             <SecondaryColor>0</SecondaryColor>
+            <IsLocked>true</IsLocked>
         </MapObject>
         <MapObject>
             <Type>Ped</Type>
@@ -97,6 +98,13 @@ Ignoriere mich bitte einfach.
                                     <Item Type="SpawnEntity">
                                         <Type>Vehicle</Type>
                                         <Template>DEV_VehicleSpawn</Template>
+                                        <AddToContext>__new_vehicle__</AddToContext>
+                                    </Item>
+                                    <Item Type="GiveItem">
+                                        <ItemDescriptionId>0x00005001</ItemDescriptionId>
+                                        <Amount>1</Amount>
+                                        <Name>Key for {{ENTITY::MODELNAME}}</Name>
+                                        <UseAsKeyFor>__new_vehicle__</UseAsKeyFor>
                                     </Item>
                                 </Sequence>
                             </Action>

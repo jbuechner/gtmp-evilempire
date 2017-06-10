@@ -189,7 +189,8 @@ namespace gtmp.evilempire.server.mapping
                 var sprite = element.Element("Sprite")?.Value?.AsInt() ?? 0;
                 var color = element.Element("Color")?.Value?.AsInt() ?? 0;
                 var name = element.Element("Name")?.Value;
-                var blip = new MapBlip(position, sprite, color, name);
+                var isShortRange = element.Element("IsShortRange")?.Value.AsBool() ?? false;
+                var blip = new MapBlip(position, sprite, color, isShortRange, name);
 
                 map.AddBlip(blip);
             }
@@ -353,7 +354,7 @@ namespace gtmp.evilempire.server.mapping
                     continue;
                 }
 
-                var id = itemDescriptionElement.Element("Id")?.Value?.AsIntFromHex();
+                var id = itemDescriptionElement.Element("Id")?.Value?.AsInt();
                 var name = itemDescriptionElement.Element("Name")?.Value;
                 var weight = itemDescriptionElement.Element("Weight")?.Value.AsDouble();
                 var volume = itemDescriptionElement.Element("Volume")?.Value.AsDouble();
@@ -447,7 +448,7 @@ namespace gtmp.evilempire.server.mapping
                     }
 
                     var itemDescriptionIdElement = item.Element("ItemDescriptionId");
-                    var itemDescriptionId = itemDescriptionIdElement?.Value?.AsIntFromHex();
+                    var itemDescriptionId = itemDescriptionIdElement?.Value?.AsInt();
                     var amount = item.Element("Amount")?.Value?.AsInt() ?? 1;
 
                     if (!itemDescriptionId.HasValue)
@@ -459,7 +460,7 @@ namespace gtmp.evilempire.server.mapping
                         continue;
                     }
 
-                    yield return new Item { Id = long.MinValue, ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
+                    yield return new Item { ItemDescriptionId = itemDescriptionId.Value, Amount = amount };
                 }
             }
         }

@@ -2,7 +2,7 @@
 <Map xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ItemDescriptions>
         <ItemDescription>
-            <Id>00001001</Id>
+            <Id>0x00001001</Id>
             <Name>One Dollar</Name>
             <Weight>0</Weight>
             <Volume>0</Volume>

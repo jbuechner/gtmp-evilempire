@@ -13,33 +13,6 @@ namespace gtmp.evilempire.server.mapping
     {
         static readonly int TimeBetweenObjectCreationInMs = 10;
 
-        public static Ped Load(MapPed ped, ServerAPI api)
-        {
-            if (!Enum.IsDefined(typeof(PedHash), ped.Hash))
-            {
-                using (ConsoleColor.Yellow.Foreground())
-                {
-                    Console.WriteLine(Invariant($"Invalid ped hash {ped.Hash}. Skipped."));
-                }
-            }
-            var entity = api.createPed((PedHash)ped.Hash, ped.Position.ToVector3(), ped.Rotation);
-            entity.invincible = ped.IsInvincible;
-            entity.freezePosition = ped.IsPositionFrozen;
-            entity.collisionless = ped.IsCollisionless;
-
-            if (ped.Dialogue != null)
-            {
-                api.setEntitySyncedData(entity, "DIALOGUE:NAME", ped.Dialogue.Name);
-            }
-            if (ped.Title != null)
-            {
-                api.setEntitySyncedData(entity, "ENTITY:TITLE", ped.Title);
-            }
-            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
-
-            return entity;
-        }
-
         public static GrandTheftMultiplayer.Server.Elements.Object Load(MapProp prop, ServerAPI api)
         {
             var entity = api.createObject(prop.Hash, prop.Position.ToVector3(), prop.Rotation.ToVector3());
@@ -64,8 +37,7 @@ namespace gtmp.evilempire.server.mapping
             }
             foreach(var ped in map.Peds)
             {
-                var entity = Load(ped, api);
-                map.MakeAssociation(entity.handle.Value, ped);
+                platform.SpawnPed(ped);
                 Thread.Sleep(TimeBetweenObjectCreationInMs);
             }
             foreach(var vehicle in map.Vehicles)
@@ -78,6 +50,7 @@ namespace gtmp.evilempire.server.mapping
                 var entity = api.createBlip(blip.Position.ToVector3());
                 entity.color = blip.Color;
                 entity.sprite = blip.Sprite;
+                entity.shortRange = blip.IsShortRange;
                 api.setBlipName(entity, blip.Name);
                 Thread.Sleep(TimeBetweenObjectCreationInMs);
             }

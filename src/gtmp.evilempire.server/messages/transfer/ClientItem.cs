@@ -16,6 +16,10 @@ namespace gtmp.evilempire.server.messages.transfer
         public int ItemDescriptionId => item.ItemDescriptionId;
         public int Amount => item.Amount;
 
+        public string Name => item.Name;
+
+        public string KeyForEntityId => item.KeyForEntityId.HasValue ? item.KeyForEntityId.Value.ToString(CultureInfo.InvariantCulture) : null;
+
         public ClientItem(Item item)
         {
             if (item == null)

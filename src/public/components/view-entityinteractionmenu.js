@@ -43,6 +43,8 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         this.resetIsLoading();
         this.isContentVisible = false;
         this.contentKey = null;
+        this.entityType = null;
+        this.entityKey = null;
     }
 
     onContentDomLinkClick(e) {
@@ -194,7 +196,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         e.target.classList.add('active');
 
         if (this.app) {
-            this.app.entityinteraction(this.entityId, action);
+            this.app.entityinteraction(this.entityId, this.entityType, this.entityKey, action);
         } else {
             console.warn('unable to dispatch entity interaction.');
         }
@@ -213,7 +215,8 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
             <div class="hover-box-title" slim-id="titleElement"></div>
             <div class="hover-box-icons">
                 <i slim-if="available.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak" data-action-requiresContent="true"></i>
-                <i slim-if="available.lock" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock" data-action-requiresContent="false"></i>
+                <i slim-if="available.lock" class="fa fa-lock hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock" data-action-requiresContent="false"></i>
+                <i slim-if="available.engine" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="engine" data-action-requiresContent="false"></i>
             </div>
         </div>
         <div slim-if="isContentVisible" class="hover-box-content">

@@ -11,7 +11,9 @@ namespace gtmp.evilempire.server.actions
     class SpawnEntityActionHandler : ActionHandler
     {
         IPlatformService platform;
+        IVehicleService vehicles;
         Vehicle vehicle; //todo: only vehicles atm
+        string contextKey;
 
         public SpawnEntityActionHandler(ServiceContainer services, IDictionary<string, object> arguments)
             : base(services, arguments)
@@ -26,6 +28,7 @@ namespace gtmp.evilempire.server.actions
             }
 
             platform = services.Get<IPlatformService>();
+            vehicles = services.Get<IVehicleService>();
             var map = services.Get<Map>();
 
             object intermediate;
@@ -44,6 +47,11 @@ namespace gtmp.evilempire.server.actions
                         {
                             Console.WriteLine($"[SpawnEntityActionHandler] There is no entity for the template {templateName} of type {entityType}.");
                         }
+                    }
+
+                    if (arguments.TryGetValue("AddToContext", out intermediate))
+                    {
+                        contextKey = intermediate.AsString();
                     }
                 }
                 else
@@ -67,7 +75,13 @@ namespace gtmp.evilempire.server.actions
         {
             if (vehicle != null && platform.IsClearRange(vehicle.Position, 5, 5))
             {
-                platform.SpawnVehicle(vehicle);
+                var copy = vehicles.CreateVehicle(vehicle);
+                platform.SpawnVehicle(copy);
+
+                if (!string.IsNullOrEmpty(contextKey))
+                {
+                    context.KeyValues[contextKey] = copy;
+                }
             }
         }
 

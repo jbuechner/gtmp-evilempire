@@ -10,8 +10,8 @@ namespace gtmp.evilempire.services
     public interface IItemService
     {
         IEnumerable<Item> CreateMoney(Currency currency, int amount);
-        IEnumerable<Item> CreateItem(ItemDescription itemDescription, int amount);
-        IEnumerable<Item> CreateItem(int itemDescriptionId, int amount);
+        IEnumerable<Item> CreateItem(ItemDescription itemDescription, int amount, string name, long? keyForEntityId);
+        IEnumerable<Item> CreateItem(int itemDescriptionId, int amount, string name, long? keyForEntityId);
         ItemDescription GetItemDescription(int itemDescriptionId);
 
         IEnumerable<ItemDescription> GetItemDescriptions();

@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConversionTests.cs" />
     <Compile Include="db\DatabaseTestBase.cs" />
     <Compile Include="db\CrudTests.cs" />
     <Compile Include="db\SequenceGeneratorTests.cs" />

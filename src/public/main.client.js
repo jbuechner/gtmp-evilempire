@@ -178,9 +178,9 @@ const BrowserEvents = {
     'cancelCharacterCustomization': function __cancelCustomizeChar() {
         sendToServer(ServerClientMessage.CancelCustomizeCharacter);
     },
-    'interactWithEntity': function __interactWithEntity(entityId, action) {
+    'interactWithEntity': function __interactWithEntity(entityId, entityType, entityKey, action) {
         entityId = resolveNetHandleFromEntityId(entityId);
-        sendToServer(ServerClientMessage.InteractWithEntity, [entityId, action]);
+        sendToServer(ServerClientMessage.InteractWithEntity, [entityId, entityType, entityKey, action]);
     },
     'triggerEntityAction': function __triggerEntityAction(entityId, action) {
         entityId = resolveNetHandleFromEntityId(entityId);
@@ -498,13 +498,16 @@ function addUiTrackedEntity(entity) {
     let positionAbove = position.Add(new Vector3(0, 0, 1));
     let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
 
-    let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
     if (client.canDisplayUiTrackedElements) { // check netHandle
+        let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
         uiTrackedEntities.set(entityId, {id: entityId, netHandle, entity, position, positionAbove});
 
         let options = getUiTrackingOptions(entity);
         if (options) {
+            let entityKey = API.getEntitySyncedData(entity, 'ENTITY:KEY');
+
             options.entityId = '' + entityId;
+            options.entityKey = entityKey;
             options.pos = {x: viewPoint.X, y: viewPoint.Y};
 
             browser.addView('view-entityinteractionmenu', options);
@@ -550,7 +553,7 @@ function getUiTrackingOptions(entity) {
         let model = API.returnNative('0x9F47B058362C84B5', 0, entity);
         let name = API.getVehicleDisplayName(model);
         let plate = API.getVehicleNumberPlate(entity);
-        return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock'] };
+        return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock', 'engine'], entityType: 'VEHICLE' };
     }
     if (API.isPed(entity)) {
         let actions = [];
@@ -560,7 +563,7 @@ function getUiTrackingOptions(entity) {
                 actions.push('speak');
             }
 
-            return {title: title, actions};
+            return {title: title, actions, entityType: 'PED'};
         }
     }
 

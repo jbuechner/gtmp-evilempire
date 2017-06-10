@@ -31,6 +31,7 @@ Slim.tag('view-inventory', class extends Slim {
             let allItems = this.items.concat(this.money);
             allItems.forEach(item => {
                 item.itemDescription = this.lookupItemDescription(item);
+                item.Name = item.Name || item.itemDescription.Name;
                 item.displayAmount = item.itemDescription.IsStackable ? item.Amount + 'x' : '';
             });
 
@@ -152,7 +153,7 @@ Slim.tag('view-inventory', class extends Slim {
             <div class="inventory item common" slim-repeat="allItems" slim-repeat-as="item" data-item-id="[[item.Id]]" click="onSelectItem">
                 <div class="item-name">
                     <span bind>[[item.displayAmount]]</span>
-                    <span bind>[[item.itemDescription.Name]]</span>
+                    <span bind>[[item.Name]]</span>
                 </div>
                 <div class="item-additional monospace">
                     <span bind>[[item.itemDescription.Weight]]</span>

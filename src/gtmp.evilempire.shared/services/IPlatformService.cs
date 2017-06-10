@@ -16,8 +16,17 @@ namespace gtmp.evilempire.services
 
         void UpdateCharacterCustomization(ISession session);
 
+        void SpawnPed(object ped); // todo: introduce ped poco/entity
+
         void SpawnVehicle(Vehicle vehicle);
 
+        string GetVehicleModelName(Vehicle vehicle);
+
         bool IsClearRange(Vector3f point, float range, float height);
+
+        object GetPedByRuntimeHandle(int handle); // todo: introduce ped poco/entity
+        Vehicle GetVehicleByRuntimeHandle(int handle);
+
+        void UpdateSpawnedVehicle(Vehicle vehicle);
     }
 }

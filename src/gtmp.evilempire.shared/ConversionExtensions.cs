@@ -24,11 +24,6 @@ namespace gtmp.evilempire
             return AsInt(value, NumberStyles.Integer);
         }
 
-        public static int? AsIntFromHex(this object value)
-        {
-            return AsInt(value, NumberStyles.HexNumber);
-        }
-
         public static int? AsInt(this object value, NumberStyles numberStyles)
         {
             if (value == null)
@@ -41,6 +36,12 @@ namespace gtmp.evilempire
             }
             string raw = (value as string) ?? value.ToString();
             int v;
+            if (raw != null && raw.IndexOf("0x", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                numberStyles = NumberStyles.HexNumber;
+                raw = raw.Substring(2);
+            }
+
             if (int.TryParse(raw, numberStyles, CultureInfo.InvariantCulture, out v))
             {
                 return v;

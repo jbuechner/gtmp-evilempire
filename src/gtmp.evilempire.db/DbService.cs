@@ -21,6 +21,7 @@ namespace gtmp.evilempire.db
         {
             _dbe = new DbEnvironment(databaseRootPath);
             AddKnownEntities();
+            AddSequences();
         }
 
         void AddKnownEntities()
@@ -29,6 +30,14 @@ namespace gtmp.evilempire.db
             _dbe.AddKnownEntity<Character, string>("character", ks => ks.AssociatedLogin, ks => ks.AssociatedLogin, false);
             _dbe.AddKnownEntity<CharacterCustomization, int>("characterCustomization", ks => ks.CharacterId, ks => ks.CharacterId, true);
             _dbe.AddKnownEntity<CharacterInventory, int>("characterInventory", ks => ks.CharacterId, ks => ks.CharacterId, true);
+            _dbe.AddKnownEntity<Vehicle, long>("vehicle", ks => ks.Id, ks => ks.Id, true);
+        }
+
+        void AddSequences()
+        {
+            _dbe.NextValueFor(Constants.Database.Sequences.CharacterIdSequence, 0);
+            _dbe.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence, Item.ZeroId + 1);
+            _dbe.NextInt64ValueFor(Constants.Database.Sequences.VehicleIdSequence, Item.ZeroId + 1);
         }
 
         public T Insert<T>(T element)
