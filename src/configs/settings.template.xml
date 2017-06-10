@@ -14,5 +14,5 @@
   <resource src="gtmp-server" />
   <announce_lan>true</announce_lan>
   <upnp>false</upnp>
-  <fqdn></fqdn>
+  <fqdn>game.evilempirelife.de</fqdn>
 </config>
