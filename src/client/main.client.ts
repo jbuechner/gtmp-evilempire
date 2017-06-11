@@ -92,7 +92,7 @@ const ClientEvents = {
         }
 
         if (data) {
-            data.EntityId = resolveEntityIdFromNetHandle(data.EntityId);
+            data.EntityId = uitracking.resolveEntityIdFromNetHandle(data.EntityId);
             if (data.Content) {
                 data.Content = deserializeFromDesignatedJson(data.Content);
             }
@@ -121,11 +121,11 @@ const BrowserEvents = {
         sendToServer(ServerClientMessage.CancelCustomizeCharacter);
     },
     'interactWithEntity': function __interactWithEntity(entityId, entityType, entityKey, action) {
-        entityId = resolveNetHandleFromEntityId(entityId);
+        entityId = uitracking.resolveNetHandleFromEntityId(entityId);
         sendToServer(ServerClientMessage.InteractWithEntity, [entityId, entityType, entityKey, action]);
     },
     'triggerEntityAction': function __triggerEntityAction(entityId, action) {
-        entityId = resolveNetHandleFromEntityId(entityId);
+        entityId = uitracking.resolveNetHandleFromEntityId(entityId);
         sendToServer(ServerClientMessage.TriggerEntityAction, [entityId, action]);
     },
     'closeInventory': function __closeInventory() {
@@ -176,152 +176,18 @@ function onServerEventTrigger(eventName, argsArray) {
 }
 
 let updateCount = 0;
-let testRange = 3;
-let uiTrackedEntities = new Map();
-function addUiTrackedEntity(entity) {
-    let entityId = entity.Value;
-    if (uiTrackedEntities.has(entityId)) {
-        return;
-    }
-
-    let position = API.getEntityPosition(entity);
-    let positionAbove = position.Add(new Vector3(0, 0, 1));
-    let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
-
-    if (client.canDisplayUiTrackedElements) { // check netHandle
-        let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
-        uiTrackedEntities.set(entityId, {id: entityId, netHandle, entity, position, positionAbove});
-
-        let options: any = getUiTrackingOptions(entity);
-        if (options) {
-            let entityKey = API.getEntitySyncedData(entity, 'ENTITY:KEY');
-
-            options.entityId = '' + entityId;
-            options.entityKey = entityKey;
-            options.pos = {x: viewPoint.X, y: viewPoint.Y};
-
-            browser.addView('view-entityinteractionmenu', options);
-        }
-    }
-}
-function updateUiTrackedEntities() {
-    uiTrackedEntities.forEach(value => {
-        value.position = API.getEntityPosition(value.entity);
-        value.positionAbove = value.position.Add(new Vector3(0, 0, 1));
-
-        let viewPoint = API.worldToScreenMaintainRatio(value.positionAbove);
-        browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { entityId: '' + value.id, x: viewPoint.X, y: viewPoint.Y} });
-    });
-}
-function removeAllUiTrackedEntities(predicate) {
-    if (uiTrackedEntities.size < 1) {
-        return;
-    }
-
-    predicate = predicate || ((value, key) => true);
-    let removable = [];
-    uiTrackedEntities.forEach((value, key) => {
-        if (predicate(value, key)) {
-            removable.push(key);
-            browser.removeView('view-entityinteractionmenu[data-entityId="' + value.id + '"]');
-        }
-    });
-    removable.forEach(key => {
-        uiTrackedEntities.delete(key);
-    });
-}
-function removeUiTrackedEntitiesThatAreOutOfRange() {
-    let player = API.getLocalPlayer();
-    let playerPosition = API.getEntityPosition(player);
-    removeAllUiTrackedEntities((value, key) => {
-        let distance = (Vector3 as any).Distance(playerPosition, value.position);
-        return distance > testRange;
-    });
-}
-function getUiTrackingOptions(entity) {
-    if (API.isVehicle(entity)) {
-        let model = API.returnNative('0x9F47B058362C84B5', 0, entity);
-        let name = API.getVehicleDisplayName(model);
-        let plate = API.getVehicleNumberPlate(entity);
-        return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock', 'engine'], entityType: 'VEHICLE' };
-    }
-    if (API.isPed(entity)) {
-        let actions = [];
-        let title = API.getEntitySyncedData(entity, 'ENTITY:TITLE');
-        if (title && typeof title === 'string') {
-            if (API.hasEntitySyncedData(entity, 'DIALOGUE:NAME')) {
-                actions.push('speak');
-            }
-
-            return {title: title, actions, entityType: 'PED'};
-        }
-    }
-
-    return null;
-}
-function resolveNetHandleFromEntityId(entityId) {
-    if (entityId) {
-        entityId = Number.parseInt(entityId);
-        let uiTrackedEntity = uiTrackedEntities.get(entityId);
-        if (uiTrackedEntity && uiTrackedEntity.netHandle) {
-            return uiTrackedEntity.netHandle;
-        }
-    }
-    return entityId;
-}
-function resolveEntityIdFromNetHandle(entityId) {
-    if (entityId) {
-        for (let [key, value] of uiTrackedEntities) {
-            if (value.netHandle && value.netHandle === entityId) {
-                return key;
-            }
-        }
-    }
-    return entityId;
-}
-
 function onUpdate() {
-    if (updateCount++ > 30) {
-        updateCount = 0;
-
-        if (client.cursor || client.cursorToggle) {
-            let player = API.getLocalPlayer();
-            let playerPos = API.getEntityPosition(player);
-            let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
-            let raycast = API.createRaycast(playerPos, tar, 10 | 12, player);
-            if (raycast && raycast.didHitEntity) {
-                if (!API.isPed(raycast.hitEntity) || !(raycast.hitEntity as any).IsHuman) {
-                    addUiTrackedEntity(raycast.hitEntity);
-                }
-            }
-            if (client.isInVehicle) {
-
-                if (client.canDisplayUiTrackedElements) {
-                    let vehicle = API.getPlayerVehicle(player);
-                    if (vehicle) {
-                        addUiTrackedEntity(vehicle);
-                    }
-                } else {
-                    removeAllUiTrackedEntities(null);
-                }
-            }
-            removeUiTrackedEntitiesThatAreOutOfRange();
-        } else {
-            removeAllUiTrackedEntities(null);
-        }
-    }
-    if (updateCount % 10 === 0) {
-        updateUiTrackedEntities();
-    }
+     if (updateCount++ > 10) {
+         uitracking.updateTrackedElements();
+         updateCount = 0;
+         uitracking.removeEntitiesOutOfPlayerRange();
+     }
 }
 
 function onPlayerEnterVehicle(localPlayerHandle) {
     let player = API.getLocalPlayer();
     if ((player as any).value === localPlayerHandle.value) {
         client.isInVehicle = true;
-        if (!client.canDisplayUiTrackedElements) {
-            removeAllUiTrackedEntities(null);
-        }
     }
 }
 
@@ -419,6 +285,7 @@ let displayInfo = { minimap: { margin: { left: 0, bottom: 0 }, width: 0, height:
 let browser = null;
 let client: Client = null;
 let inputs: InputController = null;
+let uitracking: UiTracking = null;
 let isReadyToProcessServerEventTriggers = false;
 let onServerEventTriggerSubscription = null;
 let onResourceStartSubscription = API.onResourceStart.connect(() => {
@@ -439,6 +306,7 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     displayInfo.minimap.width = res.Width / 7.11;
     displayInfo.minimap.height = res.Height / 5.71;
 
+    uitracking = new UiTracking();
     client = new Client();
     inputs = new InputController();
     Browser.create().then(newBrowser => {
@@ -457,9 +325,18 @@ function browser_ready() {
 
     browser.raiseEventInBrowser('displayInfoChanged', displayInfo);
 
-    inputs.addMapping(KEY.CTRL, { onDown: () => client.cursorToggle = true, onUp: () => client.cursorToggle = false });
+    inputs.addMapping(KEY.CTRL, { onDown: () => {
+        client.cursorToggle = true;
+        uitracking.update(client.canDisplayUiTrackedElements);
+    }, onUp: () => {
+        client.cursorToggle = false;
+        uitracking.update(false);
+    }});
     inputs.addMapping(KEY.I, () => client.displayInventory = !client.displayInventory);
-    inputs.addMapping(KEY.F12, () => client.cursor = !client.cursor);
+    inputs.addMapping(KEY.F12, () => {
+        client.cursor = !client.cursor;
+        uitracking.update(client.canDisplayUiTrackedElements);
+    });
 }
 
 function browser_backend(args) {
