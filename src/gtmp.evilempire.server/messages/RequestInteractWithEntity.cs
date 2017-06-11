@@ -129,7 +129,7 @@ namespace gtmp.evilempire.server.messages
 
         bool HasRequiredKey(ISession session, Vehicle vehicle)
         {
-            return characters.GetKeys(session.CharacterInventory.CharacterId, vehicle).Any();
+            return characters.GetKeys(session.Character.Id, vehicle).Any();
         }
     }
 }

@@ -38,19 +38,16 @@ namespace gtmp.evilempire.server.messages
         {
             var client = session?.Client;
 
-            if (session.CharacterInventory != null)
-            {
-                var inventory = db.Select<CharacterInventory, int>(session.CharacterInventory.CharacterId);
+            var inventory = db.Select<CharacterInventory, int>(session.Character.Id);
 
-                if (client != null && inventory != null)
-                {
-                    var response = new ClientCharacterInventory(inventory);
-                    var data = serialization.SerializeAsDesignatedJson(response);
-                    client.TriggerClientEvent(ClientEvents.RequestCharacterInventoryResponse, true, data);
-                    return true;
-                }
-                client.TriggerClientEvent(ClientEvents.RequestCharacterInventoryResponse, false);
+            if (client != null && inventory != null)
+            {
+                var response = new ClientCharacterInventory(inventory);
+                var data = serialization.SerializeAsDesignatedJson(response);
+                client.TriggerClientEvent(ClientEvents.RequestCharacterInventoryResponse, true, data);
+                return true;
             }
+            client.TriggerClientEvent(ClientEvents.RequestCharacterInventoryResponse, false);
             return false;
         }
     }

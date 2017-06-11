@@ -80,7 +80,7 @@ namespace gtmp.evilempire.server.actions
         public override void Handle(ActionExecutionContext context)
         {
             var session = context.Session;
-            if (session != null && session.CharacterInventory != null && items != null)
+            if (session != null && items != null)
             {
                 var length = items.Length;
                 var newItems = new Item[length];
@@ -120,7 +120,7 @@ namespace gtmp.evilempire.server.actions
                     }
                 }
 
-                characters.AddToCharacterInventory(session.CharacterInventory.CharacterId, newItems);
+                characters.AddToCharacterInventory(session.Character.Id, newItems);
             }
         }
 

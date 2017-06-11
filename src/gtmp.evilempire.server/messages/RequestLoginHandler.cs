@@ -70,7 +70,6 @@ namespace gtmp.evilempire.server.messages
                 {
                     characterInventory = characters.CreateDefaultCharacterInventory(character.Id);
                 }
-                session.CharacterInventory = characterInventory;
                 sessions.SendMoneyChangedEvents(session);
 
                 platform.UpdateCharacterCustomization(session);
