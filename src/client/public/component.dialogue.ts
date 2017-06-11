@@ -1,5 +1,10 @@
 'use strict';
 class BranchingDialoguePage {
+    pages: any;
+    markdown: any;
+    hasServerSideActions: any;
+    clientSideActions: any;
+
     constructor(options) {
         this.pages = new Map();
         this.markdown = options.__markdown;

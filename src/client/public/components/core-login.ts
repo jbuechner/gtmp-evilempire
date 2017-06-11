@@ -1,11 +1,16 @@
 Slim.tag('core-login', class extends Slim {
+    app: any;
+    username: any;
+    password: any;
+    message: any;
+
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = window.app;
+        this.app = (window as any).app;
         let self = this;
-        document.addEventListener('res:login', (ev) => {
+        document.addEventListener('res:login', (ev: any) => {
             if (ev.detail.success) {
                 self.message = "Login successful";
             }

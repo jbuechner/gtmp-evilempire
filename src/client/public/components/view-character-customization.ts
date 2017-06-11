@@ -2,6 +2,13 @@ Slim.tag('view-character-customization', class extends Slim {
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
+    app: any;
+    customization: any;
+    current: any;
+    shapeMixInput: any;
+    skinMixInput: any;
+    message: any;
+
     addIndexBasedSelection(methodStem, indexPropertyName, getItems, getCurrent, compareWithCurrentPredicate, makeDisplayName, makeChange) {
         this[indexPropertyName] = 0;
         try { this[indexPropertyName] = getCurrent() } catch(ex) { console.warn(ex) }
@@ -41,7 +48,7 @@ Slim.tag('view-character-customization', class extends Slim {
     }
 
     onBeforeCreated() {
-        this.app = window.app;
+        this.app = (window as any).app;
         let self = this;
 
         this.addIndexBasedSelection('model', 'selectedModelIndex',
@@ -107,7 +114,7 @@ Slim.tag('view-character-customization', class extends Slim {
         );
 
 
-        document.addEventListener('res:customizeChar', (ev) => {
+        document.addEventListener('res:customizeChar', (ev: any) => {
             if (ev.detail.success) {
                 self.message = "Change received";
                 console.log(ev.detail);
@@ -151,14 +158,14 @@ Slim.tag('view-character-customization', class extends Slim {
 
     shapeMixChanged(e) {
         e.preventDefault();
-        self.message = 'Contacting server to change data ...';
+        this.message = 'Contacting server to change data ...';
         this.app.customizeCharacter('face::shapeMix', this.shapeMixInput.value);
 
     }
 
     skinMixChanged(e) {
         e.preventDefault();
-        self.message = 'Contacting server to change data ...';
+        this.message = 'Contacting server to change data ...';
         this.app.customizeCharacter('face::skinMix', this.skinMixInput.value);
     }
 

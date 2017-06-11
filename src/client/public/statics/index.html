@@ -9,14 +9,15 @@
     <script src="libs/slim.js"></script>
 	<script src="libs/sha512.js"></script>
 	<script src="libs/showdown.min.js"></script>
-	<script src="component.dialogue.js"></script>
-	<script src="components/core-watermark.js"></script>
-	<script src="components/core-login.js"></script>
-	<script src="components/view-status.js"></script>
-	<script src="components/view-login.js"></script>
-	<script src="components/view-entityinteractionmenu.js"></script>
-	<script src="components/view-character-customization.js"></script>
-	<script src="components/view-inventory.js"></script>
+	<script src="main.js"></script>
+	<!--<script src="component.dialogue.js"></script>-->
+	<!--<script src="components/core-watermark.js"></script>-->
+	<!--<script src="components/core-login.js"></script>-->
+	<!--<script src="components/view-status.js"></script>-->
+	<!--<script src="components/view-login.js"></script>-->
+	<!--<script src="components/view-entityinteractionmenu.js"></script>-->
+	<!--<script src="components/view-character-customization.js"></script>-->
+	<!--<script src="components/view-inventory.js"></script>-->
 </head>
 <body>
 	<core-watermark></core-watermark>
@@ -73,10 +74,6 @@
             args = deserializeFromDesignatedJson(args);
             document.dispatchEvent(new CustomEvent(args.eventName, { detail: args.data }));
         }
-
-        const Currencies = {
-            Dollar: 1
-		};
 
         class App {
             login(username, password) {

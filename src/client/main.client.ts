@@ -1,3 +1,4 @@
+///<reference path="tsd/index.d.ts"/>
 'use strict';
 
 const ServerClientMessage = {
@@ -220,6 +221,8 @@ function argumentsToArray(args) {
 
 
 class Browser {
+    _instance: any;
+
     constructor() {
         const res = API.getScreenResolution();
 
@@ -237,7 +240,7 @@ class Browser {
                         resolve();
                     }
                 } catch (ex) {
-                    module.debugOut(ex);
+                    debugOut(ex);
                     subscription.disconnect();
                 }
             };
@@ -278,6 +281,11 @@ class Browser {
 }
 
 class Client {
+    _isInVehicle: any;
+    _cursor: any;
+    _cursorToggle: any;
+    _displayInventory: any;
+
     constructor() {
         this._isInVehicle = false;
         this._cursor = false;
@@ -398,6 +406,9 @@ class Client {
 }
 
 class InputController {
+    _pressed: any;
+    _mappings: any;
+
     constructor() {
         this._pressed = new Map();
         this._mappings = [];
@@ -502,7 +513,7 @@ function addUiTrackedEntity(entity) {
         let netHandle = API.getEntitySyncedData(entity, 'ENTITY:NET');
         uiTrackedEntities.set(entityId, {id: entityId, netHandle, entity, position, positionAbove});
 
-        let options = getUiTrackingOptions(entity);
+        let options: any = getUiTrackingOptions(entity);
         if (options) {
             let entityKey = API.getEntitySyncedData(entity, 'ENTITY:KEY');
 
@@ -544,7 +555,7 @@ function removeUiTrackedEntitiesThatAreOutOfRange() {
     let player = API.getLocalPlayer();
     let playerPosition = API.getEntityPosition(player);
     removeAllUiTrackedEntities((value, key) => {
-        let distance = Vector3.Distance(playerPosition, value.position);
+        let distance = (Vector3 as any).Distance(playerPosition, value.position);
         return distance > testRange;
     });
 }
@@ -600,7 +611,7 @@ function onUpdate() {
             let tar = API.getOffsetInWorldCoords(player, new Vector3(0, testRange, 0));
             let raycast = API.createRaycast(playerPos, tar, 10 | 12, player);
             if (raycast && raycast.didHitEntity) {
-                if (!API.isPed(raycast.hitEntity) || !raycast.hitEntity.IsHuman) {
+                if (!API.isPed(raycast.hitEntity) || !(raycast.hitEntity as any).IsHuman) {
                     addUiTrackedEntity(raycast.hitEntity);
                 }
             }
@@ -612,12 +623,12 @@ function onUpdate() {
                         addUiTrackedEntity(vehicle);
                     }
                 } else {
-                    removeAllUiTrackedEntities();
+                    removeAllUiTrackedEntities(null);
                 }
             }
             removeUiTrackedEntitiesThatAreOutOfRange();
         } else {
-            removeAllUiTrackedEntities();
+            removeAllUiTrackedEntities(null);
         }
     }
     if (updateCount % 10 === 0) {
@@ -627,17 +638,17 @@ function onUpdate() {
 
 function onPlayerEnterVehicle(localPlayerHandle) {
     let player = API.getLocalPlayer();
-    if (player.value === localPlayerHandle.value) {
+    if ((player as any).value === localPlayerHandle.value) {
         client.isInVehicle = true;
         if (!client.canDisplayUiTrackedElements) {
-            removeAllUiTrackedEntities();
+            removeAllUiTrackedEntities(null);
         }
     }
 }
 
 function onPlayerExitVehicle(localPlayerHandle) {
     let player = API.getLocalPlayer();
-    if (player.value === localPlayerHandle.value) {
+    if ((player as any) === localPlayerHandle.value) {
         client.isInVehicle = false;
     }
 }
@@ -699,7 +710,7 @@ function processServerEventTriggers() {
     }
 }
 
-function sendToServer(eventName, args) {
+function sendToServer(eventName, args = null) {
     args = serializeToDesignatedJson(args);
     API.triggerServerEvent(eventName, args);
 }

@@ -1,18 +1,30 @@
 Slim.tag('view-status', class extends Slim {
+    app: any;
+    coordinateX: any;
+    coordinateY: any;
+    coordinateZ: any;
+    rotationX: any;
+    rotationY: any;
+    rotationZ: any;
+    currencyFormatter: any;
+    cash: any;
+    displayCoordinates: any;
+    cashDisplay: any;
+
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = window.app;
+        this.app = (window as any).app;
         let self = this;
 
-        document.addEventListener('moneyChanged', ev => {
+        document.addEventListener('moneyChanged', (ev: any) => {
             if (ev.detail.currency === Currencies.Dollar) {
                 this.cash =  ev.detail.amount;
             }
         });
 
-        document.addEventListener('updateview', (ev) => {
+        document.addEventListener('updateview', (ev: any) => {
             switch(ev.detail.what) {
                 case 'coordinates':
                     let v = ev.detail.value;
@@ -34,8 +46,9 @@ Slim.tag('view-status', class extends Slim {
         this.coordinateX = this.coordinateY = this.coordinateZ = 0;
         this.rotationX = this.rotationY = this.rotationZ = 0;
 
-        this.cashDisplay.style.left = (window.displayInfo.minimap.margin.left * 2 + window.displayInfo.minimap.width) + 'px';
-        this.cashDisplay.style.bottom = (window.displayInfo.minimap.margin.bottom) + 'px';
+        let displayInfo = (window as any).displayInfo;
+        this.cashDisplay.style.left = (displayInfo.minimap.margin.left * 2 + displayInfo.minimap.width) + 'px';
+        this.cashDisplay.style.bottom = (displayInfo.minimap.margin.bottom) + 'px';
     }
 
     asCurrency(v) {

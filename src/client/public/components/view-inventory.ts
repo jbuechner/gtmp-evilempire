@@ -3,11 +3,24 @@ const ViewInventoryStorage = {
 };
 
 Slim.tag('view-inventory', class extends Slim {
+    app: any;
+    isDragging: any;
+    dragPoint: any;
+    items: any;
+    money: any;
+    selectedItem: any;
+    capturedOnDragStop: any;
+    capturedOnDragMouseMove: any;
+    allItems: any;
+    header: any;
+    container: any;
+    itemDescriptionContent: any;
+
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = window.app;
+        this.app = (window as any).app;
         this.isDragging = false;
         this.dragPoint = { x: 0, y:0 };
         this.items = [];
@@ -24,7 +37,7 @@ Slim.tag('view-inventory', class extends Slim {
             document.addEventListener('mouseup', this.capturedOnDragStop);
             document.addEventListener('mousemove', this.capturedOnDragMouseMove);
         });
-        document.addEventListener('res:charInventory', e => {
+        document.addEventListener('res:charInventory', (e: any) => {
             this.items = e.detail.Items || [];
             this.money = e.detail.Money || [];
 
@@ -52,7 +65,7 @@ Slim.tag('view-inventory', class extends Slim {
     }
 
     lookupItemDescription(item) {
-        return window.itemDescriptions.get(item.ItemDescriptionId) || { Id: -1, Name: 'n/a', Description: 'n/a', Weight: 0, Volume: 0 };
+        return (window as any).itemDescriptions.get(item.ItemDescriptionId) || { Id: -1, Name: 'n/a', Description: 'n/a', Weight: 0, Volume: 0 };
     }
 
     selectItem(item) {
@@ -87,7 +100,8 @@ Slim.tag('view-inventory', class extends Slim {
         }
 
         if (this.selectedItem) {
-            let selected = this.querySelectorAll('[data-item-id="' + this.selectedItem.Id + '"]');
+            let selector: string = '[data-item-id="' + this.selectedItem.Id + '"]';
+            let selected = this.querySelectorAll(selector);
             for (let i = 0; i < selected.length; i++) {
                 selected.item(i).setAttribute('data-selected', 'true');
             }

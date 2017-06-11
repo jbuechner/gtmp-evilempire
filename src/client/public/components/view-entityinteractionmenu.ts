@@ -8,12 +8,28 @@ KnownClientSideActions.set('CLOSEACTIVEENTITYINTERACTION', function __closeActiv
 });
 
 Slim.tag('view-entityinteractionmenu', class extends Slim {
+    app: any;
+    _entityId: any;
+    _pos: any;
+    _actions: any;
+    _dialogue: any;
+    isContentVisible: any;
+    contentKey: any;
+    entityType: any;
+    content: any;
+    entityKey: any;
+    container: any;
+    titleElement: any;
+    available: any;
+    isLoading: any;
+    loadingText: any;
+
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = window.app;
-        document.addEventListener('updateview', (ev) => {
+        this.app = (window as any).app;
+        document.addEventListener('updateview', (ev: any) => {
             if (ev.detail.value.entityId && ev.detail.value.entityId === this.entityId) {
                 switch (ev.detail.what) {
                     case 'entitytargetpos':
