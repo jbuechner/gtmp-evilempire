@@ -12,14 +12,17 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.FormattableString;
 
+using PlatformVehicle = GrandTheftMultiplayer.Server.Elements.Vehicle;
+using ManagedVehicle = gtmp.evilempire.entities.Vehicle;
+
 namespace gtmp.evilempire.server.services
 {
     class GtmpPlatformService : IPlatformService
     {
         readonly FreeroamCustomizationData freeroamCustomizationData;
         readonly IDictionary<int, MapPed> RuntimeHandleToPedMap = new Dictionary<int, MapPed>();
-        readonly IDictionary<int, entities.Vehicle> RuntimeHandleToVehicleMap = new Dictionary<int, entities.Vehicle>();
-        readonly IDictionary<entities.Vehicle, GrandTheftMultiplayer.Server.Elements.Vehicle> VehicleMap = new Dictionary<entities.Vehicle, GrandTheftMultiplayer.Server.Elements.Vehicle>();
+        readonly IDictionary<int, ManagedVehicle> RuntimeHandleToVehicleMap = new Dictionary<int, ManagedVehicle>();
+        readonly IDictionary<ManagedVehicle, PlatformVehicle> VehicleMap = new Dictionary<ManagedVehicle, PlatformVehicle>();
 
         API api;
 
@@ -71,7 +74,7 @@ namespace gtmp.evilempire.server.services
             api.sendNativeToPlayer(nativeClient, 0x4CFFC65454C93A49, nativeClient.handle, characterCustomization.HairColorId, 0);
         }
 
-        public string GetVehicleModelName(entities.Vehicle vehicle)
+        public string GetVehicleModelName(ManagedVehicle vehicle)
         {
             return api.getVehicleDisplayName((VehicleHash)vehicle.Hash);
         }
@@ -108,7 +111,7 @@ namespace gtmp.evilempire.server.services
             api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
         }
 
-        public void SpawnVehicle(entities.Vehicle vehicle)
+        public void SpawnVehicle(ManagedVehicle vehicle)
         {
             if (!Enum.IsDefined(typeof(VehicleHash), vehicle.Hash))
             {
@@ -255,9 +258,9 @@ namespace gtmp.evilempire.server.services
             return null;
         }
 
-        public entities.Vehicle GetVehicleByRuntimeHandle(int handle)
+        public ManagedVehicle GetVehicleByRuntimeHandle(int handle)
         {
-            entities.Vehicle vehicle;
+            ManagedVehicle vehicle;
             if (RuntimeHandleToVehicleMap.TryGetValue(handle, out vehicle))
             {
                 return vehicle;
@@ -265,9 +268,9 @@ namespace gtmp.evilempire.server.services
             return null;
         }
 
-        public void UpdateSpawnedVehicle(entities.Vehicle vehicle)
+        public void UpdateSpawnedVehicle(ManagedVehicle vehicle)
         {
-            GrandTheftMultiplayer.Server.Elements.Vehicle entity;
+            PlatformVehicle entity;
             if (!VehicleMap.TryGetValue(vehicle, out entity) || entity == null)
             {
                 using (ConsoleColor.Yellow.Foreground())
@@ -296,6 +299,19 @@ namespace gtmp.evilempire.server.services
                 }
             }
             return true;
+        }
+
+        public bool IsInVehicle(ISession session, ManagedVehicle vehicle)
+        {
+            PlatformVehicle native;
+
+            var nativeClient = session?.Client?.PlatformObject as Client;
+
+            if (nativeClient != null && VehicleMap.TryGetValue(vehicle, out native) && native != null)
+            {
+                return nativeClient.isInVehicle && nativeClient.vehicle == native;
+            }
+            return false;
         }
 
         static FreeroamCustomizationData CreateFreeroamCustomizationData()

@@ -28,5 +28,7 @@ namespace gtmp.evilempire.services
         Vehicle GetVehicleByRuntimeHandle(int handle);
 
         void UpdateSpawnedVehicle(Vehicle vehicle);
+
+        bool IsInVehicle(ISession session, Vehicle vehicle);
     }
 }

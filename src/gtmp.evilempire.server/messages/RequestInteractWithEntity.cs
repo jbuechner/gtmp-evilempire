@@ -112,9 +112,16 @@ namespace gtmp.evilempire.server.messages
                     case "ENGINE":
                         if (HasRequiredKey(session, vehicle))
                         {
-                            vehicle.IsEngineRunning = !vehicle.IsEngineRunning;
-                            platform.UpdateSpawnedVehicle(vehicle);
-                            session.Client.SendNotification(null, vehicle.IsEngineRunning ? "The engine is now running." : "The engine is now off.");
+                            if (platform.IsInVehicle(session, vehicle))
+                            {
+                                vehicle.IsEngineRunning = !vehicle.IsEngineRunning;
+                                platform.UpdateSpawnedVehicle(vehicle);
+                                session.Client.SendNotification(null, vehicle.IsEngineRunning ? "The engine is now running." : "The engine is now off.");
+                            }
+                            else
+                            {
+                                session.Client.SendNotification(null, "You are not inside the car.");
+                            }
                         }
                         else
                         {
