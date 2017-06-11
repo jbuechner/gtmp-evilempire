@@ -112,7 +112,7 @@ $gulp.task('rebuild', function(cb) {
 });
 
 $gulp.task('build', function(cb) {
-    $runseq('extract-server', 'delete-resources', ['cs', 'ts'], 'copy', 'build-resources-meta', 'dist', cb);
+    $runseq(['extract-server', 'cs', 'ts', 'copy-client-static', 'copy-settings', 'copy-dbt', 'copy-maps'], 'copy-cs', 'build-resources-meta', 'dist', cb);
 });
 
 $gulp.task('build-cs', function(cb) {
@@ -121,8 +121,8 @@ $gulp.task('build-cs', function(cb) {
 
 $gulp.task('build-ts', ['ts']);
 
-$gulp.task('copy', function(cb) {
-    $runseq('copy-cs', ['copy-client-static', 'copy-settings', 'copy-dbt', 'copy-maps'], cb);
+$gulp.task('build-resources', function(cb) {
+    $runseq('delete-resources', ['build-ts', 'copy-client-static' ], 'build-resources-meta', cb);
 });
 
 $gulp.task('clean', ['cs-clean'], function() {
