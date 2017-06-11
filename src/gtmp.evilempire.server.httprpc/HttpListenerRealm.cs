@@ -1,5 +1,5 @@
-﻿using gtmp.evilempire.httprpc.routes;
-using gtmp.evilempire.server;
+﻿using gtmp.evilempire.server;
+using gtmp.evilempire.server.httprpc.routes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace gtmp.evilempire.httprpc
+namespace gtmp.evilempire.server.httprpc
 {
     class HttpListenerRealm : IDisposable
     {

@@ -15,4 +15,8 @@
   <announce_lan>true</announce_lan>
   <upnp>false</upnp>
   <fqdn>game.evilempirelife.de</fqdn>
+  <httprpc>
+    <address>localhost</address>
+    <port>61022</port>
+  </httprpc>
 </config>

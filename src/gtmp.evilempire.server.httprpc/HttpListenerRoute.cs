@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace gtmp.evilempire.httprpc
+namespace gtmp.evilempire.server.httprpc
 {
     abstract class HttpListenerRoute
     {

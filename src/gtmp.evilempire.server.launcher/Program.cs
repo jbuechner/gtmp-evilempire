@@ -101,6 +101,15 @@ namespace gtmp.evilempire.server.launcher
             };
 
             ExecuteWithConsoleOutput("Starting GTMP server instance ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
+
+            processStartInfo = new ProcessStartInfo
+            {
+                FileName = Constants.HttpRpcServerExecutable,
+                WorkingDirectory = Environment.CurrentDirectory,
+                Arguments = string.Join(" ", args)
+            };
+
+            ExecuteWithConsoleOutput("Starting GTMP HTTP RPC server ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -170,7 +179,7 @@ namespace gtmp.evilempire.server.launcher
             using (var db = new DbService(evilempire.Constants.Database.DatabasePath))
             {
                 var dbt = new DbTemplate(evilempire.Constants.Database.DatabaseTemplatePath);
-                foreach(var template in dbt.Templates)
+                foreach (var template in dbt.Templates)
                 {
                     if (!ExecuteWithConsoleOutput(Invariant($"Populate db environment using template {template} ... "), WrapWithFailReason(() => DbTemplate.PopulateByTemplate(template, db), "failed")))
                     {

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>gtmp.evilempire.httprpc</RootNamespace>
-    <AssemblyName>gtmp.evilempire.httprpc</AssemblyName>
+    <RootNamespace>gtmp.evilempire.server.httprpc</RootNamespace>
+    <AssemblyName>gtmp.evilempire.server.httprpc</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -55,11 +55,12 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="CommandLineSettings.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="HttpListenerRealm.cs" />
     <Compile Include="HttpListenerRoute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="routes\ApiStatusRoute.cs" />
+    <Compile Include="XmlSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

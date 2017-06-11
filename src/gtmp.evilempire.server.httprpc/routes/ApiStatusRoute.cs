@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace gtmp.evilempire.httprpc.routes
+namespace gtmp.evilempire.server.httprpc.routes
 {
     class ApiStatusRoute : HttpListenerRoute
     {
@@ -23,7 +23,7 @@ namespace gtmp.evilempire.httprpc.routes
 
         public override void Handle(HttpListenerContext context)
         {
-            context.Response.ContentType = "text/json; charset=utf-8";
+            context.Response.ContentType = "application/json; charset=utf-8";
             context.Response.ContentEncoding = Encoding.UTF8;
 
             var settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };

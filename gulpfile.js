@@ -33,7 +33,7 @@ const project = {
             },
             csharp: {
                 sln: './src/gtmp.evilempire.sln',
-                binaries: [ './src/gtmp.evilempire.db/bin/debug/*', './src/gtmp.evilempire.server/bin/debug/*', './src/gtmp.evilempire.server.launcher/bin/debug/*', './src/gtmp.evilempire.shared/bin/debug/*' ]
+                binaries: [ './src/gtmp.evilempire.db/bin/debug/*', './src/gtmp.evilempire.server/bin/debug/*', './src/gtmp.evilempire.server.launcher/bin/debug/*', './src/gtmp.evilempire.shared/bin/debug/*', './src/gtmp.evilempire.server.httprpc/bin/debug/*' ]
             },
             dbt: './src/db/templates/*',
             maps: './src/maps/*'

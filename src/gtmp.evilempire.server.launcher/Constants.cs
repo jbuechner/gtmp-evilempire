@@ -13,6 +13,7 @@ namespace gtmp.evilempire.server.launcher
         public const string SettingsTransformationFile = "settings.xsl";
         public const string SettingFile = "settings.xml";
         public const string ServerExecutable = "GrandTheftMultiplayer.Server.exe";
+        public const string HttpRpcServerExecutable = "gtmp.evilempire.server.httprpc.exe";
 
         internal static class ExitCodes
         {

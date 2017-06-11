@@ -4,24 +4,53 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace gtmp.evilempire.ipc
 {
     public class IpcClient : IDisposable
     {
+        readonly object syncRoot = new object();
+
         MemoryMappedFile file;
         MemoryMappedViewAccessor statusView;
 
         public IpcClient()
         {
-            file = MemoryMappedFile.OpenExisting(Constants.MemoryMappedFiles.Status, MemoryMappedFileRights.Read, HandleInheritability.None);
+        }
 
-            statusView = file.CreateViewAccessor(1024, 512, MemoryMappedFileAccess.Read);
+        bool OpenMemoryMappedFile()
+        {
+            lock(syncRoot)
+            {
+                if (file == null)
+                {
+                    try
+                    {
+                        file = MemoryMappedFile.OpenExisting(Constants.MemoryMappedFiles.Status, MemoryMappedFileRights.Read, HandleInheritability.None);
+                        statusView = file.CreateViewAccessor(1024, 512, MemoryMappedFileAccess.Read);
+                        return true;
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public ServerStatus ReadStatus()
         {
+            if (!OpenMemoryMappedFile())
+            {
+                return new ServerStatus { Version = "n/a", MaximumNumbersOfPlayers = -1, CurrentNumberOfPlayers = -1 };
+            }
+
             var lengthOfVersionString = statusView.ReadByte(0);
             byte[] versionStringBytes = new byte[lengthOfVersionString];
             for (var i = 0; i < lengthOfVersionString; i++)
