@@ -53,11 +53,10 @@ const $__tasks = {
                 if (f.isDirectory()) {
                     return cb(null, null);
                 }
-                if (f.path.endsWith('.client.js') ||
-                    f.path.endsWith('.js') && f.path.match(/[/\\]libs[/\\]client[/\\]/)) {
-                    this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
-                } else {
+                if (f.path.indexOf('/src/client/public/') >= 0 || f.path.indexOf('\\src\\client\\public') >= 0) {
                     this.contents += '<file src="' + f.relative + '" />\n';
+                } else {
+                    this.contents += '<script src="' + f.relative + '" type="client" lang="javascript" />\n';
                 }
                 cb(null, null);
             },
