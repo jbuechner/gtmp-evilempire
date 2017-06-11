@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using gtmp.evilempire.ipc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.IO;
 using System.Net;
@@ -8,11 +9,11 @@ namespace gtmp.evilempire.httprpc.routes
 {
     class ApiStatusRoute : HttpListenerRoute
     {
-        class Response
+        readonly IpcClient ipcClient;
+
+        public ApiStatusRoute()
         {
-            public string Version = "1.0";
-            public int MaximumNumbersOfPlayers = 0;
-            public int CurrentNumberOfPlayers = 0;
+            ipcClient = new IpcClient();
         }
 
         public override bool Matches(HttpListenerContext context)
@@ -27,7 +28,7 @@ namespace gtmp.evilempire.httprpc.routes
 
             var settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
             var serializer = JsonSerializer.Create(settings);
-            var response = new Response();
+            var response = ipcClient.ReadStatus();
             using (var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8))
             {
                 serializer.Serialize(writer, response);

@@ -2,6 +2,7 @@
 using GrandTheftMultiplayer.Server.Elements;
 using gtmp.evilempire.db;
 using gtmp.evilempire.entities;
+using gtmp.evilempire.ipc;
 using gtmp.evilempire.server.commands;
 using gtmp.evilempire.server.mapping;
 using gtmp.evilempire.server.messages;
@@ -33,6 +34,7 @@ namespace gtmp.evilempire.server
         ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransition;
         ICommandService commands;
+        IpcServer ipc;
 
         readonly ServerTimerRealm timers;
         readonly IDictionary<string, MessageHandlerBase> clientMessageHandlers;
@@ -45,6 +47,8 @@ namespace gtmp.evilempire.server
             }
 
             this.api = api;
+            ipc = new IpcServer();
+            UpdateServerStatus();
 
             services = CreateServiceContainer();
             services.Register<IPlatformService>(platform = new GtmpPlatformService(api));
@@ -88,6 +92,9 @@ namespace gtmp.evilempire.server
 
             services?.Dispose();
             services = null;
+
+            ipc?.Dispose();
+            ipc = null;
         }
 
         static ServiceContainer CreateServiceContainer()
@@ -148,6 +155,7 @@ namespace gtmp.evilempire.server
 
             var session = sessions.CreateSession(managedClient);
             sessionStateTransition.Transit(session, SessionState.Connected);
+            UpdateServerStatus();
         }
 
         void OnPlayerFinishedDownload(Client client)
@@ -200,6 +208,7 @@ namespace gtmp.evilempire.server
                 characters.UpdatePosition(session.Character.Id, session.Client.Position, session.Client.Rotation);
             }
             sessions.RemoveSession(session);
+            UpdateServerStatus();
         }
 
         void OnClientEventTrigger(Client client, string eventName, params object[] args)
@@ -299,6 +308,17 @@ namespace gtmp.evilempire.server
                 Thread.Sleep(sleepTime);
             }
             sw.Stop();
+        }
+
+        void UpdateServerStatus()
+        {
+            var status = new ServerStatus
+            {
+                Version = "1.0",
+                MaximumNumbersOfPlayers = api.getMaxPlayers(),
+                CurrentNumberOfPlayers = api.getAllPlayers()?.Count ?? 0
+            };
+            ipc.UpdateStatus(status);
         }
 
         static IDictionary<string, MessageHandlerBase> GetClientMessageHandlers(ServiceContainer services)

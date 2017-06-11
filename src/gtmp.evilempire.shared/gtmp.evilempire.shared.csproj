@@ -83,6 +83,9 @@
     <Compile Include="entities\Vector3f.cs" />
     <Compile Include="entities\Vehicle.cs" />
     <Compile Include="IClient.cs" />
+    <Compile Include="ipc\IpcClient.cs" />
+    <Compile Include="ipc\IpcServer.cs" />
+    <Compile Include="ipc\ServerStatus.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="ParsedCommand.cs" />
     <Compile Include="LambdaExtensions.cs" />

@@ -15,5 +15,9 @@
                 public static readonly string VehicleIdSequence = "verhicleId";
             }
         }
+        public static class MemoryMappedFiles
+        {
+            public static readonly string Status = "gtmpee_status";
+        }
     }
 }
