@@ -21,7 +21,7 @@ const project = {
         src: {
             configs: './src/configs/**/*',
             resources: './src/resources/**/*',
-            public: './src/public/**/!(*.tests.*)',
+            client: './src/client/**/!(*.tests.*)',
             csharp: {
                 sln: './src/gtmp.evilempire.sln',
                 binaries: [ './src/gtmp.evilempire.db/bin/debug/*', './src/gtmp.evilempire.server/bin/debug/*', './src/gtmp.evilempire.server.launcher/bin/debug/*', './src/gtmp.evilempire.shared/bin/debug/*' ]
@@ -96,7 +96,7 @@ $gulp.task('rebuild', function(cb) {
     $runseq('clean', 'build', cb);
 });
 
-$gulp.task('build-resources', ['copy-public', 'build-resources-meta']);
+$gulp.task('build-resources', ['copy-client', 'build-resources-meta']);
 
 $gulp.task('build', function(cb) {
     $runseq('cs', 'copy', 'build-resources', 'dist', cb);
@@ -107,7 +107,7 @@ $gulp.task('build-cs', function(cb) {
 });
 
 $gulp.task('copy', function(cb) {
-    $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-public', 'copy-settings', 'copy-dbt', 'copy-maps'], cb);
+    $runseq('extract-server', 'delete-resources', 'copy-cs', ['copy-client', 'copy-settings', 'copy-dbt', 'copy-maps'], cb);
 });
 
 $gulp.task('clean', ['cs-clean'], function() {
@@ -124,8 +124,8 @@ $gulp.task('cs-clean', function() {
         .pipe($gmsbuild(msbuildConfig));
 });
 
-$gulp.task('copy-public', function() {
-    return $gulp.src(project.paths.src.public)
+$gulp.task('copy-client', function() {
+    return $gulp.src(project.paths.src.client)
         .pipe($gulp.dest(project.paths.dist.resources + '/gtmp-server'));
 });
 
@@ -153,7 +153,7 @@ $gulp.task('copy-maps', function() {
 });
 
 $gulp.task('build-resources-meta', function() {
-    return $gulp.src(project.paths.src.public)
+    return $gulp.src(project.paths.src.client)
         .pipe($__tasks.transformToGtmpResource({
             info: { name: 'GTMP Evil Empire Server', author: 'lloyd', type: 'script' },
             script: { src: './../../gtmp.evilempire.server.dll', type: 'server', lang: 'compiled' }
