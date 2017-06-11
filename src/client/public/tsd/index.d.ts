@@ -1,4 +1,4 @@
-declare enum Currencies {
+declare const enum Currencies {
     Dollar = 1
 }
 

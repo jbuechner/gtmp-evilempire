@@ -18,69 +18,10 @@ const UserGroups = {
     Admin: 200
 };
 
-const KEYS = {
-    SHIFT: 16,
-    CTRL: 17,
-    ALT: 18,
-    _0: 48,
-    _1: 49,
-    _2: 50,
-    _3: 51,
-    _4: 52,
-    _5: 53,
-    _6: 54,
-    _7: 55,
-    _8: 56,
-    _9: 57,
-    A: 65,
-    B: 66,
-    C: 67,
-    D: 68,
-    E: 69,
-    F: 70,
-    G: 71,
-    H: 72,
-    I: 73,
-    J: 74,
-    K: 75,
-    L: 76,
-    M: 77,
-    N: 78,
-    O: 79,
-    P: 80,
-    Q: 81,
-    R: 82,
-    S: 83,
-    T: 84,
-    U: 85,
-    V: 86,
-    W: 87,
-    X: 88,
-    Y: 89,
-    Z: 90,
-    F1: 112,
-    F2: 113,
-    F3: 114,
-    F4: 115,
-    F5: 116,
-    F6: 117,
-    F7: 118,
-    F8: 119,
-    F9: 120,
-    F10: 121,
-    F11: 122,
-    F12: 123
-};
-
-const KeyPhase = {
-    Down: 1,
-    Up: 2
-};
-
 const ClientEvents = {
     'enterFreeroam': function __enterFreeroam() {
         client.cursor = false;
-        client.resetCamera();
+        Client.resetCamera();
         browser.removeView('view-login');
         browser.removeView('view-character-customization');
         browser.addView('view-status', { displayCoordinates: Client.hasRequiredUserGroup(UserGroups.GameMaster) });
@@ -95,12 +36,12 @@ const ClientEvents = {
     },
     '::display:login': function __display_login() {
         client.cursor = true;
-        client.setCamera(200, 200, 150, 1, 1, 1);
+        Client.setCamera(200, 200, 150, 1, 1, 1);
         browser.addView('view-login');
     },
     '::display:characterCustomization': function __display_characterCustomization(data) {
         client.cursor = true;
-        client.setCameraToViewPlayer();
+        Client.setCameraToViewPlayer();
         let freeroamCustomizationData = deserializeFromDesignatedJson(data);
         browser.addView('view-character-customization', { current: characterCustomization, customization: freeroamCustomizationData });
     },
@@ -108,7 +49,7 @@ const ClientEvents = {
         data = deserializeFromDesignatedJson(data);
         if (success) {
             client.cursor = false;
-            client.resetCamera();
+            Client.resetCamera();
             browser.removeView('view-login');
             user = data.User;
             character = data.Character;
@@ -217,268 +158,6 @@ function serializeToDesignatedJson(value) {
 function argumentsToArray(args) {
     return Array.prototype.slice.call(args, 0);
 }
-
-
-
-class Browser {
-    _instance: any;
-
-    constructor() {
-        const res = API.getScreenResolution();
-
-        this._instance = API.createCefBrowser(res.Width, res.Height);
-        API.setCefBrowserPosition(this._instance, 0, 0);
-    }
-
-    navigate(url) {
-        return new Promise(resolve => {
-            let instance = this._instance;
-            let watch = () => {
-                try {
-                    if (!API.isCefBrowserLoading(instance)) {
-                        subscription.disconnect();
-                        resolve();
-                    }
-                } catch (ex) {
-                    debugOut(ex);
-                    subscription.disconnect();
-                }
-            };
-            API.loadPageCefBrowser(instance, url);
-            let subscription = API.onUpdate.connect(watch);
-        });
-    }
-
-    show() {
-        API.setCefBrowserHeadless(this._instance, false);
-    }
-
-    hide() {
-        API.setCefBrowserHeadless(this._instance, true);
-    }
-
-    raiseEventInBrowser(eventName, data) {
-        this._instance.call('raiseEvent', serializeToDesignatedJson(({ eventName, data })));
-    }
-
-    addView(viewName, data, allowOnlyOne) {
-        allowOnlyOne = allowOnlyOne || false;
-        this._instance.call('addView', serializeToDesignatedJson({ selector: viewName, options: data, allowOnlyOne }));
-    }
-
-    removeView(viewName) {
-        this._instance.call('removeView', serializeToDesignatedJson({ selector: viewName }));
-    }
-
-    static create() {
-        return new Promise((resolve) => {
-            let browser = new Browser();
-            browser.hide();
-            API.waitUntilCefBrowserInit(browser._instance);
-            resolve(browser);
-        }).catch(debugOut);
-    }
-}
-
-class Client {
-    _isInVehicle: any;
-    _cursor: any;
-    _cursorToggle: any;
-    _displayInventory: any;
-
-    constructor() {
-        this._isInVehicle = false;
-        this._cursor = false;
-        this._cursorToggle = false;
-        this._displayInventory = false;
-    }
-
-    get cursor() {
-        return this._cursor;
-    }
-
-    set cursor(v) {
-        if (this._cursor !== v) {
-            this._cursor = v;
-            this._onCursorStateChanged();
-        }
-    }
-
-    get isInVehicle() {
-        return this._isInVehicle;
-    }
-
-    set isInVehicle(v) {
-        if (this._isInVehicle !== v) {
-            this._isInVehicle = v;
-        }
-    }
-
-    get cursorToggle() {
-        return this._cursorToggle;
-    }
-
-    set cursorToggle(v) {
-        if (this._cursorToggle !== v) {
-            this._cursorToggle = v;
-            this._onCursorStateChanged();
-        }
-    }
-
-    get canDisplayUiTrackedElements() {
-        return !this.isInVehicle || this.cursor || this.cursorToggle;
-    }
-
-    get displayInventory() {
-        return this._displayInventory;
-    }
-
-    set displayInventory(v) {
-        if (v !== this._displayInventory) {
-            if (v) {
-                if (!this.cursorToggle && !this.cursor) {
-                    this._displayInventory = v;
-                    browser.addView('view-inventory', {}, true);
-                }
-            } else {
-                this._displayInventory = v;
-                browser.removeView('view-inventory');
-            }
-        }
-    }
-
-    setCamera(x, y, z, rx, ry, rz) {
-        let pos = x;
-        let rot = y;
-        if (typeof x === 'number' && typeof y === 'number') {
-            pos = new Vector3(x, y, z);
-            rot = new Vector3(rx, ry, rz);
-        }
-        let camera = API.createCamera(pos, rot);
-        API.setActiveCamera(camera);
-    }
-
-    setCameraToViewPlayer() {
-        let player = API.getLocalPlayer();
-        let camPos = API.getOffsetInWorldCoords(player, new Vector3(0.35, 1, 0.5));
-        let camera = API.createCamera(camPos, new Vector3(0, 0, 0));
-        API.pointCameraAtEntity(camera, player, new Vector3(0, 0, 0.5));
-        API.setActiveCamera(camera);
-    }
-
-    get isHudVisible() {
-        return API.getHudVisible();
-    }
-
-    set isHudVisible(v) {
-        API.setHudVisible(v);
-    }
-
-    get coordinates() {
-        let player = API.getLocalPlayer();
-        let c = API.returnNative('0x3FEF770D40960D5A', 5, player, false);
-        return c;
-    }
-
-    get rotation() {
-        let player = API.getLocalPlayer();
-        let r = API.returnNative('0xAFBD61CC738D9EB9', 5, player, 0);
-        return r;
-    }
-
-    get aimCoordinates() {
-        let player = API.getLocalPlayer();
-        let c = API.getPlayerAimCoords(player);
-        return c;
-    }
-
-    resetCamera() {
-        API.setActiveCamera(null);
-    }
-
-    static hasRequiredUserGroup(userGroup) {
-        return user && user.UserGroup && user.UserGroup >= userGroup;
-    }
-
-    _onCursorStateChanged() {
-        API.showCursor(this._cursor || this._cursorToggle);
-    }
-}
-
-class InputController {
-    _pressed: any;
-    _mappings: any;
-
-    constructor() {
-        this._pressed = new Map();
-        this._mappings = [];
-
-        API.onKeyUp.connect((sender, e) => this.onKeyUp(sender, e));
-        API.onKeyDown.connect((sender, e) => this.onKeyDown(sender, e));
-    }
-
-    get mappings() {
-        return this._mappings;
-    }
-
-    addMapping(key, action) {
-        let mapping = { keys: [key], actions: [action] };
-        this._mappings.push(mapping);
-        return mapping;
-    }
-
-    areKeysPressed(keys) {
-        return keys.every(p => this._pressed.has(p) && this._pressed.get(p));
-    }
-
-    isKeyPressed(key) {
-        let isPressed = this._pressed.get(key);
-        return isPressed === undefined ? false : isPressed;
-    }
-
-    setKeyPressed(key, pressed) {
-        this._pressed.set(key, pressed);
-    }
-
-    onKeyDown(sender, e) {
-        if (!this.isKeyPressed(e.KeyValue)) {
-            this.setKeyPressed(e.KeyValue, true);
-            this.triggerActions(KeyPhase.Down);
-        }
-    }
-
-    onKeyUp(sender, e) {
-        if (this.isKeyPressed(e.KeyValue)) {
-            this.triggerActions(KeyPhase.Up);
-            this.setKeyPressed(e.KeyValue, false);
-        }
-    }
-
-    triggerActions(phase) {
-        this._mappings.forEach(mapping => {
-            if (this.areKeysPressed(mapping.keys)) {
-                mapping.actions.forEach(action => {
-                    try {
-                        if (action.call && phase === KeyPhase.Down) {
-                            action.call(null);
-                        }
-                        if (action.onDown && phase === KeyPhase.Down) {
-                            action.onDown.call(null);
-                        }
-                        if (action.onUp && phase === KeyPhase.Up) {
-                            action.onUp.call(null);
-                        }
-                    } catch(ex) {
-                        debugOut(ex);
-                    }
-                });
-            }
-        });
-    }
-}
-
-
-
 
 let serverEventTriggerQueue = [];
 function onServerEventTrigger(eventName, argsArray) {
@@ -718,8 +397,8 @@ function sendToServer(eventName, args = null) {
 function pushViewData() {
     if (pushViewDataTickCount++ > 360) {
         pushViewDataTickCount = 0;
-        let coordinates = client.coordinates;
-        let rotation = client.rotation;
+        let coordinates = Client.coordinates;
+        let rotation = Client.rotation;
 
         let value = {
             coord: { x: coordinates.X, y: coordinates.Y, z: coordinates.Z },
@@ -738,8 +417,8 @@ let moneyMap = new Map();
 let displayInfo = { minimap: { margin: { left: 0, bottom: 0 }, width: 0, height: 0 } };
 
 let browser = null;
-let client = null;
-let inputs = null;
+let client: Client = null;
+let inputs: InputController = null;
 let isReadyToProcessServerEventTriggers = false;
 let onServerEventTriggerSubscription = null;
 let onResourceStartSubscription = API.onResourceStart.connect(() => {
@@ -778,9 +457,9 @@ function browser_ready() {
 
     browser.raiseEventInBrowser('displayInfoChanged', displayInfo);
 
-    inputs.addMapping(KEYS.CTRL, { onDown: () => client.cursorToggle = true, onUp: () => client.cursorToggle = false });
-    inputs.addMapping(KEYS.I, () => client.displayInventory = !client.displayInventory);
-    inputs.addMapping(KEYS.F12, () => client.cursor = !client.cursor);
+    inputs.addMapping(KEY.CTRL, { onDown: () => client.cursorToggle = true, onUp: () => client.cursorToggle = false });
+    inputs.addMapping(KEY.I, () => client.displayInventory = !client.displayInventory);
+    inputs.addMapping(KEY.F12, () => client.cursor = !client.cursor);
 }
 
 function browser_backend(args) {
