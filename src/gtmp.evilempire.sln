@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.db", "gtmp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.tests", "gtmp.evilempire.tests\gtmp.evilempire.tests.csproj", "{5BC4D0F4-339B-414D-874A-92F1A936078C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtmp.evilempire.httprpc", "gtmp.evilempire.httprpc\gtmp.evilempire.httprpc.csproj", "{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{5BC4D0F4-339B-414D-874A-92F1A936078C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BC4D0F4-339B-414D-874A-92F1A936078C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BC4D0F4-339B-414D-874A-92F1A936078C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7417E02-C1B8-4C97-9972-FEB3F6F85B0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

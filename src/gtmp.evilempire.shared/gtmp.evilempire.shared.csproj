@@ -53,6 +53,7 @@
     <Compile Include="..\shared\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="ArgumentsParser.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="AuthExtensions.cs" />
     <Compile Include="CommandExecutionResult.cs" />
@@ -113,5 +114,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
