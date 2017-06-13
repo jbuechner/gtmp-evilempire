@@ -34,6 +34,7 @@ namespace gtmp.evilempire.server
         ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransition;
         ICommandService commands;
+        private IWeatherService weatherService;
         IpcServer ipc;
 
         readonly ServerTimerRealm timers;
@@ -50,7 +51,7 @@ namespace gtmp.evilempire.server
             ipc = new IpcServer();
             UpdateServerStatus();
 
-            services = CreateServiceContainer();
+            services = CreateServiceContainer(this.api);
             services.Register<IPlatformService>(platform = new GtmpPlatformService(api));
 
             map = MapLoader.LoadFrom("maps");
@@ -65,6 +66,8 @@ namespace gtmp.evilempire.server
             commands = services.Get<ICommandService>();
             characters = services.Get<ICharacterService>();
             sessionStateTransition = services.Get<ISessionStateTransitionService>();
+            weatherService = services.Get<IWeatherService>();
+            
 
             clientMessageHandlers = GetClientMessageHandlers(services);
             AddPlatformHooks(api);
@@ -97,7 +100,7 @@ namespace gtmp.evilempire.server
             ipc = null;
         }
 
-        static ServiceContainer CreateServiceContainer()
+        static ServiceContainer CreateServiceContainer(API api)
         {
             var services = new ServiceContainer();
             services.Register<ServiceContainer>(services);
@@ -111,6 +114,7 @@ namespace gtmp.evilempire.server
             services.Register<ICommandService, CommandService>();
             services.Register<ISessionStateTransitionService, SessionStateTransitionService>();
             services.Register<IVehicleService, VehicleService>();
+            services.Register<IWeatherService>(new WeatherService(api));
 
             return services;
         }

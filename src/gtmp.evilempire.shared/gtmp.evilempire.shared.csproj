@@ -82,6 +82,7 @@
     <Compile Include="entities\User.cs" />
     <Compile Include="entities\Vector3f.cs" />
     <Compile Include="entities\Vehicle.cs" />
+    <Compile Include="entities\Weather.cs" />
     <Compile Include="IClient.cs" />
     <Compile Include="ipc\IpcClient.cs" />
     <Compile Include="ipc\IpcServer.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="services\ISessionService.cs" />
     <Compile Include="services\ISessionStateTransitionService.cs" />
     <Compile Include="services\IVehicleService.cs" />
+    <Compile Include="services\IWeatherService.cs" />
     <Compile Include="services\SerializationService.cs" />
     <Compile Include="sessions\SessionStateHandlerBase.cs" />
     <Compile Include="sessions\ISession.cs" />
