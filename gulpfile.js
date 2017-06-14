@@ -10,6 +10,8 @@ const $runseq = require('run-sequence');
 const $gmsbuild = require('gulp-msbuild');
 const $del = require('del');
 const $ts = require('gulp-typescript');
+const $fs = require('fs');
+const $path = require('path');
 
 const project = {
     paths: {
@@ -47,7 +49,7 @@ const project = {
     msbuild: {
         verbosity: 'minimal',
         stdout: true,
-        toolsVersion: 14.0,
+        toolsVersion: 15.0,
         properties: {
             Configuration: 'Debug'
         }
@@ -59,6 +61,18 @@ const project = {
         removeComments: true,
         noEmitOnError: true
     }
+}
+
+// prepare env for gulp-msbuild if vs is not installed on c:/ partitition
+const px86alt = () => { process.env['ProgramFiles(x86)'] = px86 = 'D:/Program Files (x86)'; };
+let px86 = process.env['ProgramFiles(x86)'] || 'C:/Program Files (x86)';
+try {
+    let px86Stats = $fs.statSync($path.join(px86, 'Microsoft Visual Studio', '2017'));
+    if (!px86Stats || !px86Stats.isDirectory()) {
+        px86alt();
+    };
+} catch(ex) {
+    px86alt();
 }
 
 const $__tasks = {
