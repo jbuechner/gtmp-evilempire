@@ -342,7 +342,7 @@ function browser_ready() {
         uitracking.update(false);
     }});
     inputs.addMapping(KEY.I, () => client.displayInventory = !client.displayInventory);
-    inputs.addMapping(KEY.F12, () => {
+    inputs.addMapping(KEY.BACKQUOTE, () => {
         client.cursor = !client.cursor;
         uitracking.update(client.canDisplayUiTrackedElements);
     });

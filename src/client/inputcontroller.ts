@@ -1,6 +1,7 @@
 type KeyEventArgs = System.Windows.Forms.KeyEventArgs;
 
 const enum KEY {
+    TAB = 9,
     SHIFT = 16,
     CTRL = 17,
     ALT = 18,
@@ -51,7 +52,8 @@ const enum KEY {
     F9 = 120,
     F10 = 121,
     F11 = 122,
-    F12 = 123
+    F12 = 123,
+    BACKQUOTE = 220
 }
 
 const enum KeyPhase {
