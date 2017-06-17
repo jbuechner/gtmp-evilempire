@@ -8,7 +8,7 @@ interface IInventoryViewItem extends IItem {
 }
 
 interface ICharInventoryEventArgs extends CustomEvent {
-    detail: { Items: IItem[], Money: IItem[] };
+    detail: { Items: IItem[] };
 }
 
 Slim.tag('view-inventory', class extends Slim {
@@ -46,9 +46,7 @@ Slim.tag('view-inventory', class extends Slim {
         });
         document.addEventListener('res:charInventory', (e: ICharInventoryEventArgs) => {
             let items = e.detail.Items || [];
-            let money = e.detail.Money || [];
-
-            let allItems: IInventoryViewItem[] = (items.concat(money) as IInventoryViewItem[]);
+            let allItems = items as IInventoryViewItem[];
             this.decorateInventoryViewItems(allItems);
             this.allItems = allItems; // separate assignment for slimjs
 
@@ -56,8 +54,7 @@ Slim.tag('view-inventory', class extends Slim {
         });
         document.addEventListener('characterInvChanged', (e: ICharInventoryEventArgs) => {
             let items = e.detail.Items || [];
-            let money = e.detail.Money || [];
-            let changedItems = (items.concat(money) as IInventoryViewItem[]);
+            let changedItems = items as IInventoryViewItem[];
             let mapOfDeletedItems = new Map<string, boolean>();
             let mapOfChangedItems = new Map<string, IInventoryViewItem>();
             changedItems.forEach(item => {

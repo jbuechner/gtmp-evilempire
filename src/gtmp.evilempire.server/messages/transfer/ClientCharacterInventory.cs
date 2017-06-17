@@ -14,7 +14,6 @@ namespace gtmp.evilempire.server.messages.transfer
         public int CharacterId => characterInventory.CharacterId;
 
         public IEnumerable<ClientItem> Items => characterInventory.Items.Select(s => new ClientItem(s));
-        public IEnumerable<ClientItem> Money => characterInventory.Money.Select(s => new ClientItem(s));
 
         public ClientCharacterInventory(CharacterInventory characterInventory)
         {

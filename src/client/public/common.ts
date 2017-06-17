@@ -14,10 +14,8 @@ interface IItemDescription {
     Weight: number;
     Volume: number;
 
-
     IsStackable: boolean;
     MaximumStack: number;
-
 
     AssociatedCurrency: Currency;
     Denomination: number;

@@ -91,8 +91,6 @@ namespace gtmp.evilempire.server.services
                 {
                     return item;
                 }
-                item = characterInventory.Money.FirstOrDefault(p => p.Id == itemId);
-                return item;
             }
             return null;
         }
@@ -206,20 +204,14 @@ namespace gtmp.evilempire.server.services
                             continue;
                         }
 
-                        IList<Item> targetList = null;
-                        if (itemDescription.AssociatedCurrency == Currency.None)
+                        if (itemDescription.AssociatedCurrency != Currency.None)
                         {
-                            targetList = characterInventory.Items;
-                        }
-                        else
-                        {
-                            targetList = characterInventory.Money;
                             changedCurrencies.Add(itemDescription.AssociatedCurrency);
                             hasMoneyChanged = true;
                         }
 
                         // Stack amount to existing items with stack size left
-                        var itemsWithAvailableAmountLeft = targetList.Where(p => p.ItemDescriptionId == item.ItemDescriptionId && p.Amount < itemDescription.MaximumStack);
+                        var itemsWithAvailableAmountLeft = characterInventory.Items.Where(p => p.ItemDescriptionId == item.ItemDescriptionId && p.Amount < itemDescription.MaximumStack);
                         var stackLeft = item.Amount;
                         foreach(var itemWithAvailableAmountLeft in itemsWithAvailableAmountLeft)
                         {
@@ -239,7 +231,7 @@ namespace gtmp.evilempire.server.services
                         if (item.Amount > 0)
                         {
                             item.Id = item.Id == Item.ZeroId ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence) : item.Id;
-                            targetList.Add(item);
+                            characterInventory.Items.Add(item);
                             addedOrChangedItems.Add(item);
                         }
                     }
@@ -255,39 +247,28 @@ namespace gtmp.evilempire.server.services
 
         public CharacterInventoryChanges RemoveFromCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
-            KeyValuePair<int?, IList<Item>> selectNextCandidate(CharacterInventory inv, Item item, ItemDescription itemDescription, out Item candidate) {
-                var index = inv.Items.IndexOf(p => p != null && p.Id == item.Id, out candidate);
+            bool selectNextCandidate(CharacterInventory inv, Item item, ItemDescription itemDescription, out Tuple<int, Item> candidate) {
+                Item foundItem;
+                var index = inv.Items.IndexOf(p => p != null && p.Id == item.Id, out foundItem);
                 if (index != null)
                 {
-                    return new KeyValuePair<int?, IList<Item>>(index, inv.Items);
-                }
-                index = inv.Money.IndexOf(p => p != null && p.Id == item.Id, out candidate);
-                if (index != null)
-                {
-                    return new KeyValuePair<int?, IList<Item>>(index, inv.Money);
+                    candidate = new Tuple<int, Item>(index.Value, foundItem);
+                    return true;
                 }
                 if (itemDescription != null && itemDescription.IsStackable)
                 {
-                    index = inv.Items.IndexOf(p => p != null && p.ItemDescriptionId == itemDescription.Id, out candidate);
+                    index = inv.Items.IndexOf(p => p != null && p.ItemDescriptionId == itemDescription.Id, out foundItem);
                     if (index != null)
                     {
-                        return new KeyValuePair<int?, IList<Item>>(index, inv.Items);
-                    }
-                    inv.Money.IndexOf(p => p != null && p.ItemDescriptionId == itemDescription.Id, out candidate);
-                    if (index != null)
-                    {
-                        return new KeyValuePair<int?, IList<Item>>(index, inv.Money);
+                        candidate = new Tuple<int, Item>(index.Value, foundItem);
+                        return true;
                     }
                 }
-                return new KeyValuePair<int?, IList<Item>>(null, null);
+                candidate = null;
+                return false;
             }
 
             characterInventory = characterInventory ?? throw new ArgumentNullException(nameof(characterInventory));
-
-            if (characterInventory == null)
-            {
-                throw new ArgumentNullException(nameof(characterInventory));
-            }
             if (items == null)
             {
                 return CharacterInventoryChanges.None;
@@ -309,14 +290,12 @@ namespace gtmp.evilempire.server.services
                     var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
                     var remaining = item.Amount;
 
-                    Item nextCandidate = null;
-                    KeyValuePair<int?, IList<Item>> nextCandidateKeyValue = new KeyValuePair<int?, IList<Item>>(null, null);
+                    Tuple<int, Item> nextCandidate = null;
                     do
                     {
                         if (remaining > 0)
                         {
-                            nextCandidateKeyValue = selectNextCandidate(characterInventory, item, itemDescription, out nextCandidate);
-                            if (nextCandidate == null)
+                            if (!selectNextCandidate(characterInventory, item, itemDescription, out nextCandidate))
                             {
                                 return CharacterInventoryChanges.None;
                             }
@@ -324,7 +303,7 @@ namespace gtmp.evilempire.server.services
 
                         if (itemDescription == null)
                         {
-                            itemDescription = this.items.GetItemDescription(nextCandidate.ItemDescriptionId);
+                            itemDescription = this.items.GetItemDescription(nextCandidate.Item2.ItemDescriptionId);
                         }
 
                         if (itemDescription.AssociatedCurrency != Currency.None)
@@ -333,23 +312,23 @@ namespace gtmp.evilempire.server.services
                             changedCurrencies.Add(itemDescription.AssociatedCurrency);
                         }
 
-                        if (nextCandidate.Amount > remaining)
+                        if (nextCandidate.Item2.Amount > remaining)
                         {
 
-                            nextCandidate.Amount -= remaining;
+                            nextCandidate.Item2.Amount -= remaining;
                             remaining = 0;
-                            changedItems[nextCandidate.Id] = nextCandidate;
+                            changedItems[nextCandidate.Item2.Id] = nextCandidate.Item2;
                         }
                         else
                         {
-                            remaining -= nextCandidate.Amount;
-                            nextCandidate.Amount = 0;
-                            nextCandidateKeyValue.Value.RemoveAt(nextCandidateKeyValue.Key.Value);
-                            if (changedItems.ContainsKey(nextCandidate.Id))
+                            remaining -= nextCandidate.Item2.Amount;
+                            nextCandidate.Item2.Amount = 0;
+                            characterInventory.Items.RemoveAt(nextCandidate.Item1);
+                            if (changedItems.ContainsKey(nextCandidate.Item2.Id))
                             {
-                                changedItems.Remove(nextCandidate.Id);
+                                changedItems.Remove(nextCandidate.Item2.Id);
                             }
-                            removedItems[nextCandidate.Id] = nextCandidate;
+                            removedItems[nextCandidate.Item2.Id] = nextCandidate.Item2;
                         }
                     } while (remaining > 0 && nextCandidate != null);
 
@@ -377,18 +356,18 @@ namespace gtmp.evilempire.server.services
             var characterMoneyStatistic = characterMoney.GetOrAdd(characterInventory.CharacterId, key => new ConcurrentDictionary<Currency, double>());
             characterMoneyStatistic.Clear();
 
-            var money = characterInventory.Money;
-            if (money != null)
+            var items = characterInventory.Items;
+            if (items != null)
             {
                 var index = -1;
-                while (++index < money.Count)
+                while (++index < items.Count)
                 {
                     try
                     {
-                        var item = money[index];
+                        var item = items[index];
                         if (item != null)
                         {
-                            var itemDescription = items.GetItemDescription(item.ItemDescriptionId);
+                            var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
                             if (itemDescription == null)
                             {
                                 using (ConsoleColor.Yellow.Foreground())
@@ -399,10 +378,6 @@ namespace gtmp.evilempire.server.services
                             }
                             if (itemDescription.AssociatedCurrency == Currency.None)
                             {
-                                using (ConsoleColor.Yellow.Foreground())
-                                {
-                                    Console.WriteLine($"[UpdateCharacterMoneyStatistic] WARNING for character id {characterInventory.CharacterId}. The character has a item with id {item.Id} of item description {item.ItemDescriptionId} that has no associated currency.");
-                                }
                                 continue;
                             }
 

@@ -217,22 +217,22 @@ namespace gtmp.evilempire.tests.db
                 var moneyItemB = new Item { Id = db.NextInt64ValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 1 };
                 var moneyItemC = new Item { Id = db.NextInt64ValueFor("item"), ItemDescriptionId = moneyItemDescription.Id, Amount = 5 };
 
-                inventory.Money.Add(moneyItemA);
-                inventory.Money.Add(moneyItemB);
-                inventory.Money.Add(moneyItemC);
+                inventory.Items.Add(moneyItemA);
+                inventory.Items.Add(moneyItemB);
+                inventory.Items.Add(moneyItemC);
 
                 db.Insert(inventory);
 
                 var reselectedCharacterInventory = db.Select<CharacterInventory, int>(character.Id);
 
                 Assert.IsNotNull(reselectedCharacterInventory);
-                Assert.IsNotNull(reselectedCharacterInventory.Money);
-                Assert.AreEqual(3, reselectedCharacterInventory.Money.Count);
-                Assert.AreEqual(25, reselectedCharacterInventory.Money.ElementAt(0).Amount);
-                Assert.AreEqual(1, reselectedCharacterInventory.Money.ElementAt(1).Amount);
-                Assert.AreEqual(5, reselectedCharacterInventory.Money.ElementAt(2).Amount);
+                Assert.IsNotNull(reselectedCharacterInventory.Items);
+                Assert.AreEqual(3, reselectedCharacterInventory.Items.Count);
+                Assert.AreEqual(25, reselectedCharacterInventory.Items.ElementAt(0).Amount);
+                Assert.AreEqual(1, reselectedCharacterInventory.Items.ElementAt(1).Amount);
+                Assert.AreEqual(5, reselectedCharacterInventory.Items.ElementAt(2).Amount);
 
-                Assert.AreEqual(moneyItemDescription.Id, reselectedCharacterInventory.Money.ElementAt(2).ItemDescriptionId);
+                Assert.AreEqual(moneyItemDescription.Id, reselectedCharacterInventory.Items.ElementAt(2).ItemDescriptionId);
             }
         }
     }

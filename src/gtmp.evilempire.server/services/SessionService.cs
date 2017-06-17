@@ -201,18 +201,11 @@ namespace gtmp.evilempire.server.services
             void addToInventory(CharacterInventory inventory, Item item)
             {
                 var itemDescription = lookupItemDescription(cachedDescriptions, item.ItemDescriptionId);
-                if (itemDescription?.AssociatedCurrency != Currency.None)
-                {
-                    inventory.Money.Add(item);
-                }
-                else
-                {
-                    inventory.Items.Add(item);
-                }
+                inventory.Items.Add(item);
             }
             void markAsRemoved(ClientCharacterInventory inventory, Item item)
             {
-                var clientItem = inventory.Items.Union(inventory.Money).FirstOrDefault(p => p.Id == item.Id.ToString(CultureInfo.InvariantCulture));
+                var clientItem = inventory.Items.FirstOrDefault(p => p.Id == item.Id.ToString(CultureInfo.InvariantCulture));
                 if (clientItem != null)
                 {
                     clientItem.HasBeenDeleted = true;
