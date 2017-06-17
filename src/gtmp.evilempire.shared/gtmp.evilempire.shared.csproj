@@ -102,7 +102,7 @@
     <Compile Include="services\ISessionService.cs" />
     <Compile Include="services\ISessionStateTransitionService.cs" />
     <Compile Include="services\IVehicleService.cs" />
-    <Compile Include="services\IWeatherService.cs" />
+    <Compile Include="services\IEnvironmentService.cs" />
     <Compile Include="services\SerializationService.cs" />
     <Compile Include="sessions\SessionStateHandlerBase.cs" />
     <Compile Include="sessions\ISession.cs" />
