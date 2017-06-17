@@ -1,5 +1,8 @@
 import NativeReturnType = GrandTheftMultiplayer.Client.Javascript.NativeReturnType;
+
 class Client {
+    isInFreeroam: boolean = false;
+
     _isInVehicle: boolean = false;
     _cursor: boolean = false;
     _cursorToggle: boolean = false;
@@ -51,7 +54,7 @@ class Client {
     set displayInventory(v : boolean) {
         if (v !== this._displayInventory) {
             if (v) {
-                if (!this.cursorToggle && !this.cursor) {
+                if (this.isInFreeroam) {
                     this._displayInventory = v;
                     browser.addView('view-inventory', {}, true);
                 }

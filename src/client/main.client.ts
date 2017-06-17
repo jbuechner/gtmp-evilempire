@@ -22,6 +22,7 @@ const UserGroups = {
 const ClientEvents = {
     'enterFreeroam': function __enterFreeroam() {
         client.cursor = false;
+        client.isInFreeroam = true;
         Client.resetCamera();
         browser.removeView('view-login');
         browser.removeView('view-character-customization');
@@ -37,11 +38,13 @@ const ClientEvents = {
     },
     '::display:login': function __display_login() {
         client.cursor = true;
+        client.isInFreeroam = false;
         Client.setCamera(200, 200, 150, 1, 1, 1);
         browser.addView('view-login');
     },
     '::display:characterCustomization': function __display_characterCustomization(data) {
         client.cursor = true;
+        client.isInFreeroam = false;
         Client.setCameraToViewPlayer();
         let freeroamCustomizationData = deserializeFromDesignatedJson(data);
         browser.addView('view-character-customization', { current: characterCustomization, customization: freeroamCustomizationData });
