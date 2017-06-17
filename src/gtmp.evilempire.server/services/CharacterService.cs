@@ -81,6 +81,22 @@ namespace gtmp.evilempire.server.services
             return characterInventory;
         }
 
+        public Item GetCharacterItemById(int characterId, long itemId)
+        {
+            var characterInventory = db.Select<CharacterInventory, int>(characterId);
+            if (characterInventory != null)
+            {
+                var item = characterInventory.Items.FirstOrDefault(p => p.Id == itemId);
+                if (item != null)
+                {
+                    return item;
+                }
+                item = characterInventory.Money.FirstOrDefault(p => p.Id == itemId);
+                return item;
+            }
+            return null;
+        }
+
         public CharacterCustomization CreateDefaultCharacterCustomization(int characterId)
         {
             var characterCustomization = platform.GetDefaultCharacterCustomization();
@@ -141,6 +157,16 @@ namespace gtmp.evilempire.server.services
             }
         }
 
+        public bool RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items)
+        {
+            var characterInventory = GetCharacterInventoryById(characterId);
+            if (characterInventory != null)
+            {
+                return RemoveFromCharacterInventory(characterInventory, items);
+            }
+            return false;
+        }
+
         void AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
             foreach (var item in items)
@@ -148,7 +174,6 @@ namespace gtmp.evilempire.server.services
                 var newItems = this.items.CreateItem(item.ItemDescriptionId, item.Amount, item.Name, item.KeyForEntityId);
                 AddItemsToCharacterInventory(characterInventory, newItems);
             }
-            db.Update<CharacterInventory>(characterInventory);
         }
 
         void AddItemsToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
@@ -211,11 +236,106 @@ namespace gtmp.evilempire.server.services
                         }
                     }
                 }
+                db.Update<CharacterInventory>(characterInventory);
             }
             if (hasMoneyChanged)
             {
                 UpdateCharacterMoneyStatistic(characterInventory);
             }
+        }
+
+        public bool RemoveFromCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        {
+            KeyValuePair<int?, IList<Item>> selectNextCandidate(CharacterInventory inv, Item item, ItemDescription itemDescription, out Item candidate) {
+                var index = inv.Items.IndexOf(p => p != null && p.Id == item.Id, out candidate);
+                if (index != null)
+                {
+                    return new KeyValuePair<int?, IList<Item>>(index, inv.Items);
+                }
+                index = inv.Money.IndexOf(p => p != null && p.Id == item.Id, out candidate);
+                if (index != null)
+                {
+                    return new KeyValuePair<int?, IList<Item>>(index, inv.Money);
+                }
+                if (itemDescription != null && itemDescription.IsStackable)
+                {
+                    index = inv.Items.IndexOf(p => p != null && p.ItemDescriptionId == itemDescription.Id, out candidate);
+                    if (index != null)
+                    {
+                        return new KeyValuePair<int?, IList<Item>>(index, inv.Items);
+                    }
+                    inv.Money.IndexOf(p => p != null && p.ItemDescriptionId == itemDescription.Id, out candidate);
+                    if (index != null)
+                    {
+                        return new KeyValuePair<int?, IList<Item>>(index, inv.Money);
+                    }
+                }
+                return new KeyValuePair<int?, IList<Item>>(null, null);
+            }
+
+            characterInventory = characterInventory ?? throw new ArgumentNullException(nameof(characterInventory));
+
+            if (characterInventory == null)
+            {
+                throw new ArgumentNullException(nameof(characterInventory));
+            }
+            if (items == null)
+            {
+                return true;
+            }
+
+            var sync = characterInventoriesInModification.GetOrAdd(characterInventory.CharacterId, _ => new object());
+            var hasMoneyChanged = false;
+            lock (sync)
+            {
+                foreach (var item in items)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+                    var itemDescription = this.items.GetItemDescription(item.ItemDescriptionId);
+                    var remaining = item.Amount;
+
+                    Item nextCandidate = null;
+                    KeyValuePair<int?, IList<Item>> nextCandidateKeyValue = new KeyValuePair<int?, IList<Item>>(null, null);
+                    do
+                    {
+                        if (remaining > 0)
+                        {
+                            nextCandidateKeyValue = selectNextCandidate(characterInventory, item, itemDescription, out nextCandidate);
+                            if (nextCandidate == null)
+                            {
+                                return false;
+                            }
+                        }
+
+                        hasMoneyChanged |= characterInventory.Money == nextCandidateKeyValue.Value;
+                        if (nextCandidate.Amount > remaining)
+                        {
+                            nextCandidate.Amount -= remaining;
+                            remaining = 0;
+                        }
+                        else
+                        {
+                            remaining -= nextCandidate.Amount;
+                            nextCandidate.Amount = 0;
+                            nextCandidateKeyValue.Value.RemoveAt(nextCandidateKeyValue.Key.Value);
+                        }
+                    } while (remaining > 0 && nextCandidate != null);
+
+                    if (remaining > 0)
+                    {
+                        return false;
+                    }
+                }
+                db.Update<CharacterInventory>(characterInventory);
+            }
+            if (hasMoneyChanged)
+            {
+                UpdateCharacterMoneyStatistic(characterInventory);
+            }
+            return true;
         }
 
         void UpdateCharacterMoneyStatistic(CharacterInventory characterInventory)

@@ -8,7 +8,6 @@ KnownClientSideActions.set('CLOSEACTIVEENTITYINTERACTION', function __closeActiv
 });
 
 Slim.tag('view-entityinteractionmenu', class extends Slim {
-    app: any;
     _entityId: any;
     _pos: any;
     _actions: any;
@@ -28,7 +27,6 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = (window as any).app;
         document.addEventListener('updateview', (ev: any) => {
             if (ev.detail.value.entityId && ev.detail.value.entityId === this.entityId) {
                 switch (ev.detail.what) {
@@ -177,11 +175,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
 
         this.isLoading = true;
         this.markdown = '';
-        if (this.app) {
-            this.app.triggerEntityAction(this.entityId, serverAction);
-        } else {
-            console.warn('unable to dispatch entity interaction.');
-        }
+        App.triggerEntityAction(this.entityId, serverAction);
     }
 
     raiseAction(e) {
@@ -211,11 +205,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
 
         e.target.classList.add('active');
 
-        if (this.app) {
-            this.app.entityinteraction(this.entityId, this.entityType, this.entityKey, action);
-        } else {
-            console.warn('unable to dispatch entity interaction.');
-        }
+        App.entityinteraction(this.entityId, this.entityType, this.entityKey, action);
     }
 
     resetActiveActions() {

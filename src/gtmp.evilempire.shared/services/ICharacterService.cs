@@ -12,12 +12,15 @@ namespace gtmp.evilempire.services
         CharacterCustomization GetCharacterCustomizationById(int characterId);
         CharacterInventory GetCharacterInventoryById(int characterId);
 
+        Item GetCharacterItemById(int characterId, long itemId);
+
         CharacterCustomization CreateDefaultCharacterCustomization(int characterId);
         CharacterInventory CreateDefaultCharacterInventory(int characterId);
 
         IEnumerable<Item> GetKeys(int characterId, Vehicle vehicle);
 
         void AddToCharacterInventory(int characterId, IEnumerable<Item> items);
+        bool RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items);
 
         void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
 

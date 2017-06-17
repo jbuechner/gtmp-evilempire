@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>6</LangVersion>
+    <LangVersion>7</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -115,6 +115,7 @@
     <Compile Include="messages\RequestCharacterCustomizationOkay.cs" />
     <Compile Include="messages\RequestCharacterCustomizationResponse.cs" />
     <Compile Include="messages\RequestCharacterInventory.cs" />
+    <Compile Include="messages\RequestCharacterInventoryDeleteItem.cs" />
     <Compile Include="messages\RequestInteractWithEntity.cs" />
     <Compile Include="messages\EntityContentResponse.cs" />
     <Compile Include="messages\RequestLoginHandler.cs" />

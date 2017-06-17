@@ -49,6 +49,25 @@ namespace gtmp.evilempire
             return null;
         }
 
+        public static long? AsLong(this object value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            if (value is long)
+            {
+                return (long)value;
+            }
+            string raw = (value as string) ?? value.ToString();
+            long v;
+            if (long.TryParse(raw, out v))
+            {
+                return v;
+            }
+            return null;
+        }
+
         public static byte? AsByte(this object value)
         {
             if (value == null)

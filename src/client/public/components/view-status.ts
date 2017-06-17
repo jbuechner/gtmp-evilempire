@@ -1,5 +1,4 @@
 Slim.tag('view-status', class extends Slim {
-    app: any;
     coordinateX: any;
     coordinateY: any;
     coordinateZ: any;
@@ -15,7 +14,6 @@ Slim.tag('view-status', class extends Slim {
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = (window as any).app;
         let self = this;
 
         document.addEventListener('moneyChanged', (ev: any) => {

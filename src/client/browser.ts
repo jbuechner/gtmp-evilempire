@@ -21,6 +21,7 @@ class Browser {
                     subscription.disconnect();
                 }
             };
+            API.sendNotification('loadPage ' + url);
             API.loadPageCefBrowser(instance, url);
             let subscription = API.onUpdate.connect(watch);
         });
@@ -38,7 +39,7 @@ class Browser {
         this._instance.call('raiseEvent', serializeToDesignatedJson(({ eventName, data })));
     }
 
-    addView(viewName, data, allowOnlyOne) {
+    addView(viewName: string, data?: any, allowOnlyOne?: boolean) {
         allowOnlyOne = allowOnlyOne || false;
         this._instance.call('addView', serializeToDesignatedJson({ selector: viewName, options: data, allowOnlyOne }));
     }
@@ -47,7 +48,7 @@ class Browser {
         this._instance.call('removeView', serializeToDesignatedJson({ selector: viewName }));
     }
 
-    static create() {
+    static create(): Promise<Browser> {
         return new Promise((resolve) => {
             let browser = new Browser();
             browser.hide();

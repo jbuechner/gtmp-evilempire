@@ -1,5 +1,4 @@
 Slim.tag('core-login', class extends Slim {
-    app: any;
     username: any;
     password: any;
     message: any;
@@ -8,7 +7,6 @@ Slim.tag('core-login', class extends Slim {
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = (window as any).app;
         let self = this;
         document.addEventListener('res:login', (ev: any) => {
             if (ev.detail.success) {
@@ -59,7 +57,7 @@ Slim.tag('core-login', class extends Slim {
                 }
                 password = '::' + a;
             }
-            this.app.login(this.username.value, password);
+            App.login(this.username.value, password);
             this.message = 'Logging in ...';
             this.username.focus();
         }
@@ -68,6 +66,6 @@ Slim.tag('core-login', class extends Slim {
 
     disconnect(e) {
         e.preventDefault();
-        this.app.disconnect('Disconnected from Login');
+        App.disconnect('Disconnected from Login');
     }
 });

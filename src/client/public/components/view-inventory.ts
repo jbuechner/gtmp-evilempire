@@ -3,7 +3,6 @@ const ViewInventoryStorage = {
 };
 
 Slim.tag('view-inventory', class extends Slim {
-    app: any;
     isDragging: any;
     dragPoint: any;
     items: any;
@@ -16,11 +15,12 @@ Slim.tag('view-inventory', class extends Slim {
     container: any;
     itemDescriptionContent: any;
 
+    quantity: HTMLInputElement;
+
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
     onBeforeCreated() {
-        this.app = (window as any).app;
         this.isDragging = false;
         this.dragPoint = { x: 0, y:0 };
         this.items = [];
@@ -57,11 +57,11 @@ Slim.tag('view-inventory', class extends Slim {
             this.container.style.top = ViewInventoryStorage.position.top;
         }
 
-        this.app.requestCharacterInventory();
+        App.requestCharacterInventory();
     }
 
     close() {
-        this.app.callBackend('closeInventory');
+        App.callBackend('closeInventory');
     }
 
     lookupItemDescription(item) {
@@ -149,6 +149,25 @@ Slim.tag('view-inventory', class extends Slim {
         ViewInventoryStorage.position = { left: this.container.style.left, top: this.container.style.top };
     }
 
+    requestDeleteSelected() {
+        let selectedItem = this.selectedItem;
+        if (selectedItem) {
+            let raw = this.quantity.value;
+            let quantity = 0;
+            if (typeof raw !== 'number') {
+                try {
+                    quantity = Number.parseInt(raw, 10);
+                } catch(ex) {
+                    return;
+                }
+            } else {
+                quantity = (raw as number);
+            }
+
+            App.requestDeleteItem(selectedItem.Id, quantity);
+        }
+    }
+
     get template() {
         return `
 <div slim-id="container" style="position: absolute; left: 100px; top: 100px; z-index: 9999;" class="dialogue">
@@ -187,9 +206,9 @@ Slim.tag('view-inventory', class extends Slim {
         <div style="display: flex; justify-content: space-between;">
             <div>
                 <i class="fa fa-plus-square button" aria-hidden="true"></i>
-                <input type="number" value="0" min="0" />
+                <input slim-id="quantity" type="number" value="0" min="0" />
                 <i class="fa fa-minus-square button" aria-hidden="true"></i>
-                <span class="button">
+                <span class="button" click="requestDeleteSelected">
                     <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<span>Trash</span>
                 </span>
             </div>

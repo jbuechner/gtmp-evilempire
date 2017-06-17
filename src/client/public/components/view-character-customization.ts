@@ -2,7 +2,6 @@ Slim.tag('view-character-customization', class extends Slim {
     get isVirtual() { return false; }
     get isInteractive() { return true; }
 
-    app: any;
     customization: any;
     current: any;
     shapeMixInput: any;
@@ -48,7 +47,6 @@ Slim.tag('view-character-customization', class extends Slim {
     }
 
     onBeforeCreated() {
-        this.app = (window as any).app;
         let self = this;
 
         this.addIndexBasedSelection('model', 'selectedModelIndex',
@@ -56,7 +54,7 @@ Slim.tag('view-character-customization', class extends Slim {
             () => this.current.ModelHash,
             p => p.Hash === this.current.ModelHash,
             (item, index) => item ? item.Name : '(n/a ' + index + ')',
-            item => this.app.customizeCharacter('model', item.Hash)
+            item => App.customizeCharacter('model', item.Hash)
         );
         this.addIndexBasedSelection('faceshapefirst', 'selectedFaceShapeFirst',
             () => this.customization.Faces,
@@ -65,7 +63,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Mother ' + item.Id : '(n/a ' + index + ')'
             },
-            item => this.app.customizeCharacter('face::shapeFirst', item.Id)
+            item => App.customizeCharacter('face::shapeFirst', item.Id)
         );
         this.addIndexBasedSelection('faceshapesecond', 'selectedFaceShapeSecond',
             () => this.customization.Faces,
@@ -74,7 +72,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Father ' + item.Id : '(n/a ' + index + ')'
             },
-            item => this.app.customizeCharacter('face::shapeSecond', item.Id)
+            item => App.customizeCharacter('face::shapeSecond', item.Id)
         );
         this.addIndexBasedSelection('faceskinfirst', 'selectedFaceskinFirst',
             () => this.customization.Faces,
@@ -83,7 +81,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Mother ' + item.Id : '(n/a ' + index + ')'
             },
-            item => this.app.customizeCharacter('face::skinFirst', item.Id)
+            item => App.customizeCharacter('face::skinFirst', item.Id)
         );
         this.addIndexBasedSelection('faceskinsecond', 'selectedFaceskinSecond',
             () => this.customization.Faces,
@@ -92,7 +90,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Father ' + item.Id : '(n/a ' + index + ')'
             },
-            item => this.app.customizeCharacter('face::skinSecond', item.Id)
+            item => App.customizeCharacter('face::skinSecond', item.Id)
         );
         this.addIndexBasedSelection('hairstyle', 'selectedHairStyle',
             () => this.customization.HairStyles.filter(p => p.Gender === this.current.Gender && p.AvailableDuringCharacterCustomization),
@@ -101,7 +99,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Hair ' + item.Id : '(n/a ' + index + ')'
             },
-            item => this.app.customizeCharacter('hair::style', item.Id)
+            item => App.customizeCharacter('hair::style', item.Id)
         );
         this.addIndexBasedSelection('haircolor', 'selectedHairColor',
             () => this.customization.HairColors,
@@ -110,7 +108,7 @@ Slim.tag('view-character-customization', class extends Slim {
             (item, index) => {
                 return item ? 'Color ' + item.Id : '(n/a' + index + ')'
             },
-            item => this.app.customizeCharacter('hair::color', item.Id)
+            item => App.customizeCharacter('hair::color', item.Id)
         );
 
 
@@ -159,14 +157,14 @@ Slim.tag('view-character-customization', class extends Slim {
     shapeMixChanged(e) {
         e.preventDefault();
         this.message = 'Contacting server to change data ...';
-        this.app.customizeCharacter('face::shapeMix', this.shapeMixInput.value);
+        App.customizeCharacter('face::shapeMix', this.shapeMixInput.value);
 
     }
 
     skinMixChanged(e) {
         e.preventDefault();
         this.message = 'Contacting server to change data ...';
-        this.app.customizeCharacter('face::skinMix', this.skinMixInput.value);
+        App.customizeCharacter('face::skinMix', this.skinMixInput.value);
     }
 
     shiftInBounds(array, index, delta) {
@@ -348,11 +346,11 @@ Hair
 
     ok(e) {
         e.preventDefault();
-        this.app.confirmCharacterCustomization('Disconnected from Login');
+        App.confirmCharacterCustomization();
     }
 
     cancel(e) {
         e.preventDefault();
-        this.app.cancelCharacterCustomization('Disconnected from Login');
+        App.cancelCharacterCustomization();
     }
 });

@@ -10,14 +10,6 @@
 	<script src="libs/sha512.js"></script>
 	<script src="libs/showdown.min.js"></script>
 	<script src="main.js"></script>
-	<!--<script src="component.dialogue.js"></script>-->
-	<!--<script src="components/core-watermark.js"></script>-->
-	<!--<script src="components/core-login.js"></script>-->
-	<!--<script src="components/view-status.js"></script>-->
-	<!--<script src="components/view-login.js"></script>-->
-	<!--<script src="components/view-entityinteractionmenu.js"></script>-->
-	<!--<script src="components/view-character-customization.js"></script>-->
-	<!--<script src="components/view-inventory.js"></script>-->
 </head>
 <body>
 	<core-watermark></core-watermark>
@@ -28,10 +20,6 @@
                 return JSON.parse(value.substring(5));
             }
             return value;
-        }
-
-        function serializeToDesignatedJson(value) {
-            return '$json' + JSON.stringify(value);
         }
 
         function addView(args) {
@@ -75,47 +63,7 @@
             document.dispatchEvent(new CustomEvent(args.eventName, { detail: args.data }));
         }
 
-        class App {
-            login(username, password) {
-                this.callBackend('login', argumentsToArray(arguments));
-            }
-
-            disconnect(reason) {
-                this.callBackend('disconnect', argumentsToArray(arguments));
-            }
-
-            customizeCharacter(what, newValue) {
-                this.callBackend('customizeCharacter', argumentsToArray(arguments));
-            }
-
-            callBackend(eventName, args) {
-                resourceCall('browser_backend', serializeToDesignatedJson({ eventName: eventName, args }));
-            }
-
-            confirmCharacterCustomization() {
-                this.callBackend('confirmCharacterCustomization');
-            }
-
-            cancelCharacterCustomization() {
-                this.callBackend('cancelCharacterCustomization');
-            }
-
-            entityinteraction(entityId, action) {
-                this.callBackend('interactWithEntity', argumentsToArray(arguments));
-			}
-
-            triggerEntityAction(entityId, action) {
-                this.callBackend('triggerEntityAction', argumentsToArray(arguments));
-			}
-
-			requestCharacterInventory() {
-                this.callBackend('requestCharacterInventory');
-			}
-        }
         window.app = new App();
-        function argumentsToArray(args) {
-            return Array.prototype.slice.call(args, 0);
-        }
 
         document.addEventListener('displayInfoChanged', ev => window.displayInfo = ev.detail );
         document.addEventListener('res:login', ev => {

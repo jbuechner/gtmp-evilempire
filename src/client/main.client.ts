@@ -8,7 +8,8 @@ const ServerClientMessage = {
     CancelCustomizeCharacter: 'req:customizeChar:cancel',
     InteractWithEntity: 'req:interactWithEntity',
     TriggerEntityAction: 'req:triggerEntityAction',
-    RequestCharacterInventory: 'req:charInventory'
+    RequestCharacterInventory: 'req:charInventory',
+    RequestCharacterInventoryDeleteItem: 'req:charInventoryDelItem'
 };
 
 const UserGroups = {
@@ -133,6 +134,9 @@ const BrowserEvents = {
     },
     'requestCharacterInventory': function __requestCharacterInventory() {
         sendToServer(ServerClientMessage.RequestCharacterInventory);
+    },
+    'requestDeleteItem': function __requestDeleteItem() {
+        sendToServer(ServerClientMessage.RequestCharacterInventoryDeleteItem, argumentsToArray(arguments));
     }
 };
 
@@ -282,7 +286,7 @@ let characterCustomization = null;
 let moneyMap = new Map();
 let displayInfo = { minimap: { margin: { left: 0, bottom: 0 }, width: 0, height: 0 } };
 
-let browser = null;
+let browser: Browser = null;
 let client: Client = null;
 let inputs: InputController = null;
 let uitracking: UiTracking = null;
@@ -310,10 +314,16 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     client = new Client();
     inputs = new InputController();
     Browser.create().then(newBrowser => {
+        API.sendNotification('navigate');
         browser = newBrowser;
-        browser.navigate('index.html').then(() => {
-            browser.show();
-        });
+        try {
+            browser.navigate('public/index.html').then(() => {
+                browser.show();
+            });
+        }
+        catch (ex) {
+            debugOut(ex);
+        }
     });
 });
 
