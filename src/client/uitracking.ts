@@ -1,37 +1,24 @@
-type Entity = GTA.Entity;
+interface EntityOptionProvider {
+    (entity: LocalHandle): IUiTrackingInfo
+}
 
-interface IUiTrackingInfo {
-    id: number;
-    position: Vector3;
-    positionAbove: Vector3;
-    netHandle: any;
+interface IUiTrackedEntity {
     entity: LocalHandle;
+    info: IUiTrackingInfo;
 }
 
 class UiTracking {
-    tracked: Map<number, IUiTrackingInfo> = new Map<number, IUiTrackingInfo>();
+    tracked: Map<number, IUiTrackedEntity> = new Map<number, IUiTrackedEntity>();
     maximumRange: number = 2.5;
 
-    resolveNetHandleFromEntityId(entityId) {
-        if (entityId) {
-            entityId = Number.parseInt(entityId);
-            let uiTrackedEntity = this.tracked.get(entityId);
-            if (uiTrackedEntity && uiTrackedEntity.netHandle) {
-                return uiTrackedEntity.netHandle;
-            }
-        }
-        return entityId;
-    }
+    private _entityOptionProvider: Map<EntityType, EntityOptionProvider>;
 
-    resolveEntityIdFromNetHandle(entityId) {
-        if (entityId) {
-            for (let [key, value] of this.tracked) {
-                if (value.netHandle && value.netHandle === entityId) {
-                    return key;
-                }
-            }
-        }
-        return entityId;
+    constructor() {
+        this._entityOptionProvider = new Map<EntityType, EntityOptionProvider>([
+            [ EntityType.Player, UiTracking.CreatePlayerOption ],
+            [ EntityType.Ped, UiTracking.CreatePedOption ],
+            [ EntityType.Vehicle, UiTracking.CreateVehicleOption ]
+        ]);
     }
 
     update(trackEntities: boolean): void {
@@ -53,11 +40,12 @@ class UiTracking {
 
     updateTrackedElements() {
         this.tracked.forEach(value => {
-            value.position = API.getEntityPosition(value.entity);
-            value.positionAbove = value.position.Add(new Vector3(0, 0, 1));
+            value.info.position = API.getEntityPosition(value.entity);
+            value.info.positionAbove = (<Vector3>value.info.position).Add(new Vector3(0, 0, 1));
 
-            let viewPoint = API.worldToScreenMaintainRatio(value.positionAbove);
-            browser.raiseEventInBrowser('updateview', { what: 'entitytargetpos', value: { entityId: '' + value.id, x: viewPoint.X, y: viewPoint.Y} });
+            let viewPoint = API.worldToScreenMaintainRatio(<Vector3>value.info.positionAbove);
+            value.info.position2d = { x: viewPoint.X, y: viewPoint.Y };
+            browser.raiseEventInBrowser('updateview', { what: 'entityinfo', value: value.info });
         });
     }
 
@@ -75,48 +63,36 @@ class UiTracking {
         }
     }
 
-    addTrackingFor(item: LocalHandle): void {
-        let id = item.Value;
+    addTrackingFor(entity: LocalHandle): void {
+        let id = API.getEntitySyncedData(entity, <string>SynchronizationProperties.EntityId);
         if (this.tracked.has(id)) {
             return;
         }
 
-        let position = API.getEntityPosition(item);
-        let positionAbove = position.Add(new Vector3(0, 0, 1));
-        let viewPoint = API.worldToScreenMaintainRatio(positionAbove);
-        let netHandle = API.getEntitySyncedData(item, 'ENTITY:NET');
-        let entityKey = API.getEntitySyncedData(item, 'ENTITY:KEY');
-
-        let options: any = UiTracking.getDefaultOptions(item);
-        if (options) {
-            this.tracked.set(id, { id, netHandle, entity: item, position, positionAbove });
-
-            options.entityId = '' + id;
-            options.entityKey = entityKey;
-            options.pos = {x: viewPoint.X, y: viewPoint.Y};
-
-            browser.addView('view-entityinteractionmenu', options);
+        let trackingInfo: any = this.getTrackingInfo(entity);
+        if (trackingInfo) {
+            this.tracked.set(id, { entity: entity, info: trackingInfo });
+            browser.addView('view-entityinteractionmenu', { info: trackingInfo });
         }
     }
 
-    static getDefaultOptions(item) {
-        if (API.isVehicle(item)) {
-            let model = API.returnNative('0x9F47B058362C84B5', 0, item);
-            let name = API.getVehicleDisplayName(model);
-            let plate = API.getVehicleNumberPlate(item);
-            return { title: '' + name + ' <span class="monospace">' + plate + '</span>', actions: ['lock', 'engine'], entityType: 'VEHICLE' };
-        }
-        if (API.isPed(item)) {
-            let actions = [];
-            let title = API.getEntitySyncedData(item, 'ENTITY:TITLE');
-            if (title && typeof title === 'string') {
-                if (API.hasEntitySyncedData(item, 'DIALOGUE:NAME')) {
-                    actions.push('speak');
-                }
-                return {title: title, actions, entityType: 'PED'};
-            }
-        }
+    getTrackingInfo(entity: LocalHandle): IUiTrackingInfo {
+        let entityType = getEntityType(entity);
+        let provider = this._entityOptionProvider.get(entityType);
+        if (provider !== undefined) {
+            let trackingInfo = provider(entity);
+            trackingInfo.id = API.getEntitySyncedData(entity, <string>SynchronizationProperties.EntityId);
 
+            trackingInfo.position = API.getEntityPosition(entity);
+            trackingInfo.positionAbove = (<Vector3>trackingInfo.position).Add(new Vector3(0, 0, 1));
+            trackingInfo.entityType = entityType;
+
+            let viewPoint = API.worldToScreenMaintainRatio(<Vector3>trackingInfo.positionAbove);
+            trackingInfo.position2d = {x: viewPoint.X, y: viewPoint.Y};
+            return trackingInfo;
+        } else {
+            API.sendNotification(`There is no entity option provider for entity type "${entityType}".`);
+        }
         return null;
     }
 
@@ -131,13 +107,13 @@ class UiTracking {
     }
 
     removeEntitiesOutOfRange(center: Vector3) {
-        this.removeExistingEntities((key: number, value: IUiTrackingInfo) => {
-            let distance = (Vector3 as any).Distance(center, value.position);
+        this.removeExistingEntities((key: number, value: IUiTrackedEntity) => {
+            let distance = (Vector3 as any).Distance(center, value.info.position);
             return distance > this.maximumRange;
         });
     }
 
-    removeExistingEntities(predicate: (key: number, value: IUiTrackingInfo) => boolean): boolean {
+    removeExistingEntities(predicate: (key: number, value: IUiTrackedEntity) => boolean): boolean {
         if (this.tracked.size < 1) {
             return;
         }
@@ -147,11 +123,58 @@ class UiTracking {
         this.tracked.forEach((value, key) => {
             if (predicate(key, value)) {
                 removable.push(key);
-                browser.removeView('view-entityinteractionmenu[data-entityId="' + value.id + '"]');
+                browser.removeView('view-entityinteractionmenu[data-entityId="' + value.info.id + '"]');
             }
         });
         removable.forEach(key => {
             this.tracked.delete(key);
         });
+    }
+
+    private static CreatePlayerOption(entity: LocalHandle): IUiTrackingInfo {
+        let trackingInfo = UiTracking.createEmptyTrackingInfo();
+        trackingInfo.displayName = 'a player';
+        trackingInfo.actions = [];
+        return trackingInfo;
+    }
+
+    private static CreatePedOption(entity: LocalHandle): IPedUiTrackingInfo {
+        let trackingInfo = <IPedUiTrackingInfo>UiTracking.createEmptyTrackingInfo();
+        trackingInfo.displayName = API.getEntitySyncedData(entity, <string>SynchronizationProperties.EntityDisplayName);
+        trackingInfo.dialogueName = API.getEntitySyncedData(entity, <string>SynchronizationProperties.EntityDialogueName);
+
+        if (trackingInfo.dialogueName) {
+            trackingInfo.actions = [ 'speak' ];
+        } else {
+            trackingInfo.actions = [];
+        }
+
+        return trackingInfo;
+    }
+
+    private static CreateVehicleOption(entity: LocalHandle): IUiTrackingInfo {
+        let trackingInfo = UiTracking.createEmptyTrackingInfo();
+
+        let model = API.returnNative('0x9F47B058362C84B5', 0, entity);
+        let name = API.getVehicleDisplayName(model);
+        let plate = API.getVehicleNumberPlate(entity);
+
+        trackingInfo.displayName = `${name} <span class="monospace">${plate}</span>span>`;
+        trackingInfo.actions = [ 'lock', 'engine' ];
+
+        return trackingInfo;
+    }
+
+
+    private static createEmptyTrackingInfo(): IUiTrackingInfo {
+        return {
+            id: null,
+            position: null,
+            positionAbove: null,
+            position2d: null,
+            displayName: null,
+            actions: null,
+            entityType: null
+        }
     }
 }

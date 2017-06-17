@@ -19,13 +19,31 @@ namespace gtmp.evilempire.server.services
 {
     class GtmpPlatformService : IPlatformService
     {
+        static class SynchronizationConstants
+        {
+            public static readonly string EntityType = "ENTITY_TYPE";
+            public static readonly string EntityId = "ENTITY_ID";
+            public static readonly string EntityDisplayName = "ENTITY_DISPLAYNAME";
+            public static readonly string EntityDialogueName = "ENTITY_DIALOGUENAME";
+            public static readonly string FaceShapeFirst = "FACE::SHAPEFIRST";
+            public static readonly string FaceShapeSecond = "FACE::SHAPESECOND";
+            public static readonly string FaceSkinFirst = "FACE::SKINFIRST";
+            public static readonly string FaceSkinSecond = "FACE::SKINSECOND";
+            public static readonly string FaceSkinMix = "FACE::SKINMIX";
+            public static readonly string FaceShapeMix = "FACE::SHAPEMIX";
+            public static readonly string FaceHairStyle = "HAIR::STYLE";
+            public static readonly string FaceHairColor = "HAIR::COLOR";
+        }
+
         readonly FreeroamCustomizationData freeroamCustomizationData;
-        readonly IDictionary<int, MapPed> RuntimeHandleToPedMap = new Dictionary<int, MapPed>();
-        readonly IDictionary<int, ManagedVehicle> RuntimeHandleToVehicleMap = new Dictionary<int, ManagedVehicle>();
+
+        readonly IDictionary<int, MapPed> RuntimePedsMap = new Dictionary<int, MapPed>();
+        readonly IDictionary<int, ManagedVehicle> RuntimeVehiclesMap = new Dictionary<int, ManagedVehicle>();
         readonly IDictionary<ManagedVehicle, PlatformVehicle> VehicleMap = new Dictionary<ManagedVehicle, PlatformVehicle>();
 
-        API api;
+        readonly InMemorySequence EntityIdSequence = new InMemorySequence();
 
+        API api;
 
         public GtmpPlatformService(API api)
         {
@@ -57,15 +75,14 @@ namespace gtmp.evilempire.server.services
             var nativeClient = (Client)client.PlatformObject;
             var face = characterCustomization.Face;
 
-            nativeClient.setSyncedData("ENTITY_TYPE", (int)EntityType.Player);
-            nativeClient.setSyncedData("FACE::SHAPEFIRST", face.ShapeFirst);
-            nativeClient.setSyncedData("FACE::SHAPESECOND", face.ShapeSecond);
-            nativeClient.setSyncedData("FACE::SKINFIRST", face.SkinFirst);
-            nativeClient.setSyncedData("FACE::SKINSECOND", face.SkinSecond);
-            nativeClient.setSyncedData("FACE::SKINMIX", face.SkinMix);
-            nativeClient.setSyncedData("FACE::SHAPEMIX", face.ShapeMix);
-            nativeClient.setSyncedData("HAIR::STYLE", characterCustomization.HairStyleId);
-            nativeClient.setSyncedData("HAIR::COLOR", characterCustomization.HairColorId);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceShapeFirst, face.ShapeFirst);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceShapeSecond, face.ShapeSecond);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceSkinFirst, face.SkinFirst);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceSkinSecond, face.SkinSecond);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceSkinMix, face.SkinMix);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceShapeMix, face.ShapeMix);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceHairStyle, characterCustomization.HairStyleId);
+            nativeClient.setSyncedData(SynchronizationConstants.FaceHairColor, characterCustomization.HairColorId);
 
             api.setPlayerDefaultClothes(nativeClient);
             api.setPlayerSkin(nativeClient, (PedHash)characterCustomization.ModelHash);
@@ -95,20 +112,22 @@ namespace gtmp.evilempire.server.services
                 }
             }
             var entity = api.createPed((PedHash)mapPed.Hash, mapPed.Position.ToVector3(), mapPed.Rotation);
-            RuntimeHandleToPedMap.Add(entity.handle.Value, mapPed);
+            var entityId = EntityIdSequence.Next();
+            RuntimePedsMap.Add(entityId, mapPed);
             entity.invincible = mapPed.IsInvincible;
             entity.freezePosition = mapPed.IsPositionFrozen;
             entity.collisionless = mapPed.IsCollisionless;
 
             if (mapPed.Dialogue != null)
             {
-                api.setEntitySyncedData(entity, "DIALOGUE:NAME", mapPed.Dialogue.Name);
+                api.setEntitySyncedData(entity, SynchronizationConstants.EntityDialogueName, mapPed.Dialogue.Name);
             }
             if (mapPed.Title != null)
             {
-                api.setEntitySyncedData(entity, "ENTITY:TITLE", mapPed.Title);
+                api.setEntitySyncedData(entity, SynchronizationConstants.EntityDisplayName, mapPed.Title);
             }
-            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
+            api.setEntitySyncedData(entity, SynchronizationConstants.EntityType, (int)EntityType.Ped);
+            api.setEntitySyncedData(entity, SynchronizationConstants.EntityId, entityId);
         }
 
         public void SpawnVehicle(ManagedVehicle vehicle)
@@ -122,7 +141,8 @@ namespace gtmp.evilempire.server.services
             }
             var hash = (VehicleHash)vehicle.Hash;
             var entity = api.createVehicle(hash, vehicle.Position.ToVector3(), vehicle.Rotation.ToVector3(), vehicle.Color1, vehicle.Color2);
-            RuntimeHandleToVehicleMap.Add(entity.handle.Value, vehicle);
+            var entityId = EntityIdSequence.Next();
+            RuntimeVehiclesMap.Add(entityId, vehicle);
             VehicleMap.Add(vehicle, entity);
 
             if (vehicle.NumberPlate != null)
@@ -244,13 +264,29 @@ namespace gtmp.evilempire.server.services
             entity.invincible = vehicle.IsInvincible;
             entity.collisionless = vehicle.IsCollisionless;
 
-            api.setEntitySyncedData(entity, "ENTITY:NET", entity.handle.Value);
+            api.setEntitySyncedData(entity, SynchronizationConstants.EntityType, (int)EntityType.Vehicle);
+            api.setEntitySyncedData(entity, SynchronizationConstants.EntityId, entityId);
         }
 
-        public object GetPedByRuntimeHandle(int handle)
+        public object GetRuntimeEntityById(int id)
+        {
+            ManagedVehicle vehicle = GetRuntimeVehicleById(id);
+            if (vehicle != null)
+            {
+                return vehicle;
+            }
+            object ped = GetRuntimePedById(id);
+            if (ped != null)
+            {
+                return ped;
+            }
+            return null;
+        }
+
+        public object GetRuntimePedById(int id)
         {
             MapPed mapPed;
-            if (RuntimeHandleToPedMap.TryGetValue(handle, out mapPed))
+            if (RuntimePedsMap.TryGetValue(id, out mapPed))
             {
                 return mapPed;
             }
@@ -258,10 +294,10 @@ namespace gtmp.evilempire.server.services
             return null;
         }
 
-        public ManagedVehicle GetVehicleByRuntimeHandle(int handle)
+        public ManagedVehicle GetRuntimeVehicleById(int id)
         {
             ManagedVehicle vehicle;
-            if (RuntimeHandleToVehicleMap.TryGetValue(handle, out vehicle))
+            if (RuntimeVehiclesMap.TryGetValue(id, out vehicle))
             {
                 return vehicle;
             }
@@ -282,6 +318,17 @@ namespace gtmp.evilempire.server.services
 
             entity.locked = vehicle.IsLocked;
             entity.engineStatus = vehicle.IsEngineRunning;
+        }
+
+        public void UpdateSpawnedPlayer(ISession session)
+        {
+            Client nativeClient = session?.Client?.PlatformObject as Client;
+            if (nativeClient == null)
+            {
+                return;
+            }
+            nativeClient.setSyncedData(SynchronizationConstants.EntityType, (int)EntityType.Player);
+            nativeClient.setSyncedData(SynchronizationConstants.EntityId, EntityIdSequence.Next());
         }
 
         public bool IsClearRange(Vector3f point, float range, float height)

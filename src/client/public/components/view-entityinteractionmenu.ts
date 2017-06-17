@@ -1,27 +1,25 @@
+///<reference path="../../definitions.d.ts"/>
+
 'use strict';
 const KnownClientSideActions = new Map();
 KnownClientSideActions.set('CLOSEACTIVEENTITYINTERACTION', function __closeActiveEntityInteraction() {
-    this.contentKey = null;
+    this.keyOfActiveDialogueContent = null;
     this.markdown = '';
     this.isContentVisible = false;
     this.resetActiveActions();
 });
 
 Slim.tag('view-entityinteractionmenu', class extends Slim {
-    _entityId: any;
-    _pos: any;
-    _actions: any;
-    _dialogue: any;
-    isContentVisible: any;
-    contentKey: any;
-    entityType: any;
-    content: any;
-    entityKey: any;
-    container: any;
-    titleElement: any;
-    available: any;
-    isLoading: any;
-    loadingText: any;
+    contentElement: HTMLElement;
+    containerElement: HTMLElement;
+    titleElement: HTMLElement;
+    availableActions: any;
+    isLoading: boolean;
+    loadingText: string;
+
+    _info: IUiTrackingInfo;
+    keyOfActiveDialogueContent: string;
+    isContentVisible: boolean;
 
     get isVirtual() { return false; }
     get isInteractive() { return true; }
@@ -30,8 +28,8 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
         document.addEventListener('updateview', (ev: any) => {
             if (ev.detail.value.entityId && ev.detail.value.entityId === this.entityId) {
                 switch (ev.detail.what) {
-                    case 'entitytargetpos':
-                        this.pos = { x: ev.detail.value.x, y: ev.detail.value.y };
+                    case 'entityinfo':
+                        this.info = ev.detail.value;
                         break;
                     case 'content':
                         this.resetIsLoading();
@@ -40,7 +38,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                         if (!content || typeof content === 'undefined' || content === null || typeof content.markdown === 'undefined' || content.markdown === null) {
                             this.runClientSideAction([ 'closeActiveEntityInteraction' ]);
                         } else {
-                            this.contentKey = content.key;
+                            this.keyOfActiveDialogueContent = content.key;
                             this.markdown = content.markdown;
                         }
                         break;
@@ -50,15 +48,12 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
     }
 
     onCreated() {
-        this._entityId = null;
-        this._pos = null;
-        this._actions = [];
-        this._dialogue = null;
-        this.resetIsLoading();
+        this._info = null;
+        this.keyOfActiveDialogueContent = null;
         this.isContentVisible = false;
-        this.contentKey = null;
-        this.entityType = null;
-        this.entityKey = null;
+        this.availableActions = {};
+
+        this.resetIsLoading();
     }
 
     onContentDomLinkClick(e) {
@@ -89,65 +84,64 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
 
     set markdown(v) {
         let converter = new showdown.Converter();
-        let html = converter.makeHtml(v);
+        this.contentElement.innerHTML = converter.makeHtml(v);
 
-        this.content.innerHTML = html;
-
-        this.postProcessContentDom(this.content);
+        this.postProcessContentDom(this.contentElement);
     }
 
-    get entityId() {
-        return this._entityId;
+    get info(): IUiTrackingInfo {
+        return this._info;
     }
 
-    set entityId(v) {
-        this._entityId = v;
-        this.setAttribute('data-entityId', v);
+    set info(v: IUiTrackingInfo) {
+        if (this._info !== v) {
+            this._info = v;
+            this.entityId = v.id;
+            this.title = v.displayName;
+            this.pos = v.position2d;
+            this.actions = v.actions;
+        }
     }
 
-    get title() {
-        return this.titleElement.innerHTML;
+    get entityId(): number {
+        if (this.info) {
+            return this.info.id;
+        }
+        return null;
     }
 
-    set title(v) {
+    set entityId(v: number) {
+        if (this.info === null) {
+            this.info = <IUiTrackingInfo>{ id: v };
+        }
+        this.info.id = v;
+        this.setAttribute('data-entityId', v.toFixed(0));
+    }
+
+    set title(v: string) {
         this.titleElement.innerHTML = v;
     }
 
-    get pos() {
-        return this._pos;
+    set pos(v: IVector) {
+        if (v && v.x && v.y) {
+            this.containerElement.style.visibility = 'visible';
+            this.containerElement.style.left = v.x + 'px';
+            this.containerElement.style.top = v.y + 'px';
+        } else {
+            this.containerElement.style.visibility = 'hidden';
+        }
     }
 
-    set pos(v) {
-        if (v !== this._pos) {
-            if (v && v.x && v.y) {
-                this.container.style.visibility = 'visible';
-                this.container.style.left = v.x + 'px';
-                this.container.style.top = v.y + 'px';
+    set actions(v: string[]) {
+        let available = {};
+        if (v) {
+            if (v.forEach) {
+                v.forEach(item => available[item] = true);
             } else {
-                this.container.style.visibility = 'hidden';
+                Object.getOwnPropertyNames(v).forEach(prop => available[prop] = v[prop]);
             }
-            this._pos = v;
         }
-    }
-
-    get actions() {
-        return this._actions;
-    }
-
-    set actions(v) {
-        if (v !== this._actions) {
-            this._actions = v;
-
-            let available = {};
-            if (v) {
-                if (v.forEach) {
-                    v.forEach(item => available[item] = true);
-                } else {
-                    Object.getOwnPropertyNames(v).forEach(prop => available[prop] = v[prop]);
-                }
-            }
-            this.available = available;
-        }
+        this.availableActions = available;
     }
 
     resetIsLoading() {
@@ -205,7 +199,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
 
         e.target.classList.add('active');
 
-        App.entityinteraction(this.entityId, this.entityType, this.entityKey, action);
+        App.entityinteraction(this.entityId, action);
     }
 
     resetActiveActions() {
@@ -216,13 +210,13 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
     }
 
     get template() {
-        return `<div slim-id="container" style="position:absolute;visibility: hidden;">
+        return `<div slim-id="containerElement" style="position:absolute;visibility: hidden;">
          <div class="hover-box">
             <div class="hover-box-title" slim-id="titleElement"></div>
             <div class="hover-box-icons">
-                <i slim-if="available.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak" data-action-requiresContent="true"></i>
-                <i slim-if="available.lock" class="fa fa-lock hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock" data-action-requiresContent="false"></i>
-                <i slim-if="available.engine" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="engine" data-action-requiresContent="false"></i>
+                <i slim-if="availableActions.speak" class="fa fa-comments-o hover-box-icon" aria-hidden="true" click="raiseAction" data-action="speak" data-action-requiresContent="true"></i>
+                <i slim-if="availableActions.lock" class="fa fa-lock hover-box-icon" aria-hidden="true" click="raiseAction" data-action="lock" data-action-requiresContent="false"></i>
+                <i slim-if="availableActions.engine" class="fa fa-key hover-box-icon" aria-hidden="true" click="raiseAction" data-action="engine" data-action-requiresContent="false"></i>
             </div>
         </div>
         <div slim-if="isContentVisible" class="hover-box-content">
@@ -232,7 +226,7 @@ Slim.tag('view-entityinteractionmenu', class extends Slim {
                     <span bind>[[loadingText]]</span>
                 </span>
             </p>
-            <div slim-id="content"></div>
+            <div slim-id="contentElement"></div>
         </div>
     </div>
 </div>

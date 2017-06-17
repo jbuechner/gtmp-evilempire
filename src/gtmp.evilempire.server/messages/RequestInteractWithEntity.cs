@@ -13,9 +13,9 @@ namespace gtmp.evilempire.server.messages
 {
     class RequestInteractWithEntity : MessageHandlerBase
     {
-        delegate bool InteractionHandler(ISession session, int? entityId, string entityKey, string action);
+        delegate bool InteractionHandler(ISession session, int? entityId, object entity, string action);
 
-        readonly IDictionary<string, InteractionHandler> interactionHandlers;
+        readonly IDictionary<Type, InteractionHandler> interactionHandlers;
 
         IPlatformService platform;
         ISerializationService serialization;
@@ -32,10 +32,10 @@ namespace gtmp.evilempire.server.messages
         public RequestInteractWithEntity(ServiceContainer services)
             : base(services)
         {
-            interactionHandlers = new Dictionary<string, InteractionHandler>
+            interactionHandlers = new Dictionary<Type, InteractionHandler>
             {
-                { "PED", InteractWithPed },
-                { "VEHICLE", InteractWithVehicle }
+                { typeof(MapPed), InteractWithPed },
+                { typeof(Vehicle), InteractWithVehicle }
             };
 
             platform = services.Get<IPlatformService>();
@@ -46,19 +46,20 @@ namespace gtmp.evilempire.server.messages
         public override bool ProcessClientMessage(ISession session, params object[] args)
         {
             var entityId = args.At(0).AsInt();
-            var entityType = args.At(1).AsString();
-            var entityKey = args.At(2).AsString();
-            var action = args.At(3).AsString();
+            var action = args.At(1).AsString();
 
             if (!entityId.HasValue)
             {
                 return false;
             }
 
+            var entity = platform.GetRuntimeEntityById(entityId.Value);
+            var entityType = entity.GetType();
+
             InteractionHandler handler;
             if (interactionHandlers.TryGetValue(entityType, out handler) && handler != null)
             {
-                return handler(session, entityId, entityKey, action);
+                return handler(session, entityId, entity, action);
             }
             else
             {
@@ -72,10 +73,10 @@ namespace gtmp.evilempire.server.messages
             return false;
         }
 
-        bool InteractWithPed(ISession session, int? entityId, string entityKey, string action)
+        bool InteractWithPed(ISession session, int? entityId, object entity, string action)
         {
             var client = session.Client;
-            var ped = (MapPed)platform.GetPedByRuntimeHandle(entityId.Value);
+            var ped = entity as MapPed;
             if (ped != null && string.Compare(action, "speak", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (ped.Dialogue != null)
@@ -89,9 +90,9 @@ namespace gtmp.evilempire.server.messages
             return false;
         }
 
-        bool InteractWithVehicle(ISession session, int? entityId, string entityKey, string action)
+        bool InteractWithVehicle(ISession session, int? entityId, object entity, string action)
         {
-            var vehicle = platform.GetVehicleByRuntimeHandle(entityId.Value);
+            var vehicle = entity as Vehicle;
             if (vehicle != null)
             {
                 action = action.ToUpper();

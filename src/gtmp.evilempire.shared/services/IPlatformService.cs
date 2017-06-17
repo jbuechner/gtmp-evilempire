@@ -24,10 +24,14 @@ namespace gtmp.evilempire.services
 
         bool IsClearRange(Vector3f point, float range, float height);
 
-        object GetPedByRuntimeHandle(int handle); // todo: introduce ped poco/entity
-        Vehicle GetVehicleByRuntimeHandle(int handle);
+        object GetRuntimeEntityById(int id);
+
+        object GetRuntimePedById(int id); // todo: introduce ped poco/entity
+        Vehicle GetRuntimeVehicleById(int id);
 
         void UpdateSpawnedVehicle(Vehicle vehicle);
+
+        void UpdateSpawnedPlayer(ISession session);
 
         bool IsInVehicle(ISession session, Vehicle vehicle);
     }

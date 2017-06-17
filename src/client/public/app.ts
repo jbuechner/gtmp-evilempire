@@ -19,11 +19,11 @@ class App {
         App.callBackend('cancelCharacterCustomization');
     }
 
-    static entityinteraction(entityId: string, entityType: string, entityKey: string, action: string): void {
+    static entityinteraction(entityId: number, action: string): void {
         App.callBackend('interactWithEntity', argumentsToArray(arguments));
     }
 
-    static triggerEntityAction(entityId, action) {
+    static triggerEntityAction(entityId: number, action: string) {
         App.callBackend('triggerEntityAction', argumentsToArray(arguments));
     }
 

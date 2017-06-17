@@ -86,6 +86,7 @@
     <Compile Include="entities\Weather.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="IClient.cs" />
+    <Compile Include="InMemorySequence.cs" />
     <Compile Include="ipc\IpcClient.cs" />
     <Compile Include="ipc\IpcServer.cs" />
     <Compile Include="ipc\ServerStatus.cs" />

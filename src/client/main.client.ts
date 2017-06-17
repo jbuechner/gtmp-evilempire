@@ -39,7 +39,6 @@ const ClientEvents = {
     'characterInvChanged': function __characterInventoryChanged(data) {
         data = deserializeFromDesignatedJson(data) || {};
         data.Items = data.Items || [];
-        data.Money = data.Money || [];
         browser.raiseEventInBrowser('characterInvChanged', data);
     },
     '::display:login': function __display_login() {
@@ -89,7 +88,6 @@ const ClientEvents = {
         if (!success) {
             data = data || {};
             data.Items = data.Items || [];
-            data.Money = data.Money || [];
         }
         browser.raiseEventInBrowser('res:charInventory', data);
     },
@@ -101,15 +99,12 @@ const ClientEvents = {
             data.EntityId = data.EntityId || 0;
         }
 
-        if (data) {
-            data.EntityId = uitracking.resolveEntityIdFromNetHandle(data.EntityId);
-            if (data.Content) {
-                data.Content = deserializeFromDesignatedJson(data.Content);
-            }
+        if (data.Content) {
+            data.Content = deserializeFromDesignatedJson(data.Content);
         }
         browser.raiseEventInBrowser('updateview', {
             what: 'content',
-            value: {entityId: '' + data.EntityId, content: data.Content}
+            value: {entityId: data.EntityId, content: data.Content}
         });
     }
 };
@@ -130,12 +125,10 @@ const BrowserEvents = {
     'cancelCharacterCustomization': function __cancelCustomizeChar() {
         sendToServer(ServerClientMessage.CancelCustomizeCharacter);
     },
-    'interactWithEntity': function __interactWithEntity(entityId, entityType, entityKey, action) {
-        entityId = uitracking.resolveNetHandleFromEntityId(entityId);
-        sendToServer(ServerClientMessage.InteractWithEntity, [entityId, entityType, entityKey, action]);
+    'interactWithEntity': function __interactWithEntity(entityId: number, action: string) {
+        sendToServer(ServerClientMessage.InteractWithEntity, [entityId, action]);
     },
-    'triggerEntityAction': function __triggerEntityAction(entityId, action) {
-        entityId = uitracking.resolveNetHandleFromEntityId(entityId);
+    'triggerEntityAction': function __triggerEntityAction(entityId: number, action: string) {
         sendToServer(ServerClientMessage.TriggerEntityAction, [entityId, action]);
     },
     'closeInventory': function __closeInventory() {
@@ -219,20 +212,20 @@ function onEntityDataChange(entity, key, oldValue) {
     updateCharacterCustomization(entity);
 }
 
-function updateCharacterCustomization(entity) {
+function updateCharacterCustomization(entity: LocalHandle) {
     try {
-        let entityType = API.getEntitySyncedData(entity, 'ENTITY_TYPE');
+        let entityType = getEntityType(entity);
         if (typeof entityType !== 'undefined') {
             if (entityType === 6 || entityType === 8) {
-                let shapeFirst = API.getEntitySyncedData(entity, 'FACE::SHAPEFIRST');
-                let shapeSecond = API.getEntitySyncedData(entity, 'FACE::SHAPESECOND');
-                let skinFirst = API.getEntitySyncedData(entity, 'FACE::SKINFIRST');
-                let skinSecond = API.getEntitySyncedData(entity, 'FACE::SKINSECOND');
-                let shapeMix = API.getEntitySyncedData(entity, 'FACE::SHAPEMIX');
-                let skinMix = API.getEntitySyncedData(entity, 'FACE::SKINMIX');
+                let shapeFirst = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceShapeFirst);
+                let shapeSecond = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceShapeSecond);
+                let skinFirst = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceSkinFirst);
+                let skinSecond = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceSkinSecond);
+                let shapeMix = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceShapeMix);
+                let skinMix = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceSkinMix);
 
-                let hairStyle = API.getEntitySyncedData(entity, 'HAIR::STYLE');
-                let hairColor = API.getEntitySyncedData(entity, 'HAIR::COLOR');
+                let hairStyle = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceHairStyle);
+                let hairColor = API.getEntitySyncedData(entity, <string>SynchronizationProperties.FaceHairColor);
 
                 if (typeof shapeFirst !== 'undefined' && typeof shapeSecond !== 'undefined' && typeof skinFirst !== 'undefined' && skinSecond !== 'undefined' && typeof shapeMix !== 'undefined' && skinMix !== 'undefined') {
                     API.callNative('0x9414E18B9434C2FE', entity, shapeFirst, shapeSecond, 0, skinFirst, skinSecond, 0, shapeMix, skinMix, 0, false);
@@ -286,6 +279,10 @@ function pushViewData() {
 
         browser.raiseEventInBrowser('updateview', { what: 'coordinates', value });
     }
+}
+
+function getEntityType(entity: LocalHandle) : EntityType {
+    return API.getEntitySyncedData(entity, <string>SynchronizationProperties.EntityType);
 }
 
 let pushViewDataTickCount = 0;

@@ -48,7 +48,7 @@ namespace gtmp.evilempire.server.messages
             }
 
             var client = session.Client;
-            var ped = (MapPed)platform.GetPedByRuntimeHandle(entityId.Value);
+            var ped = (MapPed)platform.GetRuntimePedById(entityId.Value);
             if (ped != null && ped.Dialogue != null)
             {
                 var dialoguePage = FindDialoguePage(ped.Dialogue, pageKey);

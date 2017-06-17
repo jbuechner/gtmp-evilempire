@@ -159,6 +159,7 @@ namespace gtmp.evilempire.server
 
             var session = sessions.CreateSession(managedClient);
             sessionStateTransition.Transit(session, SessionState.Connected);
+            platform.UpdateSpawnedPlayer(session);
             UpdateServerStatus();
         }
 
