@@ -148,13 +148,14 @@ namespace gtmp.evilempire.server.services
             return 0;
         }
 
-        public void AddToCharacterInventory(int characterId, IEnumerable<Item> items)
+        public CharacterInventoryChanges AddToCharacterInventory(int characterId, IEnumerable<Item> items)
         {
             var characterInventory = GetCharacterInventoryById(characterId);
             if (characterInventory != null)
             {
-                AddToCharacterInventory(characterInventory, items);
+                return AddToCharacterInventory(characterInventory, items);
             }
+            return CharacterInventoryChanges.None;
         }
 
         public CharacterInventoryChanges RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items)
@@ -167,23 +168,27 @@ namespace gtmp.evilempire.server.services
             return CharacterInventoryChanges.None;
         }
 
-        void AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        CharacterInventoryChanges AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
+            List<Item> newItems = new List<Item>();
             foreach (var item in items)
             {
-                var newItems = this.items.CreateItem(item.ItemDescriptionId, item.Amount, item.Name, item.KeyForEntityId);
-                AddItemsToCharacterInventory(characterInventory, newItems);
+                newItems.AddRange(this.items.CreateItem(item.ItemDescriptionId, item.Amount, item.Name, item.KeyForEntityId));
             }
+            if (newItems.Count > 0)
+            {
+                return AddItemsToCharacterInventory(characterInventory, newItems);
+            }
+            return CharacterInventoryChanges.None;
         }
 
-        void AddItemsToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        CharacterInventoryChanges AddItemsToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
-            if (characterInventory == null)
-            {
-                throw new ArgumentNullException(nameof(characterInventory));
-            }
+            characterInventory = characterInventory ?? throw new ArgumentNullException(nameof(characterInventory));
 
             var sync = characterInventoriesInModification.GetOrAdd(characterInventory.CharacterId, _ => new object());
+            var changedCurrencies = new HashSet<Currency>();
+            var addedOrChangedItems = new List<Item>();
             var hasMoneyChanged = false;
             lock (sync)
             {
@@ -209,6 +214,7 @@ namespace gtmp.evilempire.server.services
                         else
                         {
                             targetList = characterInventory.Money;
+                            changedCurrencies.Add(itemDescription.AssociatedCurrency);
                             hasMoneyChanged = true;
                         }
 
@@ -222,6 +228,7 @@ namespace gtmp.evilempire.server.services
                             stackLeft -= used;
                             item.Amount -= used;
                             itemWithAvailableAmountLeft.Amount += used;
+                            addedOrChangedItems.Add(itemWithAvailableAmountLeft);
 
                             if (stackLeft <= 0)
                             {
@@ -233,6 +240,7 @@ namespace gtmp.evilempire.server.services
                         {
                             item.Id = item.Id == Item.ZeroId ? db.NextInt64ValueFor(Constants.Database.Sequences.ItemIdSequence) : item.Id;
                             targetList.Add(item);
+                            addedOrChangedItems.Add(item);
                         }
                     }
                 }
@@ -242,6 +250,7 @@ namespace gtmp.evilempire.server.services
             {
                 UpdateCharacterMoneyStatistic(characterInventory);
             }
+            return new CharacterInventoryChanges(true, addedOrChangedItems, null, changedCurrencies);
         }
 
         public CharacterInventoryChanges RemoveFromCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)

@@ -10,6 +10,7 @@ namespace gtmp.evilempire.server.actions
     [ActionHandler("GiveItem")]
     class GiveItemActionHandler : ActionHandler
     {
+        ISessionService sessions;
         ICharacterService characters;
         IPlatformService platform;
         Item[] items;
@@ -18,19 +19,13 @@ namespace gtmp.evilempire.server.actions
         public GiveItemActionHandler(ServiceContainer services, IDictionary<string, object> arguments)
             : base(services, arguments)
         {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-            if (arguments == null)
-            {
-                throw new ArgumentNullException(nameof(arguments));
-            }
+            services = services ?? throw new ArgumentNullException(nameof(services));
+            arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
 
+            sessions = services.Get<ISessionService>();
             characters = services.Get<ICharacterService>();
             platform = services.Get<IPlatformService>();
             var map = services.Get<Map>();
-
 
             object intermediate;
             arguments.TryGetValue("ItemDescriptionId", out intermediate);
@@ -120,7 +115,8 @@ namespace gtmp.evilempire.server.actions
                     }
                 }
 
-                characters.AddToCharacterInventory(session.Character.Id, newItems);
+                var changes = characters.AddToCharacterInventory(session.Character.Id, newItems);
+                sessions.SendCharacterInventoryChangedEvents(session, changes);
             }
         }
 
