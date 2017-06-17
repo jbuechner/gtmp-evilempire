@@ -21,7 +21,6 @@ class Browser {
                     subscription.disconnect();
                 }
             };
-            API.sendNotification('loadPage ' + url);
             API.loadPageCefBrowser(instance, url);
             let subscription = API.onUpdate.connect(watch);
         });

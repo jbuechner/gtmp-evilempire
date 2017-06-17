@@ -314,7 +314,6 @@ let onResourceStartSubscription = API.onResourceStart.connect(() => {
     client = new Client();
     inputs = new InputController();
     Browser.create().then(newBrowser => {
-        API.sendNotification('navigate');
         browser = newBrowser;
         try {
             browser.navigate('public/index.html').then(() => {
