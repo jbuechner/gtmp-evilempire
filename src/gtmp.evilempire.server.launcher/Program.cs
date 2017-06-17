@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Xsl;
 using static System.FormattableString;
 
@@ -102,14 +103,25 @@ namespace gtmp.evilempire.server.launcher
 
             ExecuteWithConsoleOutput("Starting GTMP server instance ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
 
-            processStartInfo = new ProcessStartInfo
+            bool runHttpRpc = IsHttpRpcEnabled();
+            if (runHttpRpc)
             {
-                FileName = Constants.HttpRpcServerExecutable,
-                WorkingDirectory = Environment.CurrentDirectory,
-                Arguments = string.Join(" ", args)
-            };
+                processStartInfo = new ProcessStartInfo
+                {
+                    FileName = Constants.HttpRpcServerExecutable,
+                    WorkingDirectory = Environment.CurrentDirectory,
+                    Arguments = string.Join(" ", args)
+                };
 
-            ExecuteWithConsoleOutput("Starting GTMP HTTP RPC server ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
+                ExecuteWithConsoleOutput("Starting GTMP HTTP RPC server ... ", WrapWithFailReason(() => Process.Start(processStartInfo) != null, "Unable to spawn new process"));
+            }
+            else
+            {
+                using (ConsoleColor.Blue.Foreground())
+                {
+                    Console.WriteLine("HTTP RPC server not started due to missing configuration ...");
+                }
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -253,6 +265,13 @@ namespace gtmp.evilempire.server.launcher
                 a = null;
                 return true;
             };
+        }
+
+        static bool IsHttpRpcEnabled()
+        {
+            var xdoc = XDocument.Load(Constants.SettingFile);
+            var httpRpcElement = xdoc?.Root?.Element("httprpc");
+            return httpRpcElement != null;
         }
     }
 }
