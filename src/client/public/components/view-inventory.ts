@@ -217,6 +217,14 @@ Slim.tag('view-inventory', class extends Slim {
         }
     }
 
+    incrementQuantity() {
+        this.quantity.valueAsNumber += 1;
+    }
+
+    decrementQuantity() {
+        this.quantity.valueAsNumber -= 1;
+    }
+
     get template() {
         return `
 <div slim-id="container" style="position: absolute; left: 100px; top: 100px; z-index: 9999;" class="dialogue">
@@ -254,9 +262,9 @@ Slim.tag('view-inventory', class extends Slim {
     <div class="footer">
         <div style="display: flex; justify-content: space-between;">
             <div>
-                <i class="fa fa-plus-square button" aria-hidden="true"></i>
+                <i class="fa fa-plus-square button" aria-hidden="true" click="incrementQuantity"></i>
                 <input slim-id="quantity" type="number" value="0" min="0" />
-                <i class="fa fa-minus-square button" aria-hidden="true"></i>
+                <i class="fa fa-minus-square button" aria-hidden="true" click="decrementQuantity"></i>
                 <span class="button" click="requestDeleteSelected">
                     <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<span>Trash</span>
                 </span>
