@@ -2,15 +2,23 @@ const ViewInventoryStorage = {
     position: null
 };
 
+interface IInventoryViewItem extends IItem {
+    itemDescription: IItemDescription;
+    displayAmount: string;
+}
+
+interface ICharInventoryEventArgs extends CustomEvent {
+    detail: { Items: IItem[], Money: IItem[] };
+}
+
 Slim.tag('view-inventory', class extends Slim {
-    isDragging: any;
-    dragPoint: any;
-    items: any;
-    money: any;
-    selectedItem: any;
+    allItems: IInventoryViewItem[];
+    selectedItem?: IInventoryViewItem;
+
+    isDragging: boolean;
+    dragPoint: IVector;
     capturedOnDragStop: any;
     capturedOnDragMouseMove: any;
-    allItems: any;
     header: any;
     container: any;
     itemDescriptionContent: any;
@@ -23,9 +31,8 @@ Slim.tag('view-inventory', class extends Slim {
     onBeforeCreated() {
         this.isDragging = false;
         this.dragPoint = { x: 0, y:0 };
-        this.items = [];
-        this.money = [];
         this.selectedItem = null;
+        this.allItems = [];
 
         this.capturedOnDragStop = () => this.onDragStop();
         this.capturedOnDragMouseMove = (e) => this.onDragMouseMove(e);
@@ -37,11 +44,11 @@ Slim.tag('view-inventory', class extends Slim {
             document.addEventListener('mouseup', this.capturedOnDragStop);
             document.addEventListener('mousemove', this.capturedOnDragMouseMove);
         });
-        document.addEventListener('res:charInventory', (e: any) => {
-            this.items = e.detail.Items || [];
-            this.money = e.detail.Money || [];
+        document.addEventListener('res:charInventory', (e: ICharInventoryEventArgs) => {
+            let items = e.detail.Items || [];
+            let money = e.detail.Money || [];
 
-            let allItems = this.items.concat(this.money);
+            let allItems: IInventoryViewItem[] = (items.concat(money) as IInventoryViewItem[]);
             allItems.forEach(item => {
                 item.itemDescription = this.lookupItemDescription(item);
                 item.Name = item.Name || item.itemDescription.Name;
@@ -68,13 +75,14 @@ Slim.tag('view-inventory', class extends Slim {
         return (window as any).itemDescriptions.get(item.ItemDescriptionId) || { Id: -1, Name: 'n/a', Description: 'n/a', Weight: 0, Volume: 0 };
     }
 
-    selectItem(item) {
+    selectItem(item: IInventoryViewItem): void {
         this.selectedItem = item;
         if (item && item.itemDescription) {
             this.renderSelectedItemDescription(item.itemDescription.Description);
         } else {
             this.renderSelectedItemDescription('*No item selected*');
         }
+        this.quantity.value = item.Amount.toFixed(0);
         this.updateSelected();
     }
 
