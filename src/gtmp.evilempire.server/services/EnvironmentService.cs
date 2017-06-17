@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using gtmp.evilempire.entities;
@@ -11,14 +12,14 @@ using Quartz.Impl;
 
 namespace gtmp.evilempire.server.services
 {
-    class WeatherService : IWeatherService
+    class EnvironmentService : IEnvironmentService
     {
 
-        private API _api;
+        public API _api;
         public List<Weather> WeatherList = new List<Weather>();
 
 
-        public WeatherService(API api)
+        public EnvironmentService(API api)
         {
             _api = api;
             WeatherList.Add(new Weather("ExtraSunny", 0));
@@ -42,10 +43,7 @@ namespace gtmp.evilempire.server.services
             IJobDetail job = JobBuilder.Create<WeatherJob>()
                 .WithIdentity("weather_job", "weatherservice")
                 .Build();
-
-
             job.JobDataMap["weatherService"] = this;
-
             // Trigger the job to run now, and then repeat every 10 seconds
             ITrigger trigger = TriggerBuilder.Create()
                 .WithIdentity("weather_trigger", "weatherservice")
@@ -56,7 +54,22 @@ namespace gtmp.evilempire.server.services
                 .Build();
 
 
+            IJobDetail timeJob = JobBuilder.Create<WeatherJob>()
+                .WithIdentity("weather_job", "weatherservice")
+                .Build();
+            job.JobDataMap["weatherService"] = this;
+            // Trigger the job to run now, and then repeat every 10 seconds
+            ITrigger timeTrigger = TriggerBuilder.Create()
+                .WithIdentity("time_tick", "weatherservice")
+                .StartNow()
+                .WithSimpleSchedule(x => x
+                    .WithInterval(new TimeSpan(0,0,0,0,2))
+                    .RepeatForever())
+                .Build();
+
             scheduler.ScheduleJob(job, trigger);
+
+
 
         }
 
@@ -78,28 +91,51 @@ namespace gtmp.evilempire.server.services
             if (WeatherList.Contains(weather))
             {
                 _api.setWeather(weather.WeatherId);
+                
             }
         }
+
+        public void SetTime(TimeSpan time)
+        {
+            _api.setTime(time.Hours, time.Minutes);
+        }
+        
+        
 
        
     }
 
+    public class TimeJob : IJob
+    {
+        public void Execute(IJobExecutionContext context)
+        {
+            var dataMap = context.JobDetail.JobDataMap;
+            var environmentService = (EnvironmentService)dataMap["weatherService"];
+
+            var currTIme = environmentService._api.getTime();
+            if (currTIme.Minutes == 59)
+            {
+                environmentService.SetTime(new TimeSpan(currTIme.Hours, 00, 00));
+            }
+            else
+            {
+                
+            }
+
+            
+
+        }
+    }
 
     public class WeatherJob : IJob
     {
         public void Execute(IJobExecutionContext context)
         {
-
             var dataMap = context.JobDetail.JobDataMap;
-
-            var weatherService = (WeatherService)dataMap["weatherService"];
-
+            var weatherService = (EnvironmentService)dataMap["weatherService"];
             Random rdm = new Random();
-
             var weather = weatherService.WeatherList[rdm.Next(0, weatherService.WeatherList.Count - 1)];
-
             weatherService.SetWeather(weather);
-            
             //Console.WriteLine("Wetter wurde zu " + weather.Name + " geändert");
 
         }

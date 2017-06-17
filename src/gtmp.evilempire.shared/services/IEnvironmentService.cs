@@ -7,13 +7,19 @@ using gtmp.evilempire.entities;
 
 namespace gtmp.evilempire.services
 {
-    public interface IWeatherService
+    public interface IEnvironmentService
     {
 
         Weather GetCurrentWeather();
 
         void SetWeather(Weather weather);
 
+        void SetTime(TimeSpan time);
+
+        
 
     }
+
+
+    
 }

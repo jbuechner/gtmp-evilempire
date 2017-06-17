@@ -34,7 +34,7 @@ namespace gtmp.evilempire.server
         ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransition;
         ICommandService commands;
-        private IWeatherService weatherService;
+        private IEnvironmentService weatherService;
         IpcServer ipc;
 
         readonly ServerTimerRealm timers;
@@ -66,7 +66,7 @@ namespace gtmp.evilempire.server
             commands = services.Get<ICommandService>();
             characters = services.Get<ICharacterService>();
             sessionStateTransition = services.Get<ISessionStateTransitionService>();
-            weatherService = services.Get<IWeatherService>();
+            weatherService = services.Get<IEnvironmentService>();
             
 
             clientMessageHandlers = GetClientMessageHandlers(services);
@@ -114,7 +114,7 @@ namespace gtmp.evilempire.server
             services.Register<ICommandService, CommandService>();
             services.Register<ISessionStateTransitionService, SessionStateTransitionService>();
             services.Register<IVehicleService, VehicleService>();
-            services.Register<IWeatherService>(new WeatherService(api));
+            services.Register<IEnvironmentService>(new EnvironmentService(api));
 
             return services;
         }
