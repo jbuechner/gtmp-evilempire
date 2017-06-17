@@ -38,18 +38,8 @@ namespace gtmp.evilempire.server.messages
             var characterId = session?.Character?.Id;
             if (characterId != null && itemId.HasValue && quantity.HasValue && quantity.Value > 0)
             {
-                var item = characters.GetCharacterItemById(characterId.Value, itemId.Value);
-                if (characters.RemoveFromCharacterInventory(characterId.Value, new[] { new Item { Id = itemId.Value, Amount = quantity.Value } }))
-                {
-                    if (item != null)
-                    {
-                        var itemDescription = items.GetItemDescription(item.ItemDescriptionId);
-                        if (itemDescription.AssociatedCurrency != Currency.None)
-                        {
-                            sessions.SendMoneyChangedEvents(session, itemDescription.AssociatedCurrency);
-                        }
-                    }
-                }
+                var changes = characters.RemoveFromCharacterInventory(characterId.Value, new[] { new Item { Id = itemId.Value, Amount = quantity.Value } });
+                sessions.SendCharacterInventoryChangedEvents(session, changes);
             }
             return false;
         }

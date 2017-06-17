@@ -28,6 +28,7 @@ namespace gtmp.evilempire.server
         public static readonly string RequestCharacterInventoryResponse = "res:charInventory";
         public static readonly string RequestCharacterInventoryDeleteItem = "req:charInventoryDelItem";
 
+        public static readonly string CharacterInventoryChanged = "characterInvChanged";
         public static readonly string MoneyChanged = "moneyChanged";
 
     }

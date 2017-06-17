@@ -31,6 +31,7 @@ interface IItem {
     Amount: number;
     Name?: string;
     KeyForEntityId?: string;
+    HasBeenDeleted: boolean;
 }
 
 function argumentsToArray(args: any): any[] {

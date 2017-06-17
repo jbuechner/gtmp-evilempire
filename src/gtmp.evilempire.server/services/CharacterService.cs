@@ -157,14 +157,14 @@ namespace gtmp.evilempire.server.services
             }
         }
 
-        public bool RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items)
+        public CharacterInventoryChanges RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items)
         {
             var characterInventory = GetCharacterInventoryById(characterId);
             if (characterInventory != null)
             {
                 return RemoveFromCharacterInventory(characterInventory, items);
             }
-            return false;
+            return CharacterInventoryChanges.None;
         }
 
         void AddToCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
@@ -244,7 +244,7 @@ namespace gtmp.evilempire.server.services
             }
         }
 
-        public bool RemoveFromCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
+        public CharacterInventoryChanges RemoveFromCharacterInventory(CharacterInventory characterInventory, IEnumerable<Item> items)
         {
             KeyValuePair<int?, IList<Item>> selectNextCandidate(CharacterInventory inv, Item item, ItemDescription itemDescription, out Item candidate) {
                 var index = inv.Items.IndexOf(p => p != null && p.Id == item.Id, out candidate);
@@ -281,9 +281,12 @@ namespace gtmp.evilempire.server.services
             }
             if (items == null)
             {
-                return true;
+                return CharacterInventoryChanges.None;
             }
 
+            var changedItems = new Dictionary<long, Item>();
+            var removedItems = new Dictionary<long, Item>();
+            var changedCurrencies = new HashSet<Currency>();
             var sync = characterInventoriesInModification.GetOrAdd(characterInventory.CharacterId, _ => new object());
             var hasMoneyChanged = false;
             lock (sync)
@@ -306,27 +309,43 @@ namespace gtmp.evilempire.server.services
                             nextCandidateKeyValue = selectNextCandidate(characterInventory, item, itemDescription, out nextCandidate);
                             if (nextCandidate == null)
                             {
-                                return false;
+                                return CharacterInventoryChanges.None;
                             }
                         }
 
-                        hasMoneyChanged |= characterInventory.Money == nextCandidateKeyValue.Value;
+                        if (itemDescription == null)
+                        {
+                            itemDescription = this.items.GetItemDescription(nextCandidate.ItemDescriptionId);
+                        }
+
+                        if (itemDescription.AssociatedCurrency != Currency.None)
+                        {
+                            changedCurrencies.Add(itemDescription.AssociatedCurrency);
+                        }
+
                         if (nextCandidate.Amount > remaining)
                         {
+
                             nextCandidate.Amount -= remaining;
                             remaining = 0;
+                            changedItems[nextCandidate.Id] = nextCandidate;
                         }
                         else
                         {
                             remaining -= nextCandidate.Amount;
                             nextCandidate.Amount = 0;
                             nextCandidateKeyValue.Value.RemoveAt(nextCandidateKeyValue.Key.Value);
+                            if (changedItems.ContainsKey(nextCandidate.Id))
+                            {
+                                changedItems.Remove(nextCandidate.Id);
+                            }
+                            removedItems[nextCandidate.Id] = nextCandidate;
                         }
                     } while (remaining > 0 && nextCandidate != null);
 
                     if (remaining > 0)
                     {
-                        return false;
+                        return CharacterInventoryChanges.None;
                     }
                 }
                 db.Update<CharacterInventory>(characterInventory);
@@ -335,7 +354,7 @@ namespace gtmp.evilempire.server.services
             {
                 UpdateCharacterMoneyStatistic(characterInventory);
             }
-            return true;
+            return new CharacterInventoryChanges(true, changedItems.Values, removedItems.Values, changedCurrencies);
         }
 
         void UpdateCharacterMoneyStatistic(CharacterInventory characterInventory)

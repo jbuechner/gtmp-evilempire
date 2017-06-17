@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using gtmp.evilempire.server.sessions;
 using System.Collections.Generic;
 using gtmp.evilempire.entities;
+using gtmp.evilempire.server.messages.transfer;
+using System.Globalization;
 
 namespace gtmp.evilempire.server.services
 {
@@ -22,24 +24,19 @@ namespace gtmp.evilempire.server.services
         ConcurrentDictionary<IClient, Session> clientToSessionMap = new ConcurrentDictionary<IClient, Session>();
         ConcurrentDictionary<string, Session> loginToSessionMap = new ConcurrentDictionary<string, Session>();
 
+        ISerializationService serialization;
         ISessionStateTransitionService sessionStateTransitionService;
+        IItemService items;
         ICharacterService characters;
 
         ConcurrentDictionary<int, byte> usedPrivateDimensions = new ConcurrentDictionary<int, byte>();
 
-        public SessionService(ISessionStateTransitionService sessionStateTransitionService, ICharacterService characters)
+        public SessionService(ISerializationService serialization, ISessionStateTransitionService sessionStateTransitionService, ICharacterService characters, IItemService items)
         {
-            if (sessionStateTransitionService == null)
-            {
-                throw new ArgumentNullException(nameof(sessionStateTransitionService));
-            }
-            if (characters == null)
-            {
-                throw new ArgumentNullException(nameof(characters));
-            }
-
-            this.sessionStateTransitionService = sessionStateTransitionService;
-            this.characters = characters;
+            this.serialization = serialization ?? throw new ArgumentNullException(nameof(serialization));
+            this.sessionStateTransitionService = sessionStateTransitionService ?? throw new ArgumentNullException(nameof(sessionStateTransitionService));
+            this.characters = characters ?? throw new ArgumentNullException(nameof(characters));
+            this.items = items ?? throw new ArgumentNullException(nameof(items));
         }
 
         public ISession CreateSession(IClient client)
@@ -156,8 +153,26 @@ namespace gtmp.evilempire.server.services
             }
         }
 
+        public void SendCharacterInventoryChangedEvents(ISession session, CharacterInventoryChanges changes)
+        {
+            session = session ?? throw new ArgumentNullException(nameof(session));
+            if (changes == null || !changes.Any)
+            {
+                return;
+            }
+
+            SendItemChangedEvents(session, changes.AddedOrChangedItems, changes.RemovedItems);
+
+            var currencies = changes.ChangedCurrencies.ToArray();
+            if (currencies != null && currencies.Length > 0)
+            {
+                SendMoneyChangedEvents(session, currencies);
+            }
+        }
+
         public void SendMoneyChangedEvents(ISession session, params Currency[] currencies)
         {
+            session = session ?? throw new ArgumentNullException(nameof(session));
             if (currencies == null || currencies.Length < 1)
             {
                 currencies = Enum.GetValues(typeof(Currency)).Cast<Currency>().Where(p => p != Currency.None).ToArray();
@@ -167,6 +182,78 @@ namespace gtmp.evilempire.server.services
             {
                 var amount = characters.GetTotalAmountOfMoney(session.Character.Id, currency);
                 session.Client.TriggerClientEvent(ClientEvents.MoneyChanged, (int)currency, amount);
+            }
+        }
+
+        public void SendItemChangedEvents(ISession session, IEnumerable<Item> addedOrChangedItems, IEnumerable<Item> removedItems)
+        {
+            Dictionary<int, ItemDescription> cachedDescriptions = new Dictionary<int, ItemDescription>();
+            ItemDescription lookupItemDescription(IDictionary<int, ItemDescription> cache, int itemDescriptionId)
+            {
+                ItemDescription itemDescription;
+                if (cache.TryGetValue(itemDescriptionId, out itemDescription))
+                {
+                    return itemDescription;
+                }
+                return cache[itemDescriptionId] = items.GetItemDescription(itemDescriptionId);
+            }
+
+            void addToInventory(CharacterInventory inventory, Item item)
+            {
+                var itemDescription = lookupItemDescription(cachedDescriptions, item.ItemDescriptionId);
+                if (itemDescription?.AssociatedCurrency != Currency.None)
+                {
+                    inventory.Money.Add(item);
+                }
+                else
+                {
+                    inventory.Items.Add(item);
+                }
+            }
+            void markAsRemoved(ClientCharacterInventory inventory, Item item)
+            {
+                var clientItem = inventory.Items.Union(inventory.Money).FirstOrDefault(p => p.Id == item.Id.ToString(CultureInfo.InvariantCulture));
+                if (clientItem != null)
+                {
+                    clientItem.HasBeenDeleted = true;
+                }
+            }
+
+            session = session ?? throw new ArgumentNullException(nameof(session));
+            if (addedOrChangedItems == null || removedItems == null)
+            {
+                return;
+            }
+
+            var characterId = session.Character?.Id;
+            var client = session.Client;
+            if (client != null && characterId.HasValue)
+            {
+                var hasAtLeastOneChange = false;
+                CharacterInventory inventory = new CharacterInventory { CharacterId = characterId.Value };
+                removedItems = removedItems.ToList(); // multiple iterations
+                foreach (var item in addedOrChangedItems.Union(removedItems))
+                {
+                    addToInventory(inventory, item);
+                    hasAtLeastOneChange |= true;
+                }
+
+                var response = new ClientCharacterInventory(inventory);
+                foreach (var removedItem in removedItems)
+                {
+                    if (removedItem == null)
+                    {
+                        continue;
+                    }
+                    markAsRemoved(response, removedItem);
+                    hasAtLeastOneChange |= true;
+                }
+
+                if (hasAtLeastOneChange)
+                {
+                    var data = serialization.SerializeAsDesignatedJson(response);
+                    client.TriggerClientEvent(ClientEvents.CharacterInventoryChanged, data);
+                }
             }
         }
 

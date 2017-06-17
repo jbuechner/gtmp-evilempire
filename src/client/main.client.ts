@@ -36,6 +36,12 @@ const ClientEvents = {
         moneyMap.set(currency, amount);
         browser.raiseEventInBrowser('moneyChanged', { currency, amount });
     },
+    'characterInvChanged': function __characterInventoryChanged(data) {
+        data = deserializeFromDesignatedJson(data) || {};
+        data.Items = data.Items || [];
+        data.Money = data.Money || [];
+        browser.raiseEventInBrowser('characterInvChanged', data);
+    },
     '::display:login': function __display_login() {
         client.cursor = true;
         client.isInFreeroam = false;

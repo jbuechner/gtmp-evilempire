@@ -56,6 +56,7 @@
     <Compile Include="ArgumentsParser.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="AuthExtensions.cs" />
+    <Compile Include="CharacterInventoryChanges.cs" />
     <Compile Include="CommandExecutionResult.cs" />
     <Compile Include="CommandInfo.cs" />
     <Compile Include="ConsoleExtensions.cs" />

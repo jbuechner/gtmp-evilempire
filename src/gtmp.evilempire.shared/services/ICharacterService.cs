@@ -20,7 +20,7 @@ namespace gtmp.evilempire.services
         IEnumerable<Item> GetKeys(int characterId, Vehicle vehicle);
 
         void AddToCharacterInventory(int characterId, IEnumerable<Item> items);
-        bool RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items);
+        CharacterInventoryChanges RemoveFromCharacterInventory(int characterId, IEnumerable<Item> items);
 
         void UpdatePosition(int characterId, Vector3f? position, Vector3f? rotation);
 

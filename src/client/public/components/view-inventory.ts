@@ -49,14 +49,45 @@ Slim.tag('view-inventory', class extends Slim {
             let money = e.detail.Money || [];
 
             let allItems: IInventoryViewItem[] = (items.concat(money) as IInventoryViewItem[]);
+            this.decorateInventoryViewItems(allItems);
+            this.allItems = allItems; // separate assignment for slimjs
+
+            this.selectItem(this.allItems.length > 0 ? this.allItems[0] : null);
+        });
+        document.addEventListener('characterInvChanged', (e: ICharInventoryEventArgs) => {
+            let items = e.detail.Items || [];
+            let money = e.detail.Money || [];
+            let changedItems = (items.concat(money) as IInventoryViewItem[]);
+            let mapOfDeletedItems = new Map<string, boolean>();
+            let mapOfChangedItems = new Map<string, IInventoryViewItem>();
+            changedItems.forEach(item => {
+                if (item.HasBeenDeleted) {
+                    mapOfDeletedItems.set(item.Id, item.HasBeenDeleted);
+                } else {
+                    mapOfChangedItems.set(item.Id, item);
+                }
+            });
+            changedItems = null;
+
+            let allItems = this.allItems.filter(item => {
+                return !mapOfDeletedItems.has(item.Id);
+            });
+            mapOfDeletedItems.clear();
+            mapOfDeletedItems = null;
             allItems.forEach(item => {
-                item.itemDescription = this.lookupItemDescription(item);
-                item.Name = item.Name || item.itemDescription.Name;
-                item.displayAmount = item.itemDescription.IsStackable ? item.Amount + 'x' : '';
+                let changedItem = mapOfChangedItems.get(item.Id);
+                if (changedItem !== undefined) {
+                    item.Amount = changedItem.Amount;
+                    this.decorateInventoryViewItem(item);
+                    mapOfChangedItems.delete(item.Id);
+                }
+            });
+            mapOfChangedItems.forEach(newItem => {
+                this.decorateInventoryViewItem(newItem);
+                allItems.push(newItem);
             });
 
             this.allItems = allItems;
-            this.selectItem(this.allItems.length > 0 ? this.allItems[0] : null);
         });
 
         if (ViewInventoryStorage.position !== null) {
@@ -65,6 +96,16 @@ Slim.tag('view-inventory', class extends Slim {
         }
 
         App.requestCharacterInventory();
+    }
+
+    decorateInventoryViewItems(items: IInventoryViewItem[]) {
+        items.forEach(item => this.decorateInventoryViewItem(item));
+    }
+
+    decorateInventoryViewItem(item: IInventoryViewItem) {
+        item.itemDescription = this.lookupItemDescription(item);
+        item.Name = item.Name || item.itemDescription.Name;
+        item.displayAmount = item.itemDescription.IsStackable ? item.Amount + 'x' : '';
     }
 
     close() {

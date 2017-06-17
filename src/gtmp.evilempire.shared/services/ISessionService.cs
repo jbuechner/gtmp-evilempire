@@ -18,7 +18,9 @@ namespace gtmp.evilempire.services
         void RemoveStaleSessions();
         void StoreSessionState();
 
+        void SendCharacterInventoryChangedEvents(ISession session, CharacterInventoryChanges changes);
         void SendMoneyChangedEvents(ISession session, params Currency[] currencies);
+        void SendItemChangedEvents(ISession session, IEnumerable<Item> addedOrChangedItems, IEnumerable<Item> removedItems);
 
         void ForEachSession(Func<ISession, bool> fn);
     }

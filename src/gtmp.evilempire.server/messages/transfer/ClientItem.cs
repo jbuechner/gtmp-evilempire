@@ -20,6 +20,8 @@ namespace gtmp.evilempire.server.messages.transfer
 
         public string KeyForEntityId => item.KeyForEntityId.HasValue ? item.KeyForEntityId.Value.ToString(CultureInfo.InvariantCulture) : null;
 
+        public bool HasBeenDeleted { get; set; } = false;
+
         public ClientItem(Item item)
         {
             if (item == null)
