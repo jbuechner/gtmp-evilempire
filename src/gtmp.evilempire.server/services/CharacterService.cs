@@ -320,6 +320,7 @@ namespace gtmp.evilempire.server.services
 
                         if (itemDescription.AssociatedCurrency != Currency.None)
                         {
+                            hasMoneyChanged = true;
                             changedCurrencies.Add(itemDescription.AssociatedCurrency);
                         }
 
